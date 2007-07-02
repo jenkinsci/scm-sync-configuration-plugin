@@ -113,7 +113,7 @@ public class ScmSyncConfigurationBusiness {
 		}
 		
 		String modifiedFilePathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(modifiedFile);
-		LOGGER.info("Synchronizeing file ["+modifiedFilePathRelativeToHudsonRoot+"] to SCM ...");
+		LOGGER.info("Synchronizing file ["+modifiedFilePathRelativeToHudsonRoot+"] to SCM ...");
 		String commitMessage = createCommitMessage("Modification on file", user, comment);
 		
 		File modifiedFileTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+modifiedFilePathRelativeToHudsonRoot);
