@@ -22,7 +22,7 @@ import org.codehaus.plexus.util.FileUtils;
 
 public class ScmSyncConfigurationBusiness {
 
-	private static final String WORKING_DIRECTORY_PATH = "/ScmSyncConfiguration/";
+	private static final String WORKING_DIRECTORY_PATH = "/scm-sync-configuration/";
 	private static final String CHECKOUT_SCM_DIRECTORY = "checkoutConfiguration";
     private static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationBusiness.class.getName());
 	
