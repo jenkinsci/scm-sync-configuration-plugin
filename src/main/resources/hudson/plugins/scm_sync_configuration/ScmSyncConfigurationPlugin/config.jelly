@@ -1,0 +1,11 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project">
+
+  <f:section title="${%SCM Sync configuration}">
+    <j:forEach var="scm" items="${it.scms}">
+    	<f:radioBlock name="scm" value="${scm}" title="${scm.title}">
+    		<st:include from="${it}" page="scms/${scm.configPage}" />
+    	</f:radioBlock>
+    </j:forEach>
+  </f:section>
+  
+</j:jelly>
