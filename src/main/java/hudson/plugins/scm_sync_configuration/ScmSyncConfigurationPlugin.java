@@ -54,11 +54,15 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		super.configure(req, formData);
 		
 		this.scm = SCM.valueOf(req.getParameter("scm"));
-		this.scmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
-		this.save();
-		
-		this.business.initializeRepository(true);
-		this.business.synchronizeAllJobsConfigs(getCurrentUser());
+		String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
+		// If something changed, let's reinitialize repository in working directory !
+		if(newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(this.scmRepositoryUrl)){
+			this.scmRepositoryUrl = newScmRepositoryUrl;
+			this.save();
+			
+			this.business.initializeRepository(true);
+			this.business.synchronizeAllJobsConfigs(getCurrentUser());
+		}
 	}
 	
 	public void doSubmitComment(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
