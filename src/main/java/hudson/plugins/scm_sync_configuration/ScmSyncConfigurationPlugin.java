@@ -53,7 +53,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		this.scmRepositoryUrl = createScmRepositoryUrl(req);
 		this.save();
 		
-		this.business.initializeRepository();
+		this.business.initializeRepository(true);
 	}
 	
 	public static String createScmRepositoryUrl(StaplerRequest req){

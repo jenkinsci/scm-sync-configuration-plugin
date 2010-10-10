@@ -42,16 +42,25 @@ public class ScmSyncConfigurationBusiness {
 		
 		this.scmManager = (ScmManager)this.plexus.lookup(ScmManager.ROLE);
 		this.checkoutScmDirectory = new File(getCheckoutScmDirectoryAbsolutePath());
-		initializeRepository();
+		initializeRepository(false);
 	}
 	
 	public void stop() throws Exception {
 		this.plexus.stop();
 	}
 	
-	public void initializeRepository(){
+	public void initializeRepository(boolean deleteCheckoutScmDir){
 		// Let's check if everything is available to checkout sources
 		if(scmConfigurationSettledUp()){
+			// If checkoutScmDirectory was not empty, reinitialize it !
+			if(deleteCheckoutScmDir && checkoutScmDirectory.exists()){
+				try {
+					FileUtils.forceDelete(checkoutScmDirectory);
+				} catch (IOException e) {
+					LOGGER.throwing(FileUtils.class.getName(), "forceDelete", e);
+				}
+			}
+			
 			// Checkouting sources
 			try {
 				scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutScmDirectory));
