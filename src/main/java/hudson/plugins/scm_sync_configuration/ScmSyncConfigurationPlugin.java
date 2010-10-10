@@ -29,6 +29,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	
 	transient private ScmSyncConfigurationBusiness business;
 	private String scmRepositoryUrl;
+	private SCM scm;
 
 	public ScmSyncConfigurationPlugin(){
 		setBusiness(new ScmSyncConfigurationBusiness(this));
@@ -52,20 +53,12 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 			throws IOException, ServletException, FormException {
 		super.configure(req, formData);
 		
-		this.scmRepositoryUrl = createScmRepositoryUrl(req);
+		this.scm = SCM.valueOf(req.getParameter("scm"));
+		this.scmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
 		this.save();
 		
 		this.business.initializeRepository(true);
 		this.business.synchronizeAllJobsConfigs(getCurrentUser());
-	}
-	
-	public static String createScmRepositoryUrl(StaplerRequest req){
-		SCM scm = retrieveSCMFromRequest(req);
-		return scm.createScmUrlFromRequest(req);
-	}
-	
-	private static SCM retrieveSCMFromRequest(StaplerRequest req){
-		return SCM.valueOf(req.getParameter("scm"));
 	}
 	
 	public void doSubmitComment(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
@@ -129,5 +122,17 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
 	public String getScmRepositoryUrl() {
 		return scmRepositoryUrl;
+	}
+	
+	public boolean isScmSelected(SCM _scm){
+		return this.scm == _scm;
+	}
+	
+	public String getScmUrl(){
+		if(this.scm != null){
+			return this.scm.extractScmUrlFrom(this.scmRepositoryUrl);
+		} else {
+			return null;
+		}
 	}
 }

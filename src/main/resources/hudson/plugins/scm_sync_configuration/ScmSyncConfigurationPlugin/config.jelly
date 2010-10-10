@@ -2,7 +2,7 @@
 
   <f:section title="${%SCM Sync configuration}">
     <j:forEach var="scm" items="${it.scms}">
-    	<f:radioBlock name="scm" value="${scm}" title="${scm.title}">
+    	<f:radioBlock name="scm" value="${scm}" title="${scm.title}" checked="${it.isScmSelected(scm)}">
     		<st:include from="${it}" page="scms/${scm.configPage}" />
     	</f:radioBlock>
     </j:forEach>
