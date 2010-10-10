@@ -71,7 +71,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	}
 	
 	public void commitFile(XmlFile modifiedFile, String comment, User user){
-		this.business.commitFile(modifiedFile, comment, user);
+		this.business.synchronizeFile(modifiedFile.getFile(), comment, user);
 	}
 	
 	public static ScmSyncConfigurationPlugin getInstance(){

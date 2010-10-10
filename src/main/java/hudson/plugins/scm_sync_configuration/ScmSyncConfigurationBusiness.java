@@ -1,6 +1,5 @@
 package hudson.plugins.scm_sync_configuration;
 
-import hudson.XmlFile;
 import hudson.model.Hudson;
 import hudson.model.User;
 
@@ -86,12 +85,12 @@ public class ScmSyncConfigurationBusiness {
 		return this.scmRepository!=null;
 	}
 	
-	public void commitFile(XmlFile modifiedFile, String comment, User user){
+	public void synchronizeFile(File modifiedFile, String comment, User user){
 		if(!scmConfigurationSettledUp()){
 			return;
 		}
 		
-		String modifiedFilePathRelativeToHudsonRoot = buildPathRelativeToHudsonRoot(modifiedFile.getFile(), Hudson.getInstance().getRootDir());
+		String modifiedFilePathRelativeToHudsonRoot = buildPathRelativeToHudsonRoot(modifiedFile, Hudson.getInstance().getRootDir());
 		StringBuilder commitMessage = new StringBuilder();
 		commitMessage.append("Modification on file");
 		if(user != null){
@@ -104,7 +103,7 @@ public class ScmSyncConfigurationBusiness {
 		File modifiedFileTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+modifiedFilePathRelativeToHudsonRoot);
 		boolean modifiedFileAlreadySynchronized = modifiedFileTranslatedInScm.exists();
 		try {
-			FileUtils.copyFile(modifiedFile.getFile(), modifiedFileTranslatedInScm);
+			FileUtils.copyFile(modifiedFile, modifiedFileTranslatedInScm);
 		} catch (IOException e) {
 			LOGGER.throwing(FileUtils.class.getName(), "copyFile", e);
 			// TODO: rethrow exception
