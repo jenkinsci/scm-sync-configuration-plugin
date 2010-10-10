@@ -122,7 +122,7 @@
 	            }
 	        ); 
 	        
-		content = "<form id='commentForm' method='post' action='"+rootURL+"/plugin/scm-sync-configuration/submitComment'>---Comment--- : <input type='text' id='comment' name='comment' size='30' /></form>";
+		content = "<form id='commentForm' method='post' action='"+rootURL+"/plugin/scm-sync-configuration/submitComment'>---Comment--- :<br/><textarea id='comment' name='comment' cols='80' rows='3'></textarea></form>";
 		YAHOO.global.build.stat.configuration.modalPopup.setHeader("---Commit comment---");
 		YAHOO.global.build.stat.configuration.modalPopup.setBody(content); 
 	    YAHOO.global.build.stat.configuration.modalPopup.setFooter('<span id="panelFooter" class="button-group"></span>'); 
