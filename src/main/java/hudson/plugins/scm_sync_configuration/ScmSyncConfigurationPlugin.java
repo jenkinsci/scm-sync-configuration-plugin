@@ -16,6 +16,8 @@ import javax.servlet.ServletException;
 
 import net.sf.json.JSONObject;
 
+import org.acegisecurity.AccessDeniedException;
+import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -54,6 +56,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		this.save();
 		
 		this.business.initializeRepository(true);
+		this.business.synchronizeAllJobsConfigs(getCurrentUser());
 	}
 	
 	public static String createScmRepositoryUrl(StaplerRequest req){
@@ -70,8 +73,26 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		req.getSession().setAttribute("commitMessage", req.getParameter("comment"));
 	}
 	
-	public void commitFile(XmlFile modifiedFile, String comment, User user){
-		this.business.synchronizeFile(modifiedFile.getFile(), comment, user);
+	public void commitFile(XmlFile modifiedFile){
+		this.business.synchronizeFile(modifiedFile.getFile(), getCurrentComment(), getCurrentUser());
+	}
+	
+	private static String getCurrentComment(){
+		StaplerRequest req = Stapler.getCurrentRequest();
+		// Sometimes, request can be null : when hudson starts for example !
+		String comment = null;
+		if(req != null){
+			comment = (String)req.getSession().getAttribute("commitMessage");
+		}
+		return comment;
+	}
+	
+	private static User getCurrentUser(){
+		User user = null;
+		try {
+			user = Hudson.getInstance().getMe();
+		}catch(AccessDeniedException e){}
+		return user;
 	}
 	
 	public static ScmSyncConfigurationPlugin getInstance(){

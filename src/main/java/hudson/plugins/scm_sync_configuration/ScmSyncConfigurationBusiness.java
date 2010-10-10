@@ -99,7 +99,7 @@ public class ScmSyncConfigurationBusiness {
 			return;
 		}
 		
-		String modifiedFilePathRelativeToHudsonRoot = buildPathRelativeToHudsonRoot(modifiedFile, Hudson.getInstance().getRootDir());
+		String modifiedFilePathRelativeToHudsonRoot = buildPathRelativeToHudsonRoot(modifiedFile);
 		StringBuilder commitMessage = new StringBuilder();
 		commitMessage.append("Modification on file");
 		if(user != null){
@@ -155,9 +155,28 @@ public class ScmSyncConfigurationBusiness {
 			LOGGER.throwing(ScmManager.class.getName(), "checkIn", e);
 			// TODO: rethrow exception
 		}
-	}	
+	}
+	
+	public void synchronizeAllJobsConfigs(User user){
+		File hudsonJobsDirectory = new File(Hudson.getInstance().getRootDir().getAbsolutePath()+File.separator+"jobs");
+		for(File hudsonJob : hudsonJobsDirectory.listFiles()){
+			if(hudsonJob.isDirectory()){
+				File hudsonJobConfig = new File(hudsonJob.getAbsoluteFile()+File.separator+"config.xml");
+				String hudsonJobConfigPathRelativeToHudsonRoot = buildPathRelativeToHudsonRoot(hudsonJobConfig);
+				File hudsonJobConfigTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+hudsonJobConfigPathRelativeToHudsonRoot);
+				try {
+					if(!hudsonJobConfigTranslatedInScm.exists() 
+							|| !FileUtils.contentEquals(hudsonJobConfigTranslatedInScm, hudsonJobConfig)){
+						synchronizeFile(hudsonJobConfig, "Synchronization init", user);
+					}
+				} catch (IOException e) {
+				}
+			}
+		}
+	}
 
-	private String buildPathRelativeToHudsonRoot(File filePath, File hudsonRoot){
+	private String buildPathRelativeToHudsonRoot(File filePath){
+		File hudsonRoot = Hudson.getInstance().getRootDir();
 		if(!filePath.getAbsolutePath().startsWith(hudsonRoot.getAbsolutePath())){
 			throw new IllegalArgumentException("Err ! File <"+filePath.getAbsolutePath()+"> seems not to reside in <"+hudsonRoot.getAbsolutePath()+"> !");
 		}
