@@ -2,6 +2,7 @@ package hudson.plugins.scm_sync_configuration;
 
 import hudson.Plugin;
 import hudson.XmlFile;
+import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
 import hudson.model.Saveable;
 import hudson.model.Hudson;
@@ -138,5 +139,9 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		} else {
 			return null;
 		}
+	}
+	
+	public Descriptor getDescriptorForSCM(String scmName){
+		return Hudson.getInstance().getDescriptorByName(SCM.valueOf(scmName).getSCMDescriptorClassName());
 	}
 }

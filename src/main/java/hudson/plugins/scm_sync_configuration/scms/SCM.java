@@ -12,6 +12,9 @@ public enum SCM {
 		public String extractScmUrlFrom(String scmUrl) {
 			return scmUrl.substring(SCM_URL_PREFIX.length());
 		}
+		public String getSCMDescriptorClassName() {
+			return "hudson.scm.SubversionSCM";
+		}
 	};
 
 	private String title;
@@ -32,4 +35,5 @@ public enum SCM {
 	
 	public abstract String createScmUrlFromRequest(StaplerRequest req);
 	public abstract String extractScmUrlFrom(String scmUrl);
+	public abstract String getSCMDescriptorClassName();
 }
