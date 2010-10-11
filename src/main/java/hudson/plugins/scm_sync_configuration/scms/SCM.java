@@ -4,7 +4,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 public enum SCM {
 	
-	SUBVERSION("Subversion", "svn-config.jelly", "hudson.scm.SubversionSCM", "/plugins/scm_sync_configuration/ScmSyncConfigurationPlugin/SubversionSCM/scms/"){
+	SUBVERSION("Subversion", "svn-config.jelly", "hudson.scm.SubversionSCM", "/plugins/SubversionSCM/url-help"){
 		private static final String SCM_URL_PREFIX="scm:svn:";
 		public String createScmUrlFromRequest(StaplerRequest req) {
 			return SCM_URL_PREFIX+req.getParameter("repositoryUrl");
