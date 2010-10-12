@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>scm-sync-configuration</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <packaging>hpi</packaging>
 
   <developers>
@@ -72,4 +72,10 @@
     </plugins>
   </build>
     
+
+  <scm>
+    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/scm-sync-configuration-0.0.1</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/scm-sync-configuration-0.0.1</developerConnection>
+    <url>https://hudson.dev.java.net/source/browse/hudson/tags/scm-sync-configuration-0.0.1</url>
+  </scm>
 </project>
