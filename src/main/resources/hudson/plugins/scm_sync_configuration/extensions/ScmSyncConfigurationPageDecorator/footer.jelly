@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
 
 <j:set var="url" value="${request.requestURL}" />
-<j:if test="${it.getPlugin().getStrategyForURL(url.toString()) != null}">
+<j:if test="${it.getPlugin().shouldDecorationOccursOnURL(url.toString()) != null}">
 	<j:set var="scmStrategy" value="${it.getPlugin().getStrategyForURL(url.toString())}" />
 	<j:set var="pageMatcher" value="${scmStrategy.getPageMatcherMatching(url.toString())}" />
 	<script type="text/javascript">

@@ -112,6 +112,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return null;
 	}
 	
+	public boolean shouldDecorationOccursOnURL(String url){
+		return getStrategyForURL(url) != null && this.business.scmConfigurationSettledUp();
+	}
+	
 	public ScmSyncStrategy getStrategyForURL(String url){
 		for(ScmSyncStrategy strat : AVAILABLE_STRATEGIES){
 			if(strat.isCurrentUrlApplicable(url)){
