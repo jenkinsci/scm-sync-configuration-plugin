@@ -71,6 +71,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		req.getSession().setAttribute("commitMessage", req.getParameter("comment"));
 	}
 	
+	// TODO: do retrieve help file with an action !
+	public void doHelpForRepositoryUrl(StaplerRequest req, StaplerResponse res) throws ServletException, IOException{
+    	req.getView(this, SCM.valueOf(req.getParameter("scm")).getRepositoryUrlHelpPath()).forward(req, res);
+	}
+	
 	public void commitFile(XmlFile modifiedFile){
 		this.business.synchronizeFile(modifiedFile.getFile(), getCurrentComment(), getCurrentUser());
 	}
