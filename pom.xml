@@ -11,6 +11,7 @@
   <name>SCM Sync Configuration Plugin</name>
   <version>0.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
+  <url>http://wiki.hudson-ci.org/display/HUDSON/SCM+Sync+configuration+plugin</url>
 
   <developers>
     <developer>
