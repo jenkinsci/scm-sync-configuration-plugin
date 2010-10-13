@@ -6,7 +6,7 @@ import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 
 import java.util.List;
 
-public class AbstractScmSyncStrategy<T extends Saveable> implements ScmSyncStrategy {
+public abstract class AbstractScmSyncStrategy<T extends Saveable> implements ScmSyncStrategy {
 
 	private Class<? extends Saveable> saveableClazz;
 	private List<PageMatcher> pageMatchers;
