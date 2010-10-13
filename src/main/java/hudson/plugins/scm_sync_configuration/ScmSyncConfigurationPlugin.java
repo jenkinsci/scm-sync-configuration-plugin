@@ -64,7 +64,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 			this.save();
 			
 			this.business.initializeRepository(true);
-			this.business.synchronizeAllJobsConfigs(getCurrentUser());
+			this.business.synchronizeAllConfigs(AVAILABLE_STRATEGIES, getCurrentUser());
 		}
 	}
 	

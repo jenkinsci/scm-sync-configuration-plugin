@@ -2,6 +2,7 @@ package hudson.plugins.scm_sync_configuration;
 
 import hudson.model.Hudson;
 import hudson.model.User;
+import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 
 import java.io.File;
 import java.io.IOException;
@@ -157,20 +158,22 @@ public class ScmSyncConfigurationBusiness {
 		}
 	}
 	
-	public void synchronizeAllJobsConfigs(User user){
-		File hudsonJobsDirectory = new File(Hudson.getInstance().getRootDir().getAbsolutePath()+File.separator+"jobs");
-		for(File hudsonJob : hudsonJobsDirectory.listFiles()){
-			if(hudsonJob.isDirectory()){
-				File hudsonJobConfig = new File(hudsonJob.getAbsoluteFile()+File.separator+"config.xml");
-				String hudsonJobConfigPathRelativeToHudsonRoot = buildPathRelativeToHudsonRoot(hudsonJobConfig);
-				File hudsonJobConfigTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+hudsonJobConfigPathRelativeToHudsonRoot);
-				try {
-					if(!hudsonJobConfigTranslatedInScm.exists() 
-							|| !FileUtils.contentEquals(hudsonJobConfigTranslatedInScm, hudsonJobConfig)){
-						synchronizeFile(hudsonJobConfig, "Synchronization init", user);
-					}
-				} catch (IOException e) {
+	public void synchronizeAllConfigs(ScmSyncStrategy[] availableStrategies, User user){
+		List<File> filesToSync = new ArrayList<File>();
+		// Building synced files from strategies
+		for(ScmSyncStrategy strategy : availableStrategies){
+			filesToSync.addAll(strategy.createInitializationSynchronizedFileset());
+		}
+		
+		for(File fileToSync : filesToSync){
+			String hudsonConfigPathRelativeToHudsonRoot = buildPathRelativeToHudsonRoot(fileToSync);
+			File hudsonConfigTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+hudsonConfigPathRelativeToHudsonRoot);
+			try {
+				if(!hudsonConfigTranslatedInScm.exists() 
+						|| !FileUtils.contentEquals(hudsonConfigTranslatedInScm, fileToSync)){
+					synchronizeFile(fileToSync, "Synchronization init", user);
 				}
+			} catch (IOException e) {
 			}
 		}
 	}
