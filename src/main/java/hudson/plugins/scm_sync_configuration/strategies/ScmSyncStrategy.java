@@ -1,5 +1,8 @@
 package hudson.plugins.scm_sync_configuration.strategies;
 
+import java.io.File;
+import java.util.List;
+
 import hudson.model.Saveable;
 
 public interface ScmSyncStrategy {
@@ -18,4 +21,9 @@ public interface ScmSyncStrategy {
 	 * @return true if current url matches with current ScmSyncStrategy target, false otherwise
 	 */
 	boolean isCurrentUrlApplicable(String url);
+	
+	/**
+	 * @return a Fileset of file to synchronize when initializing scm repository
+	 */
+	List<File> createInitializationSynchronizedFileset();
 }
