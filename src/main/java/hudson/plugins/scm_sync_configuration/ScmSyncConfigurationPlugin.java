@@ -9,6 +9,7 @@ import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
+import hudson.plugins.scm_sync_configuration.strategies.impl.HudsonConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
 
 import java.io.IOException;
@@ -25,7 +26,8 @@ import org.kohsuke.stapler.StaplerResponse;
 public class ScmSyncConfigurationPlugin extends Plugin{
 	
 	private static final transient ScmSyncStrategy[] AVAILABLE_STRATEGIES = new ScmSyncStrategy[]{
-			new JobConfigScmSyncStrategy()
+			new JobConfigScmSyncStrategy(),
+			new HudsonConfigScmSyncStrategy()
 	};
 	
 	transient private ScmSyncConfigurationBusiness business;
