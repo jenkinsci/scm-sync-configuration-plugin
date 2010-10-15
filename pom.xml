@@ -9,7 +9,7 @@
 
   <artifactId>scm-sync-configuration</artifactId>
   <name>SCM Sync Configuration Plugin</name>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.0.2</version>
   <packaging>hpi</packaging>
   <url>http://wiki.hudson-ci.org/display/HUDSON/SCM+Sync+configuration+plugin</url>
 
@@ -74,4 +74,10 @@
     </plugins>
   </build>
     
+
+  <scm>
+    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/scm-sync-configuration-0.0.2</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/scm-sync-configuration-0.0.2</developerConnection>
+    <url>https://hudson.dev.java.net/source/browse/hudson/tags/scm-sync-configuration-0.0.2</url>
+  </scm>
 </project>
