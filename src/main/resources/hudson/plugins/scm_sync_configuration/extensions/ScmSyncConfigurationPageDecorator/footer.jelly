@@ -30,35 +30,49 @@
         return null;
     }
 	function decorateOnsubmitForm(){
-		var form = retrieveTargetFormOnPage();
-        form.observe("submit", function(evt){
-            var dontStopEvent = YAHOO.scmSyncConfiguration.commentPopupValidated || enterCommitComment();
-            if(!dontStopEvent){
-                Event.stop(evt);
-            }
-        });
-        /*
-        var mySubmit = function(){
-            var stopEvent YAHOO.scmSyncConfiguration.commentPopupValidated || enterCommitComment(this);
-            if(stopEven){
-                
-            }
-            return stopEvent;
-        }
-    
-        var oldOnSubmit = form.onsubmit;
-        if(typeof oldOnSubmit == "function"){
-            form.onsubmit = function(){ oldOnSubmit.call(this); mySubmit.call(this); }
-        } else {
-            form.onsubmit = mySubmit;
-        }
+		try {
+			var form = retrieveTargetFormOnPage();
+			if(form != null){
+		        form.observe("submit", function(evt){
+		            var dontStopEvent = YAHOO.scmSyncConfiguration.commentPopupValidated || enterCommitComment();
+		            if(!dontStopEvent){
+		                Event.stop(evt);
+		            }
+		        });
+		    } else {
+		    	unexpectedError("Cannot retrieve target form on current page !");
+		    }
+		}catch(ex){ unexpectedError("Exception: "+logProps(ex)); }
         form = null; // memory leak prevention
-        */
+	}
+	
+	function unexpectedError(message){
+		alertMsg = 'Something went wrong with the scm-sync-configuration plugin !\n';
+		alertMsg += 'Please report a JIRA with as much informations as possible (browser, os, current url, error message etc.).\n';
+		alertMsg += 'Error message : '+message;
+		alert(alertMsg);
+	}
+
+	/**
+	  * Log l'ensemble des propriétés de l'objet javascript fourni
+	  */
+	function logProps(obj){
+		str = '';
+		if(obj == null){
+			return "unknown object (null) !";
+		} else {
+			for(prop in obj)
+			{
+				str += '['+prop+'='+obj[prop]+'],';
+			}
+			return "Object : "+obj+" :: "+str);
+		}
 	}
 	
 	function ajaxCall(callType, param, successCallback){
 		ajaxCall(callType, param, successCallback, false);
 	}
+	
 	function ajaxCall(callType, param, successCallback, skipLoading){
 		
 		if(!skipLoading){
