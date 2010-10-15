@@ -65,7 +65,7 @@
 			{
 				str += '['+prop+'='+obj[prop]+'],';
 			}
-			return "Object : "+obj+" :: "+str);
+			return "Object : "+obj+" :: "+str;
 		}
 	}
 	
