@@ -100,7 +100,7 @@ public class ScmSyncConfigurationBusiness {
 			return;
 		}
 		
-		String modifiedFilePathRelativeToHudsonRoot = buildPathRelativeToHudsonRoot(modifiedFile);
+		String modifiedFilePathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(modifiedFile);
 		StringBuilder commitMessage = new StringBuilder();
 		commitMessage.append("Modification on file");
 		if(user != null){
@@ -166,7 +166,7 @@ public class ScmSyncConfigurationBusiness {
 		}
 		
 		for(File fileToSync : filesToSync){
-			String hudsonConfigPathRelativeToHudsonRoot = buildPathRelativeToHudsonRoot(fileToSync);
+			String hudsonConfigPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(fileToSync);
 			File hudsonConfigTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+hudsonConfigPathRelativeToHudsonRoot);
 			try {
 				if(!hudsonConfigTranslatedInScm.exists() 
@@ -178,14 +178,6 @@ public class ScmSyncConfigurationBusiness {
 		}
 	}
 
-	private String buildPathRelativeToHudsonRoot(File filePath){
-		File hudsonRoot = Hudson.getInstance().getRootDir();
-		if(!filePath.getAbsolutePath().startsWith(hudsonRoot.getAbsolutePath())){
-			throw new IllegalArgumentException("Err ! File <"+filePath.getAbsolutePath()+"> seems not to reside in <"+hudsonRoot.getAbsolutePath()+"> !");
-		}
-		return filePath.getAbsolutePath().substring(hudsonRoot.getAbsolutePath().length()+1); // "+1" because we don't need ending file separator
-	}
-	
 	private static String getCheckoutScmDirectoryAbsolutePath(){
 		return Hudson.getInstance().getRootDir().getAbsolutePath()+WORKING_DIRECTORY_PATH+CHECKOUT_SCM_DIRECTORY;
 	}
