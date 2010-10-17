@@ -10,10 +10,11 @@ public interface ScmSyncStrategy {
 	/**
 	 * Is the given Saveable eligible for the current strategy ?
 	 * @param saveable A saveable which is saved
+	 * @param file Corresponding file to the given Saveable object
 	 * @return true if current Saveable instance matches with current ScmSyncStrategy target,
 	 * false otherwise
 	 */
-	boolean isSaveableApplicable(Saveable saveable);
+	boolean isSaveableApplicable(Saveable saveable, File file);
 	
 	/**
 	 * Is the given url eligible for the current strategy ?

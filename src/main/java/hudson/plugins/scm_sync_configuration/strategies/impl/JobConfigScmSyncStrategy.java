@@ -3,21 +3,21 @@ package hudson.plugins.scm_sync_configuration.strategies.impl;
 import hudson.model.Hudson;
 import hudson.model.Job;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
+import hudson.plugins.scm_sync_configuration.strategies.model.ClassAndFileConfigurationEntityMatcher;
+import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.plexus.util.FileUtils;
-
-public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy<Job> {
+public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
 	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ { add(new PageMatcher("^job/[^/]+/configure$", "config")); } };
+	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MANAGER = new ClassAndFileConfigurationEntityMatcher(Job.class, "^jobs/[^/]+/config\\.xml$");
 	
 	public JobConfigScmSyncStrategy(){
-		super(Job.class, PAGE_MATCHERS);
+		super(CONFIG_ENTITY_MANAGER, PAGE_MATCHERS);
 	}
 	
 	public List<File> createInitializationSynchronizedFileset() {

@@ -12,6 +12,7 @@ import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.HudsonConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -104,9 +105,9 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return Hudson.getInstance().getPlugin(ScmSyncConfigurationPlugin.class);
 	}
 	
-	public ScmSyncStrategy getStrategyForSaveable(Saveable s){
+	public ScmSyncStrategy getStrategyForSaveable(Saveable s, File f){
 		for(ScmSyncStrategy strat : AVAILABLE_STRATEGIES){
-			if(strat.isSaveableApplicable(s)){
+			if(strat.isSaveableApplicable(s, f)){
 				return strat;
 			}
 		}

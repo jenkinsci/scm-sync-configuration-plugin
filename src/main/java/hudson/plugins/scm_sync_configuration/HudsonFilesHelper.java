@@ -11,6 +11,7 @@ public class HudsonFilesHelper {
 		if(!file.getAbsolutePath().startsWith(hudsonRoot.getAbsolutePath())){
 			throw new IllegalArgumentException("Err ! File <"+file.getAbsolutePath()+"> seems not to reside in <"+hudsonRoot.getAbsolutePath()+"> !");
 		}
-		return file.getAbsolutePath().substring(hudsonRoot.getAbsolutePath().length()+1); // "+1" because we don't need ending file separator
+		String truncatedPath = file.getAbsolutePath().substring(hudsonRoot.getAbsolutePath().length()+1); // "+1" because we don't need ending file separator
+		return truncatedPath.replaceAll("\\\\", "/"); 
 	}
 }
