@@ -6,11 +6,11 @@ import java.io.File;
 
 public class HudsonFilesHelper {
 
-	public static String buildPathRelativeToHudsonRoot(File filePath){
+	public static String buildPathRelativeToHudsonRoot(File file){
 		File hudsonRoot = Hudson.getInstance().getRootDir();
-		if(!filePath.getAbsolutePath().startsWith(hudsonRoot.getAbsolutePath())){
-			throw new IllegalArgumentException("Err ! File <"+filePath.getAbsolutePath()+"> seems not to reside in <"+hudsonRoot.getAbsolutePath()+"> !");
+		if(!file.getAbsolutePath().startsWith(hudsonRoot.getAbsolutePath())){
+			throw new IllegalArgumentException("Err ! File <"+file.getAbsolutePath()+"> seems not to reside in <"+hudsonRoot.getAbsolutePath()+"> !");
 		}
-		return filePath.getAbsolutePath().substring(hudsonRoot.getAbsolutePath().length()+1); // "+1" because we don't need ending file separator
+		return file.getAbsolutePath().substring(hudsonRoot.getAbsolutePath().length()+1); // "+1" because we don't need ending file separator
 	}
 }
