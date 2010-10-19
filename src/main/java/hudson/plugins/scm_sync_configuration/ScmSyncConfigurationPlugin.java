@@ -1,7 +1,6 @@
 package hudson.plugins.scm_sync_configuration;
 
 import hudson.Plugin;
-import hudson.XmlFile;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
 import hudson.model.Saveable;
@@ -82,8 +81,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     	req.getView(this, SCM.valueOf(req.getParameter("scm")).getRepositoryUrlHelpPath()).forward(req, res);
 	}
 	
-	public void commitFile(XmlFile modifiedFile){
-		this.business.synchronizeFile(modifiedFile.getFile(), getCurrentComment(), getCurrentUser());
+	public void synchronizeFile(File modifiedFile){
+		this.business.synchronizeFile(modifiedFile, getCurrentComment(), getCurrentUser());
 	}
 	
 	private static String getCurrentComment(){

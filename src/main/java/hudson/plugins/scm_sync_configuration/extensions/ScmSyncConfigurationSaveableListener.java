@@ -26,7 +26,7 @@ public class ScmSyncConfigurationSaveableListener extends SaveableListener{
 		ScmSyncStrategy strategy = plugin.getStrategyForSaveable(o, file.getFile());
 		
 		if(strategy != null){
-			plugin.commitFile(file);
+			plugin.synchronizeFile(file.getFile());
 		}
 	}
 }
