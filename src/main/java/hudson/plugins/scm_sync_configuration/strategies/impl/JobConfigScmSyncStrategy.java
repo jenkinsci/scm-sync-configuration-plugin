@@ -13,7 +13,7 @@ import java.util.List;
 
 public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
-	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ { add(new PageMatcher("^job/[^/]+/configure$", "config")); } };
+	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ { add(new PageMatcher("^(view/[^/]+/)?job/[^/]+/configure$", "config")); } };
 	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MANAGER = new ClassAndFileConfigurationEntityMatcher(Job.class, "^jobs/[^/]+/config\\.xml$");
 	
 	public JobConfigScmSyncStrategy(){
