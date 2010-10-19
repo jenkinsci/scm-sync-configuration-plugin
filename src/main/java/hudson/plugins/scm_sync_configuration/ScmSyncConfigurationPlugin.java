@@ -57,21 +57,24 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 			throws IOException, ServletException, FormException {
 		super.configure(req, formData);
 		
-		this.scm = SCM.valueOf(req.getParameter("scm"));
-		String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
-		// If something changed, let's reinitialize repository in working directory !
-		if(newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(this.scmRepositoryUrl)){
-			this.scmRepositoryUrl = newScmRepositoryUrl;
-			this.save();
-			
-			this.business.initializeRepository(true);
-			this.business.synchronizeAllConfigs(AVAILABLE_STRATEGIES, getCurrentUser());
+		String scmType = req.getParameter("scm");
+		if(scmType != null){
+			this.scm = SCM.valueOf(scmType);
+			String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
+			// If something changed, let's reinitialize repository in working directory !
+			if(newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(this.scmRepositoryUrl)){
+				this.scmRepositoryUrl = newScmRepositoryUrl;
+				this.save();
+				
+				this.business.initializeRepository(true);
+				this.business.synchronizeAllConfigs(AVAILABLE_STRATEGIES, getCurrentUser());
+			}
 		}
 	}
 	
 	public void doSubmitComment(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
 		// TODO: complexify this in order to pass a strategy identifier in the session key
-		req.getSession().setAttribute("commitMessage", req.getParameter("comment"));
+		ScmSyncConfigurationDataProvider.provideComment(req, req.getParameter("comment"));
 	}
 	
 	// TODO: do retrieve help file with an action !
@@ -88,7 +91,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		// Sometimes, request can be null : when hudson starts for example !
 		String comment = null;
 		if(req != null){
-			comment = (String)req.getSession().getAttribute("commitMessage");
+			comment = ScmSyncConfigurationDataProvider.retrieveComment(req, false);
 		}
 		return comment;
 	}
@@ -116,6 +119,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	}
 	
 	public boolean shouldDecorationOccursOnURL(String url){
+		// Removing comment from session here...
+		ScmSyncConfigurationDataProvider.retrieveComment(Stapler.getCurrentRequest(), true);
 		return getStrategyForURL(url) != null && this.business.scmConfigurationSettledUp();
 	}
 	
