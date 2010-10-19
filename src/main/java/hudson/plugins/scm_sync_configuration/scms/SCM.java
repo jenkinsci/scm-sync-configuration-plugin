@@ -7,7 +7,9 @@ public enum SCM {
 	SUBVERSION("Subversion", "svn/config.jelly", "hudson.scm.SubversionSCM", "/hudson/plugins/scm_sync_configuration/ScmSyncConfigurationPlugin/scms/svn/url-help.jelly"){
 		private static final String SCM_URL_PREFIX="scm:svn:";
 		public String createScmUrlFromRequest(StaplerRequest req) {
-			return SCM_URL_PREFIX+req.getParameter("repositoryUrl");
+			String repoURL = req.getParameter("repositoryUrl");
+			if(repoURL == null){ return null; }
+			else { return SCM_URL_PREFIX+repoURL; }
 		}
 		public String extractScmUrlFrom(String scmUrl) {
 			return scmUrl.substring(SCM_URL_PREFIX.length());
