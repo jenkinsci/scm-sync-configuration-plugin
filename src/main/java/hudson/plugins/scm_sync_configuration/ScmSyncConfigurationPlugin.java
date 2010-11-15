@@ -45,6 +45,15 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		this.business.start();
 	}
 	
+	public void init() {
+		try {
+			this.business.init();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void stop() throws Exception {
 		this.business.stop();
@@ -79,6 +88,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	// TODO: do retrieve help file with an action !
 	public void doHelpForRepositoryUrl(StaplerRequest req, StaplerResponse res) throws ServletException, IOException{
     	req.getView(this, SCM.valueOf(req.getParameter("scm")).getRepositoryUrlHelpPath()).forward(req, res);
+	}
+	
+	public void deleteHierarchy(File rootHierarchy){
+		this.business.deleteHierarchy(rootHierarchy, getCurrentUser());
 	}
 	
 	public void synchronizeFile(File modifiedFile){
@@ -149,6 +162,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return this.scm == _scm;
 	}
 	
+	public SCM getSCM(){
+		return this.scm;
+	}
+	
 	public String getScmUrl(){
 		if(this.scm != null){
 			return this.scm.extractScmUrlFrom(this.scmRepositoryUrl);
@@ -157,7 +174,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		}
 	}
 	
-	public Descriptor getDescriptorForSCM(String scmName){
-		return Hudson.getInstance().getDescriptorByName(SCM.valueOf(scmName).getSCMDescriptorClassName());
+	public Descriptor<? extends hudson.scm.SCM> getDescriptorForSCM(String scmName){
+		return SCM.valueOf(scmName).getSCMDescriptor();
 	}
 }
