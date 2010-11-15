@@ -44,34 +44,50 @@
       <version>1.4</version>
     </dependency>
     
+    <dependency>
+      <groupId>org.jvnet.hudson.plugins</groupId>
+      <artifactId>subversion</artifactId>
+	  <version>1.8</version>
+    </dependency>    
     <!-- providers declaration -->
     <dependency>
       <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
       <artifactId>maven-scm-provider-svnjava</artifactId>
-      <version>1.10.1</version>
-    </dependency>    
+      <version>1.12</version>
+    </dependency>
   </dependencies>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>merge</id>
-            <configuration>
-              <descriptors>
-                <descriptor>src/main/resources/META-INF/plexus/components.xml</descriptor>
-              </descriptors>
-            </configuration>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>merge-descriptors</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
+	<pluginManagement>
+		<plugins>
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<tagBase>https://svn.dev.java.net/svn/hudson/tags/scm-sync-configuration/</tagBase>
+				</configuration>
+			</plugin>
+		</plugins>
+	</pluginManagement>
+	<plugins>
+		<plugin>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-maven-plugin</artifactId>
+			<executions>
+				<execution>
+				<id>merge</id>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/resources/META-INF/plexus/components.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<phase>generate-resources</phase>
+				<goals>
+					<goal>merge-descriptors</goal>
+				</goals>
+			</execution>
+			</executions>
+		</plugin>
+	</plugins>
   </build>
+
 </project>
