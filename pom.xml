@@ -21,6 +21,10 @@
       <email>fcamblor+wikihudson@gmail.com</email>
     </developer>
   </developers>
+  
+  <properties>
+  	<powermock.version>1.4.6</powermock.version>
+  </properties>
     
   <!-- get every artifact through maven.glassfish.org, which proxies all the artifacts that we need -->
   <repositories>
@@ -37,26 +41,6 @@
     </pluginRepository>
   </pluginRepositories>
   
-  <dependencies>
-  	<dependency>
-      <groupId>org.apache.maven.scm</groupId>
-      <artifactId>maven-scm-manager-plexus</artifactId>
-      <version>1.4</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.jvnet.hudson.plugins</groupId>
-      <artifactId>subversion</artifactId>
-	  <version>1.8</version>
-    </dependency>    
-    <!-- providers declaration -->
-    <dependency>
-      <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
-      <artifactId>maven-scm-provider-svnjava</artifactId>
-      <version>1.12</version>
-    </dependency>
-  </dependencies>
-
   <build>
 	<pluginManagement>
 		<plugins>
@@ -90,4 +74,60 @@
 	</plugins>
   </build>
 
+  <dependencies>
+  	<dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-manager-plexus</artifactId>
+      <version>1.4</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jvnet.hudson.plugins</groupId>
+      <artifactId>subversion</artifactId>
+	  <version>1.8</version>
+    </dependency>    
+    <!-- providers declaration -->
+    <dependency>
+      <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
+      <artifactId>maven-scm-provider-svnjava</artifactId>
+      <version>1.12</version>
+    </dependency>
+    
+    <!-- TEST DEPENDENCIES -->
+    <!-- powermock to mock static methods.. especially Hudson.getInstance() -->
+	<dependency>
+	   <groupId>org.powermock</groupId>
+	   <artifactId>powermock-module-junit4</artifactId>
+	   <version>${powermock.version}</version>
+	   <scope>test</scope>
+	</dependency>
+	<dependency>
+	   <groupId>org.powermock</groupId>
+	   <artifactId>powermock-api-easymock</artifactId>
+	   <version>${powermock.version}</version>
+	   <scope>test</scope>
+	</dependency>  
+	<!-- Fixing easymock to 3.0 because transitive dependency grabbed by powermock only allow to mock interfaces -->
+	<dependency>
+	   <groupId>org.easymock</groupId>
+	   <artifactId>easymock</artifactId>
+	   <version>3.0</version>
+	   <scope>test</scope>
+	</dependency>
+	<!-- Grabbing cglib-nodep, used by easymock to create plain class mocks -->
+	<dependency>
+	    <groupId>cglib</groupId>
+	    <artifactId>cglib-nodep</artifactId>
+	    <version>2.2</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>4.8.1</version>
+		<type>jar</type>
+		<scope>test</scope>
+	</dependency>
+  </dependencies>
+  
 </project>
