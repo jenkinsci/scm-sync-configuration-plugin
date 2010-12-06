@@ -2,6 +2,7 @@ package hudson.plugins.scm_sync_configuration;
 
 import hudson.model.Hudson;
 import hudson.model.User;
+import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 
 import java.io.File;
@@ -15,7 +16,6 @@ import org.apache.maven.scm.ScmFileSet;
 import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
-import org.apache.maven.scm.provider.ScmProviderRepository;
 import org.apache.maven.scm.repository.ScmRepository;
 import org.apache.maven.scm.repository.ScmRepositoryException;
 import org.codehaus.plexus.embed.Embedder;
@@ -28,14 +28,12 @@ public class ScmSyncConfigurationBusiness {
 	private static final String CHECKOUT_SCM_DIRECTORY = "checkoutConfiguration";
     private static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationBusiness.class.getName());
 	
-	private ScmSyncConfigurationPlugin plugin;
 	private Embedder plexus;
 	private ScmManager scmManager;
 	private ScmRepository scmRepository = null;
 	private File checkoutScmDirectory = null;
 	
-	public ScmSyncConfigurationBusiness(ScmSyncConfigurationPlugin plugin){
-		this.plugin = plugin;
+	public ScmSyncConfigurationBusiness(){
 	}
 	
 	public void start() throws Exception {
@@ -43,19 +41,19 @@ public class ScmSyncConfigurationBusiness {
 		this.plexus.start();
 	}
 	
-	public void init() throws Exception {
+	public void init(ScmContext scmContext) throws Exception {
 		this.scmManager = (ScmManager)this.plexus.lookup(ScmManager.ROLE);
 		this.checkoutScmDirectory = new File(getCheckoutScmDirectoryAbsolutePath());
-		initializeRepository(false);
+		initializeRepository(scmContext, false);
 	}
 	
 	public void stop() throws Exception {
 		this.plexus.stop();
 	}
 	
-	public void initializeRepository(boolean deleteCheckoutScmDir){
+	public void initializeRepository(ScmContext scmContext, boolean deleteCheckoutScmDir){
 		// Let's check if everything is available to checkout sources
-		if(scmConfigurationSettledUp()){
+		if(scmConfigurationSettledUp(scmContext)){
 			// If checkoutScmDirectory was not empty, reinitialize it !
 			if(deleteCheckoutScmDir && checkoutScmDirectory.exists()){
 				try {
@@ -74,14 +72,14 @@ public class ScmSyncConfigurationBusiness {
 		}
 	}
 	
-	public boolean scmConfigurationSettledUp(){
-		String scmRepositoryUrl = plugin.getScmRepositoryUrl();
+	public boolean scmConfigurationSettledUp(ScmContext scmContext){
+		String scmRepositoryUrl = scmContext.getScmRepositoryUrl();
 		if(scmRepositoryUrl == null){
 			return false;
 		}
 		
 		try {
-			this.scmRepository = this.plugin.getSCM().getConfiguredRepository(this.scmManager, scmRepositoryUrl);
+			this.scmRepository = scmContext.getScm().getConfiguredRepository(this.scmManager, scmRepositoryUrl);
 		} catch (ScmRepositoryException e) {
 		} catch (NoSuchScmProviderException e) {
 		}
@@ -98,8 +96,8 @@ public class ScmSyncConfigurationBusiness {
 		return this.scmRepository!=null;
 	}
 	
-	public void deleteHierarchy(File rootHierarchy, User user){
-		if(!scmConfigurationSettledUp()){
+	public void deleteHierarchy(ScmContext scmContext, File rootHierarchy, User user){
+		if(!scmConfigurationSettledUp(scmContext)){
 			return;
 		}
 		
@@ -116,8 +114,8 @@ public class ScmSyncConfigurationBusiness {
 		}
 	}
 	
-	public void synchronizeFile(File modifiedFile, String comment, User user){
-		if(!scmConfigurationSettledUp()){
+	public void synchronizeFile(ScmContext scmContext, File modifiedFile, String comment, User user){
+		if(!scmConfigurationSettledUp(scmContext)){
 			return;
 		}
 		
@@ -172,7 +170,7 @@ public class ScmSyncConfigurationBusiness {
 		}
 	}
 	
-	public void synchronizeAllConfigs(ScmSyncStrategy[] availableStrategies, User user){
+	public void synchronizeAllConfigs(ScmContext scmContext, ScmSyncStrategy[] availableStrategies, User user){
 		List<File> filesToSync = new ArrayList<File>();
 		// Building synced files from strategies
 		for(ScmSyncStrategy strategy : availableStrategies){
@@ -185,7 +183,7 @@ public class ScmSyncConfigurationBusiness {
 			try {
 				if(!hudsonConfigTranslatedInScm.exists() 
 						|| !FileUtils.contentEquals(hudsonConfigTranslatedInScm, fileToSync)){
-					synchronizeFile(fileToSync, "Synchronization init", user);
+					synchronizeFile(scmContext, fileToSync, "Synchronization init", user);
 				}
 			} catch (IOException e) {
 			}

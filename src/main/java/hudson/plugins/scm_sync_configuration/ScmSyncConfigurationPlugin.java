@@ -6,6 +6,7 @@ import hudson.model.Descriptor.FormException;
 import hudson.model.Saveable;
 import hudson.model.Hudson;
 import hudson.model.User;
+import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.HudsonConfigScmSyncStrategy;
@@ -35,7 +36,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	private SCM scm;
 
 	public ScmSyncConfigurationPlugin(){
-		setBusiness(new ScmSyncConfigurationBusiness(this));
+		setBusiness(new ScmSyncConfigurationBusiness());
 	}
 	
 	@Override
@@ -47,7 +48,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	
 	public void init() {
 		try {
-			this.business.init();
+			this.business.init(createScmContext());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -74,8 +75,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 				this.scmRepositoryUrl = newScmRepositoryUrl;
 				this.save();
 				
-				this.business.initializeRepository(true);
-				this.business.synchronizeAllConfigs(AVAILABLE_STRATEGIES, getCurrentUser());
+				this.business.initializeRepository(createScmContext(), true);
+				this.business.synchronizeAllConfigs(createScmContext(), AVAILABLE_STRATEGIES, getCurrentUser());
 			}
 		}
 	}
@@ -91,11 +92,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	}
 	
 	public void deleteHierarchy(File rootHierarchy){
-		this.business.deleteHierarchy(rootHierarchy, getCurrentUser());
+		this.business.deleteHierarchy(createScmContext(), rootHierarchy, getCurrentUser());
 	}
 	
 	public void synchronizeFile(File modifiedFile){
-		this.business.synchronizeFile(modifiedFile, getCurrentComment(), getCurrentUser());
+		this.business.synchronizeFile(createScmContext(), modifiedFile, getCurrentComment(), getCurrentUser());
 	}
 	
 	private static String getCurrentComment(){
@@ -133,7 +134,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public boolean shouldDecorationOccursOnURL(String url){
 		// Removing comment from session here...
 		ScmSyncConfigurationDataProvider.retrieveComment(Stapler.getCurrentRequest(), true);
-		return getStrategyForURL(url) != null && this.business.scmConfigurationSettledUp();
+		return getStrategyForURL(url) != null && this.business.scmConfigurationSettledUp(createScmContext());
+	}
+	
+	public ScmContext createScmContext(){
+		return new ScmContext(this.scm, this.scmRepositoryUrl);
 	}
 	
 	public ScmSyncStrategy getStrategyForURL(String url){
