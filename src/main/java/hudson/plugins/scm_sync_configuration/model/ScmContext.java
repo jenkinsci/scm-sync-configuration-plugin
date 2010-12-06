@@ -1,5 +1,7 @@
 package hudson.plugins.scm_sync_configuration.model;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 
 public class ScmContext {
@@ -18,5 +20,10 @@ public class ScmContext {
 
 	public SCM getScm() {
 		return scm;
+	}
+	
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this).append("scm", scm).append("scmRepositoryUrl", scmRepositoryUrl).toString();
 	}
 }
