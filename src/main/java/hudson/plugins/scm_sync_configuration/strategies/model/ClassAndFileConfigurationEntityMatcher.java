@@ -18,8 +18,16 @@ public class ClassAndFileConfigurationEntityMatcher implements
 	}
 	
 	public boolean matches(Saveable saveable, File file) {
-		String filePathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(file);
-		return saveableClazz.isAssignableFrom(saveable.getClass()) && this.filePathRegex.matcher(filePathRelativeToHudsonRoot).matches();
+		if(saveableClazz.isAssignableFrom(saveable.getClass())){
+			if(file == null){
+				return true;
+			} else {
+				String filePathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(file);
+				return this.filePathRegex.matcher(filePathRelativeToHudsonRoot).matches();
+			}
+		}
+		
+		return false;
 	}
 
 }
