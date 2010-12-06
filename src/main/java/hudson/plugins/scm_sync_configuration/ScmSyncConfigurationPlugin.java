@@ -95,6 +95,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		this.business.deleteHierarchy(createScmContext(), rootHierarchy, getCurrentUser());
 	}
 	
+	public void renameHierarchy(File oldDir, File newDir){
+		this.business.renameHierarchy(createScmContext(), oldDir, newDir, getCurrentUser());
+	}
+	
 	public void synchronizeFile(File modifiedFile){
 		this.business.synchronizeFile(createScmContext(), modifiedFile, getCurrentComment(), getCurrentUser());
 	}
@@ -131,14 +135,14 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return null;
 	}
 	
+	public ScmContext createScmContext(){
+		return new ScmContext(this.scm, this.scmRepositoryUrl);
+	}
+	
 	public boolean shouldDecorationOccursOnURL(String url){
 		// Removing comment from session here...
 		ScmSyncConfigurationDataProvider.retrieveComment(Stapler.getCurrentRequest(), true);
 		return getStrategyForURL(url) != null && this.business.scmConfigurationSettledUp(createScmContext());
-	}
-	
-	public ScmContext createScmContext(){
-		return new ScmContext(this.scm, this.scmRepositoryUrl);
 	}
 	
 	public ScmSyncStrategy getStrategyForURL(String url){

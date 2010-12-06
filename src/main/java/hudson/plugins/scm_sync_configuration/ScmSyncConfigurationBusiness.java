@@ -14,6 +14,9 @@ import java.util.logging.Logger;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFileSet;
 import org.apache.maven.scm.command.add.AddScmResult;
+import org.apache.maven.scm.command.checkin.CheckInScmResult;
+import org.apache.maven.scm.command.remove.RemoveScmResult;
+import org.apache.maven.scm.command.update.UpdateScmResult;
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.repository.ScmRepository;
@@ -97,21 +100,86 @@ public class ScmSyncConfigurationBusiness {
 	}
 	
 	public void deleteHierarchy(ScmContext scmContext, File rootHierarchy, User user){
+		deleteHierarchy(scmContext, rootHierarchy, createCommitMessage("Hierarchy deleted", user, null));
+	}
+	
+	public void deleteHierarchy(ScmContext scmContext, File rootHierarchy, String commitMessage){
 		if(!scmConfigurationSettledUp(scmContext)){
 			return;
 		}
 		
-		String commitMessage = createCommitMessage("Hierarchy deleted", user, null);
-		
 		File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
 		String rootHierarchyPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(rootHierarchy);
 		File rootHierarchyTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+rootHierarchyPathRelativeToHudsonRoot);
+		File enclosingDirectory = rootHierarchyTranslatedInScm.getParentFile();
 		try {
-			this.scmManager.remove(this.scmRepository, new ScmFileSet(scmRoot, rootHierarchyTranslatedInScm), commitMessage);
+			// FIXME : CRITICAL !!
+			// Here we MUST make an update to make scm delete work...
+			// But generally, we should NOT force an update here (update should ONLY come from
+			// the user will, not on the delete process !)
+			// If we don't make an update, delete is complaining because of a tree conflict :(
+			UpdateScmResult updateResult;
+			ScmFileSet updateFileSet = new ScmFileSet(enclosingDirectory, rootHierarchy.getName());
+			updateResult = this.scmManager.update(this.scmRepository, updateFileSet);
+			ScmFileSet deleteFileSet = new ScmFileSet(enclosingDirectory, rootHierarchyTranslatedInScm);
+			RemoveScmResult removeResult = this.scmManager.remove(this.scmRepository, deleteFileSet, commitMessage);
+			ScmFileSet commitFileSet = new ScmFileSet(enclosingDirectory, rootHierarchy.getName());
+			CheckInScmResult checkInResult = this.scmManager.checkIn(this.scmRepository, commitFileSet, commitMessage);
+			updateResult = this.scmManager.update(this.scmRepository, updateFileSet);
 		} catch (ScmException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "remove", e);
 			// TODO: rethrow exception
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+	}
+	
+	public void renameHierarchy(ScmContext scmContext, File oldDir, File newDir, User user){
+		if(!scmConfigurationSettledUp(scmContext)){
+			return;
+		}
+		
+		String oldDirPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(oldDir);
+		String newDirPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(newDir);
+		String commitMessage = createCommitMessage("Moved "+oldDirPathRelativeToHudsonRoot+" hierarchy to "+newDirPathRelativeToHudsonRoot, user, null);
+		
+		File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
+		File newDirTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+newDirPathRelativeToHudsonRoot);
+		try {
+			newDirTranslatedInScm.mkdir(); // TODO: exception if mkdir returns false ?
+			exportDirTo(oldDirPathRelativeToHudsonRoot, newDirTranslatedInScm);
+			ScmFileSet addFileset = new ScmFileSet(scmRoot, new File(newDirPathRelativeToHudsonRoot));
+			AddScmResult addResult = this.scmManager.add(this.scmRepository, addFileset);
+			ScmFileSet addFilesetWithIncludes = new ScmFileSet(scmRoot, newDirPathRelativeToHudsonRoot+"/**/*");
+			addResult = this.scmManager.add(this.scmRepository, addFilesetWithIncludes);
+			CheckInScmResult checkInResult = this.scmManager.checkIn(this.scmRepository, addFileset, commitMessage);
+			this.deleteHierarchy(scmContext, oldDir, commitMessage);
+		} catch (ScmException e) {
+			LOGGER.throwing(ScmManager.class.getName(), "add, export or remove", e);
+			// TODO: rethrow exception
+		} catch (IOException e) {
+			LOGGER.throwing(ScmFileSet.class.getName(), "<init>", e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void exportDirTo(String pathToExportRelativeToScmRoot, File notSynchronizedWithScmToDirectory) throws ScmException, IOException {
+		File tmpDir = createTmpDir();
+		try {
+			this.scmManager.export(this.scmRepository, new ScmFileSet(tmpDir));
+			FileUtils.copyDirectoryStructure(new File(tmpDir.getAbsolutePath()+File.separator+pathToExportRelativeToScmRoot), notSynchronizedWithScmToDirectory);
+		}finally {
+			tmpDir.delete();
+		}
+	}
+	
+	private static File createTmpDir() throws IOException {
+	    final File temp = File.createTempFile("tmp", Long.toString(System.nanoTime()));
+	    if(!(temp.delete())) { throw new IOException("Could not delete temp file: " + temp.getAbsolutePath()); }
+	    if(!(temp.mkdir())) { throw new IOException("Could not create temp directory: " + temp.getAbsolutePath()); }
+	    return (temp);
 	}
 	
 	public void synchronizeFile(ScmContext scmContext, File modifiedFile, String comment, User user){
