@@ -7,6 +7,8 @@ import hudson.scm.SubversionSCM.DescriptorImpl.Credential;
 
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
@@ -44,30 +46,24 @@ public enum SCM {
 		protected SCMCredentialConfiguration extractScmCredentials(String scmUrl) {
 			String realm = retrieveRealmFor(scmUrl);
 			if(realm != null){
+				SubversionSCM.DescriptorImpl subversionDescriptor = (SubversionSCM.DescriptorImpl)getSCMDescriptor();
 				try {
-					SubversionSCM.DescriptorImpl subversionDescriptor = (SubversionSCM.DescriptorImpl)getSCMDescriptor();
 					Field credentialField = SubversionSCM.DescriptorImpl.class.getDeclaredField("credentials");
 					credentialField.setAccessible(true);
 					Map<String,Credential> credentials = (Map<String,Credential>)credentialField.get(subversionDescriptor);
 					Credential cred = credentials.get(realm);
-					// FIXME : retrieve kind & realm somehow !
 					String kind = "";
 					return createSCMCredentialConfiguration(cred.createSVNAuthentication(kind));
 				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.log(Level.SEVERE, "'credentials' field not readable on SubversionSCM.DescriptorImpl !");
 				} catch (NoSuchFieldException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.log(Level.SEVERE, "'credentials' field not readable on SubversionSCM.DescriptorImpl !");
 				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.log(Level.SEVERE, "'credentials' field not accessible on "+String.valueOf(subversionDescriptor)+" !");
 				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.log(Level.SEVERE, "'credentials' field not accessible on "+String.valueOf(subversionDescriptor)+" !");
 				} catch (SVNException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.log(Level.WARNING, "Error creating SVN authentication from realm <"+realm+"> !", e);
 				}
 			}
 			return null;
@@ -132,6 +128,7 @@ public enum SCM {
 	private String scmClassName;
 	private String configPage;
 	private String repositoryUrlHelpPath;
+    private static final Logger LOGGER = Logger.getLogger(SCM.class.getName());
 	
 	private SCM(String _title, String _configPage, String _scmClassName, String _repositoryUrlHelpPath){
 		this.title = _title;
