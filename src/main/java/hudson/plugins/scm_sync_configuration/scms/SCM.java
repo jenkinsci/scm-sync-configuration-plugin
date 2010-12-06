@@ -174,6 +174,7 @@ public enum SCM {
         // TODO: uncomment this ??? (MRELEASE-76)
         //scmRepo.setPersistCheckout( false );
 
+        // TODO: instead of creating a SCMCredentialConfiguration, create a ScmProviderRepository
         if ( repository.getProviderRepository() instanceof ScmProviderRepositoryWithHost )
         {
             ScmProviderRepositoryWithHost repositoryWithHost =
