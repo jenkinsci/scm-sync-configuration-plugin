@@ -17,10 +17,8 @@ import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.command.checkin.CheckInScmResult;
 import org.apache.maven.scm.command.remove.RemoveScmResult;
 import org.apache.maven.scm.command.update.UpdateScmResult;
-import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.repository.ScmRepository;
-import org.apache.maven.scm.repository.ScmRepositoryException;
 import org.codehaus.plexus.embed.Embedder;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -57,8 +55,10 @@ public class ScmSyncConfigurationBusiness {
 	public void initializeRepository(ScmContext scmContext, boolean deleteCheckoutScmDir){
 		// Let's check if everything is available to checkout sources
 		if(scmConfigurationSettledUp(scmContext)){
+			LOGGER.info("Initializing SCM repository for scm-sync-configuration plugin ...");
 			// If checkoutScmDirectory was not empty, reinitialize it !
 			if(deleteCheckoutScmDir && checkoutScmDirectory.exists()){
+				LOGGER.info("Deleting old checkout SCM directory ...");
 				try {
 					FileUtils.forceDelete(checkoutScmDirectory);
 				} catch (IOException e) {
@@ -67,11 +67,14 @@ public class ScmSyncConfigurationBusiness {
 			}
 			
 			// Checkouting sources
+			LOGGER.info("Checkouting SCM files into checkoutDirectory ...");
 			try {
 				scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutScmDirectory));
 			} catch (ScmException e) {
 				LOGGER.throwing(ScmManager.class.getName(), "checkOut", e);
 			}
+			
+			LOGGER.info("SCM repository initialization done.");
 		}
 	}
 	
@@ -81,11 +84,7 @@ public class ScmSyncConfigurationBusiness {
 			return false;
 		}
 		
-		try {
-			this.scmRepository = scmContext.getScm().getConfiguredRepository(this.scmManager, scmRepositoryUrl);
-		} catch (ScmRepositoryException e) {
-		} catch (NoSuchScmProviderException e) {
-		}
+		this.scmRepository = scmContext.getScm().getConfiguredRepository(this.scmManager, scmRepositoryUrl);
 		
 		if(!checkoutScmDirectory.exists()){
 			try {

@@ -44,14 +44,20 @@ public enum SCM {
 			return scmUrl.substring(SCM_URL_PREFIX.length());
 		}
 		protected SCMCredentialConfiguration extractScmCredentials(String scmUrl) {
+			LOGGER.info("Extracting SVN Credentials for url : "+scmUrl);
 			String realm = retrieveRealmFor(scmUrl);
 			if(realm != null){
+				LOGGER.fine("Extracted realm from "+scmUrl+" is <"+realm+">");
 				SubversionSCM.DescriptorImpl subversionDescriptor = (SubversionSCM.DescriptorImpl)getSCMDescriptor();
 				try {
 					Field credentialField = SubversionSCM.DescriptorImpl.class.getDeclaredField("credentials");
 					credentialField.setAccessible(true);
 					Map<String,Credential> credentials = (Map<String,Credential>)credentialField.get(subversionDescriptor);
 					Credential cred = credentials.get(realm);
+					if(cred == null){
+						LOGGER.severe("No credentials are stored in Hudson for realm <"+realm+"> !");
+						return null;
+					}
 					String kind = "";
 					return createSCMCredentialConfiguration(cred.createSVNAuthentication(kind));
 				} catch (SecurityException e) {
@@ -157,14 +163,24 @@ public enum SCM {
 		return this.repositoryUrlHelpPath;
 	}
 
-	public ScmRepository getConfiguredRepository(ScmManager scmManager, String scmRepositoryURL) 
-				throws ScmRepositoryException, NoSuchScmProviderException {
+	public ScmRepository getConfiguredRepository(ScmManager scmManager, String scmRepositoryURL) {
 		SCMCredentialConfiguration credentials = extractScmCredentials( extractScmUrlFrom(scmRepositoryURL) );
 		if(credentials == null){
 			return null;
 		}
 
-        ScmRepository repository = scmManager.makeScmRepository( scmRepositoryURL );
+		LOGGER.info("Creating SCM repository object for url : "+scmRepositoryURL);
+        ScmRepository repository = null;
+        try {
+			repository = scmManager.makeScmRepository( scmRepositoryURL );
+		} catch (ScmRepositoryException e) {
+			LOGGER.throwing(ScmManager.class.getName(), "makeScmRepository", e);
+		} catch (NoSuchScmProviderException e) {
+			LOGGER.throwing(ScmManager.class.getName(), "makeScmRepository", e);
+		}
+        if(repository == null){
+        	return null;
+        }
 
         ScmProviderRepository scmRepo = repository.getProviderRepository();
 
@@ -174,6 +190,7 @@ public enum SCM {
         // TODO: instead of creating a SCMCredentialConfiguration, create a ScmProviderRepository
         if ( repository.getProviderRepository() instanceof ScmProviderRepositoryWithHost )
         {
+    		LOGGER.info("Populating host data into SCM repository object ...");
             ScmProviderRepositoryWithHost repositoryWithHost =
                 (ScmProviderRepositoryWithHost) repository.getProviderRepository();
             String host = repositoryWithHost.getHost();
@@ -187,6 +204,7 @@ public enum SCM {
         }
 
         if(credentials != null){
+    		LOGGER.info("Populating credentials data into SCM repository object ...");
 	        if ( !StringUtils.isEmpty( credentials.getUsername() ) )
 	        {
 	            scmRepo.setUser( credentials.getUsername() );
