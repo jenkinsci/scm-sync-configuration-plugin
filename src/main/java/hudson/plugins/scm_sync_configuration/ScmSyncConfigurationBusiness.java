@@ -63,6 +63,7 @@ public class ScmSyncConfigurationBusiness {
 					FileUtils.forceDelete(checkoutScmDirectory);
 				} catch (IOException e) {
 					LOGGER.throwing(FileUtils.class.getName(), "forceDelete", e);
+					LOGGER.severe("Error while deleting <"+checkoutScmDirectory.getAbsolutePath()+"> : "+e.getMessage());
 				}
 			}
 			
@@ -72,6 +73,7 @@ public class ScmSyncConfigurationBusiness {
 				scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutScmDirectory));
 			} catch (ScmException e) {
 				LOGGER.throwing(ScmManager.class.getName(), "checkOut", e);
+				LOGGER.severe("Error during checkout : "+e.getMessage());
 			}
 			
 			LOGGER.info("SCM repository initialization done.");
@@ -119,7 +121,7 @@ public class ScmSyncConfigurationBusiness {
 			commitFileSet = new ScmFileSet(enclosingDirectory, rootHierarchy.getName());
 		}catch(IOException e){
 			LOGGER.throwing(ScmFileSet.class.getName(), "<init>", e);
-			LOGGER.severe("Hierarchy deletion aborted !");
+			LOGGER.severe("Hierarchy deletion aborted : "+e.getMessage());
 			return;
 		}
 		
@@ -136,7 +138,7 @@ public class ScmSyncConfigurationBusiness {
 			updateResult = this.scmManager.update(this.scmRepository, updateFileSet);
 		} catch (ScmException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "remove", e);
-			LOGGER.severe("Hierarchy deletion aborted !");
+			LOGGER.severe("Hierarchy deletion aborted : "+e.getMessage());
 		}
 	}
 	
@@ -163,8 +165,10 @@ public class ScmSyncConfigurationBusiness {
 			this.deleteHierarchy(scmContext, oldDir, commitMessage);
 		} catch (ScmException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "add, export or remove", e);
+			LOGGER.severe("Error during add, export or remove : "+e.getMessage());
 		} catch (IOException e) {
-			LOGGER.throwing(ScmFileSet.class.getName(), "<init>", e);
+			LOGGER.throwing(ScmSyncConfigurationBusiness.class.getName(), "exportDirTo", e);
+			LOGGER.severe("Error during export : "+e.getMessage());
 		}
 	}
 	
@@ -200,7 +204,8 @@ public class ScmSyncConfigurationBusiness {
 			FileUtils.copyFile(modifiedFile, modifiedFileTranslatedInScm);
 		} catch (IOException e) {
 			LOGGER.throwing(FileUtils.class.getName(), "copyFile", e);
-			// TODO: rethrow exception
+			LOGGER.severe("Error while copying file : "+e.getMessage());
+			return;
 		}
 
 		// if modified file is not yet synchronized with scm, let's add it !
@@ -227,7 +232,7 @@ public class ScmSyncConfigurationBusiness {
 				this.scmManager.add(this.scmRepository, new ScmFileSet(scmRoot, new File(currentPath.toString())));
 			} catch (ScmException e) {
 				LOGGER.throwing(ScmManager.class.getName(), "add", e);
-				// TODO: rethrow exception
+				LOGGER.warning("Error while adding file : "+e.getMessage());
 			}
 		}
 		synchronizedFiles.add(new File(modifiedFilePathRelativeToHudsonRoot));
@@ -243,6 +248,7 @@ public class ScmSyncConfigurationBusiness {
 			}
 		} catch (ScmException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "checkIn", e);
+			LOGGER.severe("Error while checkin : "+e.getMessage());
 		}
 	}
 	

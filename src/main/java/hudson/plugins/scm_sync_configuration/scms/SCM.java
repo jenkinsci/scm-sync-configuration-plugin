@@ -75,13 +75,19 @@ public enum SCM {
 			return null;
 		}
 		
-		private String retrieveRealmFor(String scmURL){
+		private String retrieveRealmFor(String scmURL) {
 			final String[] realms = new String[]{ null };
 			
             SVNRepository repository;
-			try {
+            try {
 				repository = SVNRepositoryFactory.create(SVNURL.parseURIDecoded(scmURL));
 	            repository.setTunnelProvider(SVNWCUtil.createDefaultOptions(true));
+            }catch(SVNException e){
+            	LOGGER.throwing(SVNRepositoryFactory.class.getName(), "create", e);
+            	LOGGER.severe("Error while creating SVNRepository : "+e.getMessage());
+            	return null;
+            }
+			try {
 	            repository.setAuthenticationManager(new DefaultSVNAuthenticationManager(SVNWCUtil.getDefaultConfigurationDirectory(), true, "", "", null, "") {
                     @Override
                     public SVNAuthentication getFirstAuthentication(String kind, String realm, SVNURL url) throws SVNException {
@@ -175,8 +181,10 @@ public enum SCM {
 			repository = scmManager.makeScmRepository( scmRepositoryURL );
 		} catch (ScmRepositoryException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "makeScmRepository", e);
+			LOGGER.severe("Error creating ScmRepository : "+e.getMessage());
 		} catch (NoSuchScmProviderException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "makeScmRepository", e);
+			LOGGER.severe("Error creating ScmRepository : "+e.getMessage());
 		}
         if(repository == null){
         	return null;
