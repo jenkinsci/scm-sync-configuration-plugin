@@ -89,6 +89,7 @@ public class ScmSyncConfigurationBusiness {
 		if(!checkoutScmDirectory.exists()){
 			try {
 				FileUtils.forceMkdir(checkoutScmDirectory);
+				LOGGER.info("Directory <"+ checkoutScmDirectory.getAbsolutePath() +"> created !");
 			} catch (IOException e) {
 				LOGGER.warning("Directory <"+ checkoutScmDirectory.getAbsolutePath() +"> cannot be created !");
 				return false;
@@ -107,30 +108,35 @@ public class ScmSyncConfigurationBusiness {
 			return;
 		}
 		
-		File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
 		String rootHierarchyPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(rootHierarchy);
 		File rootHierarchyTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+rootHierarchyPathRelativeToHudsonRoot);
 		File enclosingDirectory = rootHierarchyTranslatedInScm.getParentFile();
+		LOGGER.info("Deleting hierarchy <"+rootHierarchyPathRelativeToHudsonRoot+"> from SCM ...");
+		ScmFileSet updateFileSet = null;
+		ScmFileSet commitFileSet = null;
+		try {
+			updateFileSet = new ScmFileSet(enclosingDirectory, rootHierarchy.getName());
+			commitFileSet = new ScmFileSet(enclosingDirectory, rootHierarchy.getName());
+		}catch(IOException e){
+			LOGGER.throwing(ScmFileSet.class.getName(), "<init>", e);
+			LOGGER.severe("Hierarchy deletion aborted !");
+			return;
+		}
+		
 		try {
 			// FIXME : CRITICAL !!
 			// Here we MUST make an update to make scm delete work...
 			// But generally, we should NOT force an update here (update should ONLY come from
 			// the user will, not on the delete process !)
 			// If we don't make an update, delete is complaining because of a tree conflict :(
-			UpdateScmResult updateResult;
-			ScmFileSet updateFileSet = new ScmFileSet(enclosingDirectory, rootHierarchy.getName());
-			updateResult = this.scmManager.update(this.scmRepository, updateFileSet);
+			UpdateScmResult updateResult = this.scmManager.update(this.scmRepository, updateFileSet);
 			ScmFileSet deleteFileSet = new ScmFileSet(enclosingDirectory, rootHierarchyTranslatedInScm);
 			RemoveScmResult removeResult = this.scmManager.remove(this.scmRepository, deleteFileSet, commitMessage);
-			ScmFileSet commitFileSet = new ScmFileSet(enclosingDirectory, rootHierarchy.getName());
 			CheckInScmResult checkInResult = this.scmManager.checkIn(this.scmRepository, commitFileSet, commitMessage);
 			updateResult = this.scmManager.update(this.scmRepository, updateFileSet);
 		} catch (ScmException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "remove", e);
-			// TODO: rethrow exception
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Hierarchy deletion aborted !");
 		}
 	}
 	
@@ -141,8 +147,9 @@ public class ScmSyncConfigurationBusiness {
 		
 		String oldDirPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(oldDir);
 		String newDirPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(newDir);
-		String commitMessage = createCommitMessage("Moved "+oldDirPathRelativeToHudsonRoot+" hierarchy to "+newDirPathRelativeToHudsonRoot, user, null);
+		LOGGER.info("Renaming hierarchy <"+oldDirPathRelativeToHudsonRoot+"> to <"+newDirPathRelativeToHudsonRoot+">");
 		
+		String commitMessage = createCommitMessage("Moved "+oldDirPathRelativeToHudsonRoot+" hierarchy to "+newDirPathRelativeToHudsonRoot, user, null);
 		File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
 		File newDirTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+newDirPathRelativeToHudsonRoot);
 		try {
@@ -156,11 +163,8 @@ public class ScmSyncConfigurationBusiness {
 			this.deleteHierarchy(scmContext, oldDir, commitMessage);
 		} catch (ScmException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "add, export or remove", e);
-			// TODO: rethrow exception
 		} catch (IOException e) {
 			LOGGER.throwing(ScmFileSet.class.getName(), "<init>", e);
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	
@@ -187,6 +191,7 @@ public class ScmSyncConfigurationBusiness {
 		}
 		
 		String modifiedFilePathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(modifiedFile);
+		LOGGER.info("Commiting file <"+modifiedFilePathRelativeToHudsonRoot+"> to SCM ...");
 		String commitMessage = createCommitMessage("Modification on file", user, comment);
 		
 		File modifiedFileTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+modifiedFilePathRelativeToHudsonRoot);
@@ -230,10 +235,14 @@ public class ScmSyncConfigurationBusiness {
 		
 		// Let's commit everything !
 		try {
-			this.scmManager.checkIn(this.scmRepository, fileSet, commitMessage);
+			CheckInScmResult result = this.scmManager.checkIn(this.scmRepository, fileSet, commitMessage);
+			if(result.isSuccess()){
+				LOGGER.info("File commited successfully !");
+			} else {
+				LOGGER.severe("Problem encountered during commit of <"+modifiedFilePathRelativeToHudsonRoot+"> : "+result.getCommandOutput());
+			}
 		} catch (ScmException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "checkIn", e);
-			// TODO: rethrow exception
 		}
 	}
 	
