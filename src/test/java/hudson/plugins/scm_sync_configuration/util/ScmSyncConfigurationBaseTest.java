@@ -58,7 +58,7 @@ public class ScmSyncConfigurationBaseTest {
 	@After
 	public void teardown() throws Throwable {
 		// Deleting current test directory
-		currentTestDirectory.delete();
+		FileUtils.deleteDirectory(currentTestDirectory);
 	}
 	
 	protected static File createTmpDirectory(String directoryPrefix) throws IOException {
