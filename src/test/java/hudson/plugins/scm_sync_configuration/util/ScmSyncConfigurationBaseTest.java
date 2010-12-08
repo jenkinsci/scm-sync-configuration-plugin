@@ -28,14 +28,15 @@ public class ScmSyncConfigurationBaseTest {
 	
 	private File currentTestDirectory = null;
 	private File curentLocalSvnRepository = null;
+	private File currentHudsonRootDirectory = null;
 
 	@Before
 	public void setup() throws Throwable {
 		// Mocking Hudson root directory
 		currentTestDirectory = createTmpDirectory("SCMSyncConfigTestsRoot");
-		File tmpHudsonRoot = new File(currentTestDirectory.getAbsolutePath()+"/hudsonRootDir/");
-	    if(!(tmpHudsonRoot.mkdir())) { throw new IOException("Could not create hudson root directory: " + tmpHudsonRoot.getAbsolutePath()); }
-		FileUtils.copyDirectoryStructure(new ClassPathResource("hudsonRootBaseTemplate/").getFile(), tmpHudsonRoot);
+		currentHudsonRootDirectory = new File(currentTestDirectory.getAbsolutePath()+"/hudsonRootDir/");
+	    if(!(currentHudsonRootDirectory.mkdir())) { throw new IOException("Could not create hudson root directory: " + currentHudsonRootDirectory.getAbsolutePath()); }
+		FileUtils.copyDirectoryStructure(new ClassPathResource("hudsonRootBaseTemplate/").getFile(), currentHudsonRootDirectory);
 
         //EnvVars env = Computer.currentComputer().getEnvironment();
         //env.put("HUDSON_HOME", tmpHudsonRoot.getPath() );
@@ -49,7 +50,7 @@ public class ScmSyncConfigurationBaseTest {
 		mockStatic(Hudson.class);
 		Hudson hudsonMockedInstance = createPartialMock(Hudson.class, new String[]{ "getRootDir" });
 		expect(Hudson.getInstance()).andStubReturn(hudsonMockedInstance);
-		expect(hudsonMockedInstance.getRootDir()).andStubReturn(tmpHudsonRoot);
+		expect(hudsonMockedInstance.getRootDir()).andStubReturn(currentHudsonRootDirectory);
 
 		replay(hudsonMockedInstance);
 		replay(Hudson.class);
@@ -102,5 +103,13 @@ public class ScmSyncConfigurationBaseTest {
 
 	protected File getCurentLocalSvnRepository() {
 		return curentLocalSvnRepository;
+	}
+
+	public File getCurrentHudsonRootDirectory() {
+		return currentHudsonRootDirectory;
+	}
+	
+	public File getCurrentScmSyncConfigurationCheckoutDirectory(){
+		return new File(currentHudsonRootDirectory.getAbsolutePath()+"/scm-sync-configuration/checkoutConfiguration/");
 	}
 }
