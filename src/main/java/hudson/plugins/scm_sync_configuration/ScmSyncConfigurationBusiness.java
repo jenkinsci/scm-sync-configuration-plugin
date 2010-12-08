@@ -3,6 +3,7 @@ package hudson.plugins.scm_sync_configuration;
 import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
+import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 
 import java.io.File;
@@ -82,11 +83,12 @@ public class ScmSyncConfigurationBusiness {
 	
 	public boolean scmConfigurationSettledUp(ScmContext scmContext){
 		String scmRepositoryUrl = scmContext.getScmRepositoryUrl();
-		if(scmRepositoryUrl == null){
+		SCM scm = scmContext.getScm();
+		if(scmRepositoryUrl == null || scm == null){
 			return false;
 		}
 		
-		this.scmRepository = scmContext.getScm().getConfiguredRepository(this.scmManager, scmRepositoryUrl);
+		this.scmRepository = scm.getConfiguredRepository(this.scmManager, scmRepositoryUrl);
 		
 		if(!checkoutScmDirectory.exists()){
 			try {
