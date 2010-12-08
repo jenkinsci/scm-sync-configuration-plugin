@@ -5,6 +5,9 @@ import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationBaseTest;
 
+import java.io.File;
+
+import org.codehaus.plexus.util.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,8 +51,32 @@ public class InitRepositoryTest extends ScmSyncConfigurationBaseTest {
 		SCM mockedSCM = createSCMMock(true);
 		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
 		sscBusiness.init(scmContext);
-		sscBusiness.scmConfigurationSettledUp(scmContext);
 		assert sscBusiness.scmConfigurationSettledUp(scmContext);
+	}
+	
+	@Test
+	public void shouldResetCheckoutConfigurationDirectoryWhenAsked() throws Throwable {
+		// Initializing the repository...
+		SCM mockedSCM = createSCMMock(true);
+		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
+		sscBusiness.init(scmContext);
+		
+		// After init, local checkouted repository should exists
+		assert getCurrentScmSyncConfigurationCheckoutDirectory().exists();
+		
+		// Populating checkoutConfiguration directory ..
+		File fileWhichShouldBeDeletedAfterReset = new File(getCurrentScmSyncConfigurationCheckoutDirectory().getAbsolutePath()+"/hello.txt");
+		assert fileWhichShouldBeDeletedAfterReset.createNewFile();
+		FileUtils.fileWrite(fileWhichShouldBeDeletedAfterReset.getAbsolutePath(), "Hello world !");
+		
+		// Reseting the repository, without cleanup
+		sscBusiness.initializeRepository(scmContext, false);
+		assert fileWhichShouldBeDeletedAfterReset.exists();
+		
+		// Reseting the repository with cleanup
+		sscBusiness.initializeRepository(scmContext, true);
+		assert !fileWhichShouldBeDeletedAfterReset.exists();
+		
 	}
 	
 	protected String getSCMRepositoryURL(){
