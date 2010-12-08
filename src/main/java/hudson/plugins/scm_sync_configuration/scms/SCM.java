@@ -43,7 +43,7 @@ public enum SCM {
 		public String extractScmUrlFrom(String scmUrl) {
 			return scmUrl.substring(SCM_URL_PREFIX.length());
 		}
-		protected SCMCredentialConfiguration extractScmCredentials(String scmUrl) {
+		public SCMCredentialConfiguration extractScmCredentials(String scmUrl) {
 			LOGGER.info("Extracting SVN Credentials for url : "+scmUrl);
 			String realm = retrieveRealmFor(scmUrl);
 			if(realm != null){
@@ -242,5 +242,5 @@ public enum SCM {
 	
 	public abstract String createScmUrlFromRequest(StaplerRequest req);
 	public abstract String extractScmUrlFrom(String scmUrl);
-	protected abstract SCMCredentialConfiguration extractScmCredentials(String scmRepositoryURL);
+	public abstract SCMCredentialConfiguration extractScmCredentials(String scmRepositoryURL);
 }
