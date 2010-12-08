@@ -32,7 +32,7 @@ public class ScmSyncConfigurationBaseTest {
 	@Before
 	public void setup() throws Throwable {
 		// Mocking Hudson root directory
-		currentTestDirectory = createTmpDirectory();
+		currentTestDirectory = createTmpDirectory("SCMSyncConfigTestsRoot");
 		File tmpHudsonRoot = new File(currentTestDirectory.getAbsolutePath()+"/hudsonRootDir/");
 	    if(!(tmpHudsonRoot.mkdir())) { throw new IOException("Could not create hudson root directory: " + tmpHudsonRoot.getAbsolutePath()); }
 		FileUtils.copyDirectoryStructure(new ClassPathResource("hudsonRootBaseTemplate/").getFile(), tmpHudsonRoot);
@@ -61,8 +61,8 @@ public class ScmSyncConfigurationBaseTest {
 		currentTestDirectory.delete();
 	}
 	
-	protected static File createTmpDirectory() throws IOException {
-	    final File temp = File.createTempFile("hudsonHomeRoot", Long.toString(System.nanoTime()));
+	protected static File createTmpDirectory(String directoryPrefix) throws IOException {
+	    final File temp = File.createTempFile(directoryPrefix, Long.toString(System.nanoTime()));
 	    if(!(temp.delete())) { throw new IOException("Could not delete temp file: " + temp.getAbsolutePath()); }
 	    if(!(temp.mkdir())) { throw new IOException("Could not create temp directory: " + temp.getAbsolutePath()); }
 	    return (temp);
