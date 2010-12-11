@@ -26,7 +26,7 @@ import org.kohsuke.stapler.StaplerResponse;
 
 public class ScmSyncConfigurationPlugin extends Plugin{
 	
-	private static final transient ScmSyncStrategy[] AVAILABLE_STRATEGIES = new ScmSyncStrategy[]{
+	public static final transient ScmSyncStrategy[] AVAILABLE_STRATEGIES = new ScmSyncStrategy[]{
 			new JobConfigScmSyncStrategy(),
 			new HudsonConfigScmSyncStrategy()
 	};
