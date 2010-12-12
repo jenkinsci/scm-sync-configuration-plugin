@@ -1,6 +1,7 @@
 package hudson.plugins.test.utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,13 +9,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.FileUtils;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 
 public class DirectoryUtils {
 
+    private static final Logger LOGGER = Logger.getLogger(DirectoryUtils.class.getName());
+    
 	private static class FileComparator implements Comparator<File>{
 		public int compare(File o1, File o2) {
 			return o1.getName().compareTo(o2.getName());
@@ -29,7 +35,7 @@ public class DirectoryUtils {
 		
 		Predicate<File> patternMatcherOnFilenamePredicate = new Predicate<File>() {
 			public boolean apply(File f) {
-				return excludePattern.matcher(f.getName()).matches();
+				return !excludePattern.matcher(f.getName()).matches();
 			}
 		};
 		
@@ -61,6 +67,17 @@ public class DirectoryUtils {
 			}
 			if(f1.isDirectory() != f2.isDirectory()){
 				return false;
+			}
+			if(f1.isFile()){
+				try {
+					if(!FileUtils.contentEquals(f1, f2)){
+						return false;
+					}
+				}catch(IOException e){
+					LOGGER.throwing(FileUtils.class.getName(), "contentEquals", e);
+					LOGGER.severe("Error occured when comparing <"+f1.getAbsolutePath()+"> content with <"+f2.getAbsolutePath()+"> content");
+					return false;
+				}
 			}
 			if(recursive && f1.isDirectory()){
 				if(!directoryContentsAreEqual(f1, f2, excludePattern, recursive)){
