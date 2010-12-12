@@ -38,10 +38,6 @@ public class SCMManipulator {
 		this.scmManager = _scmManager;
 	}
 	
-	public void updateScmRepository(ScmRepository _scmRepository){
-		this.scmRepository = _scmRepository;
-	}
-	
 	/**
 	 * Will check if everything is settled up (useful before a scm manipulation)
 	 * @param scmContext
@@ -316,7 +312,7 @@ public class SCMManipulator {
 			return checkinOk;
 		}
 		
-		LOGGER.info("Cheking in SCM files : "+Arrays.toString(filesToCheckin.toArray(new File[0]))+" ...");
+		LOGGER.info("Checking in SCM files : "+Arrays.toString(filesToCheckin.toArray(new File[0]))+" ...");
 
 		ScmFileSet fileSet = new ScmFileSet(scmRoot, filesToCheckin);
 
@@ -336,7 +332,7 @@ public class SCMManipulator {
 
 		
 		if(checkinOk){
-			LOGGER.info("Cheked in SCM files : "+Arrays.toString(filesToCheckin.toArray(new File[0]))+" !");
+			LOGGER.info("Checked in SCM files : "+Arrays.toString(filesToCheckin.toArray(new File[0]))+" !");
 		}
 		
 		return checkinOk;
