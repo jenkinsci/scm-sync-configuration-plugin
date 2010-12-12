@@ -6,6 +6,7 @@ import static org.powermock.api.easymock.PowerMock.createPartialMock;
 import static org.powermock.api.easymock.PowerMock.mockStatic;
 import static org.powermock.api.easymock.PowerMock.replay;
 import hudson.model.Hudson;
+import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.SCMCredentialConfiguration;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.plexus.util.FileUtils;
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -46,13 +48,19 @@ public class ScmSyncConfigurationBaseTest {
 	    if(!(curentLocalSvnRepository.mkdir())) { throw new IOException("Could not create SVN local repo directory: " + curentLocalSvnRepository.getAbsolutePath()); }
 	    FileUtils.copyDirectoryStructure(new ClassPathResource("svnEmptyRepository").getFile(), curentLocalSvnRepository);
 
+	    // Mocking user
+	    User mockedUser = EasyMock.createMock(User.class);
+	    expect(mockedUser.getId()).andStubReturn("fcamblor");
+	    
 		// Mocking Hudson singleton instance ...
 		mockStatic(Hudson.class);
-		Hudson hudsonMockedInstance = createPartialMock(Hudson.class, new String[]{ "getRootDir" });
+		Hudson hudsonMockedInstance = createPartialMock(Hudson.class, new String[]{ "getRootDir", "getMe" });
 		expect(Hudson.getInstance()).andStubReturn(hudsonMockedInstance);
 		expect(hudsonMockedInstance.getRootDir()).andStubReturn(currentHudsonRootDirectory);
+		expect(hudsonMockedInstance.getMe()).andStubReturn(mockedUser);
 
 		replay(hudsonMockedInstance);
+		replay(mockedUser);
 		replay(Hudson.class);
 	}
 	
