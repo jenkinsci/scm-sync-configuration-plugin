@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.maven.scm.manager.ScmManager;
+import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -28,7 +29,7 @@ public class ScmSyncConfigurationBusiness {
 	public ScmSyncConfigurationBusiness(){
 	}
 	
-	public void init(ScmContext scmContext) throws ComponentLookupException {
+	public void init(ScmContext scmContext) throws ComponentLookupException, PlexusContainerException {
 		ScmManager scmManager = SCMManagerFactory.getInstance().createScmManager();
 		this.scmManipulator = new SCMManipulator(scmManager);
 		this.checkoutScmDirectory = new File(getCheckoutScmDirectoryAbsolutePath());

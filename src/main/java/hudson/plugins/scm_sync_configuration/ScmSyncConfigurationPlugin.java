@@ -43,7 +43,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void start() throws Exception {
 		super.start();
 		this.load();
-		SCMManagerFactory.getInstance().start();
 	}
 	
 	public void init() {
