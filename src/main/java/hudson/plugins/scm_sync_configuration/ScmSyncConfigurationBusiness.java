@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.maven.scm.manager.ScmManager;
-import org.codehaus.plexus.embed.Embedder;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.FileUtils;
 
 
@@ -22,27 +22,17 @@ public class ScmSyncConfigurationBusiness {
 	private static final String CHECKOUT_SCM_DIRECTORY = "checkoutConfiguration";
     private static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationBusiness.class.getName());
 	
-	private Embedder plexus;
 	private SCMManipulator scmManipulator;
 	private File checkoutScmDirectory = null;
 	
 	public ScmSyncConfigurationBusiness(){
 	}
 	
-	public void start() throws Exception {
-		this.plexus = new Embedder();
-		this.plexus.start();
-	}
-	
-	public void init(ScmContext scmContext) throws Exception {
-		ScmManager scmManager = (ScmManager)this.plexus.lookup(ScmManager.ROLE);
+	public void init(ScmContext scmContext) throws ComponentLookupException {
+		ScmManager scmManager = SCMManagerFactory.getInstance().createScmManager();
 		this.scmManipulator = new SCMManipulator(scmManager);
 		this.checkoutScmDirectory = new File(getCheckoutScmDirectoryAbsolutePath());
 		initializeRepository(scmContext, false);
-	}
-	
-	public void stop() throws Exception {
-		this.plexus.stop();
 	}
 	
 	public void initializeRepository(ScmContext scmContext, boolean deleteCheckoutScmDir){

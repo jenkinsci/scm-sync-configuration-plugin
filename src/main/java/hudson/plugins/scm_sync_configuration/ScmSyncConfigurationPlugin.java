@@ -43,7 +43,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void start() throws Exception {
 		super.start();
 		this.load();
-		this.business.start();
+		SCMManagerFactory.getInstance().start();
 	}
 	
 	public void init() {
@@ -57,7 +57,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	
 	@Override
 	public void stop() throws Exception {
-		this.business.stop();
+		SCMManagerFactory.getInstance().stop();
 		super.stop();
 	}
 	
