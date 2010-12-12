@@ -128,6 +128,12 @@
 		<type>jar</type>
 		<scope>test</scope>
 	</dependency>
+    <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>r07</version>
+        <scope>test</scope>
+    </dependency>	
   </dependencies>
   
 </project>
