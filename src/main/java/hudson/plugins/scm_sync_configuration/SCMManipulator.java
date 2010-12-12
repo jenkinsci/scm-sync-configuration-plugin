@@ -73,7 +73,7 @@ public class SCMManipulator {
 		}
 		
 		// Checkouting sources
-		LOGGER.info("Checkouting SCM files into <"+checkoutDirectory.getAbsolutePath()+"> ...");
+		LOGGER.fine("Checkouting SCM files into <"+checkoutDirectory.getAbsolutePath()+"> ...");
 		try {
 			CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory));
 			if(!result.isSuccess()){
@@ -88,7 +88,7 @@ public class SCMManipulator {
 		}
 		
 		if(checkoutOk){
-			LOGGER.info("Checkouted SCM files into <"+checkoutDirectory.getAbsolutePath()+"> !");
+			LOGGER.fine("Checkouted SCM files into <"+checkoutDirectory.getAbsolutePath()+"> !");
 		}
 
 		return checkoutOk;
@@ -104,7 +104,7 @@ public class SCMManipulator {
 		String directoryName = hierarchyToDelete.getName();
 		File enclosingDirectory = hierarchyToDelete.getParentFile();
 		
-		LOGGER.info("Deleting SCM hierarchy <"+hierarchyToDelete.getAbsolutePath()+"> from SCM ...");
+		LOGGER.fine("Deleting SCM hierarchy <"+hierarchyToDelete.getAbsolutePath()+"> from SCM ...");
 		ScmFileSet updateFileSet = null;
 		ScmFileSet commitFileSet = null;
 		try {
@@ -151,7 +151,7 @@ public class SCMManipulator {
 		}
 
 		if(deleteOk){
-			LOGGER.info("Deleted SCM hierarchy <"+hierarchyToDelete.getAbsolutePath()+"> !");
+			LOGGER.fine("Deleted SCM hierarchy <"+hierarchyToDelete.getAbsolutePath()+"> !");
 		}
 
 		return deleteOk;
@@ -164,7 +164,7 @@ public class SCMManipulator {
 			return renameOk;
 		}
 		
-		LOGGER.info("Renaming SCM hierarchy <"+oldDirPathRelativeToScmRoot+"> to <"+newDirPathRelativeToScmRoot+"> ...");
+		LOGGER.fine("Renaming SCM hierarchy <"+oldDirPathRelativeToScmRoot+"> to <"+newDirPathRelativeToScmRoot+"> ...");
 		File newDir = new File(scmRoot.getAbsoluteFile()+File.separator+newDirPathRelativeToScmRoot);
 		File oldDir = new File(scmRoot.getAbsoluteFile()+File.separator+oldDirPathRelativeToScmRoot);
 		
@@ -210,7 +210,7 @@ public class SCMManipulator {
 		}
 		
 		if(renameOk){
-			LOGGER.info("Renamed SCM hierarchy <"+oldDirPathRelativeToScmRoot+"> to <"+newDirPathRelativeToScmRoot+"> !");
+			LOGGER.fine("Renamed SCM hierarchy <"+oldDirPathRelativeToScmRoot+"> to <"+newDirPathRelativeToScmRoot+"> !");
 		}
 		
 		return renameOk;
@@ -223,7 +223,7 @@ public class SCMManipulator {
 			return exportOk;
 		}
 		
-		LOGGER.info("Exporting SCM directory <"+syncedHierarchyPathRelativeToScmRoot+"> to <"+outputDirectory.getAbsolutePath()+"> ...");
+		LOGGER.fine("Exporting SCM directory <"+syncedHierarchyPathRelativeToScmRoot+"> to <"+outputDirectory.getAbsolutePath()+"> ...");
 		
 		File tmpDir;
 		try {
@@ -258,7 +258,7 @@ public class SCMManipulator {
 		}
 
 		if(exportOk){
-			LOGGER.info("Exported SCM directory <"+syncedHierarchyPathRelativeToScmRoot+"> to <"+outputDirectory.getAbsolutePath()+"> !");
+			LOGGER.fine("Exported SCM directory <"+syncedHierarchyPathRelativeToScmRoot+"> to <"+outputDirectory.getAbsolutePath()+"> !");
 		}
 		
 		return exportOk;
@@ -271,7 +271,7 @@ public class SCMManipulator {
 			return synchronizedFiles;
 		}
 		
-		LOGGER.info("Adding SCM file <"+filePathRelativeToScmRoot+"> ...");
+		LOGGER.fine("Adding SCM file <"+filePathRelativeToScmRoot+"> ...");
 		
 		try {
 			// Split every directory leading through modifiedFilePathRelativeToHudsonRoot
@@ -299,7 +299,7 @@ public class SCMManipulator {
 
 
 		if(!synchronizedFiles.isEmpty()){
-			LOGGER.info("Added SCM files : "+Arrays.toString(synchronizedFiles.toArray(new File[0]))+" !");
+			LOGGER.fine("Added SCM files : "+Arrays.toString(synchronizedFiles.toArray(new File[0]))+" !");
 		}
 		
 		return synchronizedFiles;
@@ -312,7 +312,7 @@ public class SCMManipulator {
 			return checkinOk;
 		}
 		
-		LOGGER.info("Checking in SCM files : "+Arrays.toString(filesToCheckin.toArray(new File[0]))+" ...");
+		LOGGER.fine("Checking in SCM files : "+Arrays.toString(filesToCheckin.toArray(new File[0]))+" ...");
 
 		ScmFileSet fileSet = new ScmFileSet(scmRoot, filesToCheckin);
 
@@ -332,7 +332,7 @@ public class SCMManipulator {
 
 		
 		if(checkinOk){
-			LOGGER.info("Checked in SCM files : "+Arrays.toString(filesToCheckin.toArray(new File[0]))+" !");
+			LOGGER.fine("Checked in SCM files : "+Arrays.toString(filesToCheckin.toArray(new File[0]))+" !");
 		}
 		
 		return checkinOk;
