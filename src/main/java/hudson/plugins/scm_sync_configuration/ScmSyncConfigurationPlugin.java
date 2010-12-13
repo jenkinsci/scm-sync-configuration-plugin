@@ -112,7 +112,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return comment;
 	}
 	
-	private static User getCurrentUser(){
+	private User getCurrentUser(){
 		User user = null;
 		try {
 			user = Hudson.getInstance().getMe();
