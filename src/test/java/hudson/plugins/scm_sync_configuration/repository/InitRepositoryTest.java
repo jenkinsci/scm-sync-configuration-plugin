@@ -92,31 +92,4 @@ public class InitRepositoryTest extends ScmSyncConfigurationBaseTest {
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/InitRepositoryTest.shouldSynchronizeHudsonFiles/");
 	}
-	
-	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath) throws ComponentLookupException, PlexusContainerException, IOException{
-		// Settling up scm context
-		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
-		SCMManipulator scmManipulator = new SCMManipulator(SCMManagerFactory.getInstance().createScmManager());
-		boolean configSettledUp = scmManipulator.scmConfigurationSettledUp(scmContext, true);
-		assert configSettledUp;
-		
-		// Checkouting scm in temp directory
-		File checkoutDirectoryForVerifications = createTmpDirectory("InitRepositoryTest__verifyCurrentScmContentMatchesHierarchy");
-		scmManipulator.checkout(checkoutDirectoryForVerifications);
-		boolean directoryContentsAreEqual = DirectoryUtils.directoryContentsAreEqual(checkoutDirectoryForVerifications, new ClassPathResource(hierarchyPath).getFile(), 
-				getSpecialSCMDirectoryExcludePattern(), true);
-		
-		FileUtils.deleteDirectory(checkoutDirectoryForVerifications);
-		
-		assert directoryContentsAreEqual;
-	}
-	
-	protected String getSCMRepositoryURL(){
-		return "scm:svn:file:///"+this.getCurentLocalSvnRepository().getAbsolutePath();
-	}
-	
-	protected Pattern getSpecialSCMDirectoryExcludePattern(){
-		return Pattern.compile("\\.svn");
-	}
 }

@@ -7,14 +7,21 @@ import static org.powermock.api.easymock.PowerMock.mockStatic;
 import static org.powermock.api.easymock.PowerMock.replay;
 import hudson.model.Hudson;
 import hudson.model.User;
+import hudson.plugins.scm_sync_configuration.SCMManagerFactory;
+import hudson.plugins.scm_sync_configuration.SCMManipulator;
+import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.SCMCredentialConfiguration;
+import hudson.plugins.test.utils.DirectoryUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
+import org.codehaus.plexus.PlexusContainerException;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.FileUtils;
 import org.easymock.EasyMock;
 import org.junit.After;
@@ -100,7 +107,36 @@ public class ScmSyncConfigurationBaseTest {
 		return mockedSCM;
 	}
 
-	// Overridable in a near future (when dealing for multiple scms ..)
+	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath) throws ComponentLookupException, PlexusContainerException, IOException{
+		// Settling up scm context
+		SCM mockedSCM = createSCMMock(true);
+		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
+		SCMManipulator scmManipulator = new SCMManipulator(SCMManagerFactory.getInstance().createScmManager());
+		boolean configSettledUp = scmManipulator.scmConfigurationSettledUp(scmContext, true);
+		assert configSettledUp;
+		
+		// Checkouting scm in temp directory
+		File checkoutDirectoryForVerifications = createTmpDirectory("InitRepositoryTest__verifyCurrentScmContentMatchesHierarchy");
+		scmManipulator.checkout(checkoutDirectoryForVerifications);
+		boolean directoryContentsAreEqual = DirectoryUtils.directoryContentsAreEqual(checkoutDirectoryForVerifications, new ClassPathResource(hierarchyPath).getFile(), 
+				getSpecialSCMDirectoryExcludePattern(), true);
+		
+		FileUtils.deleteDirectory(checkoutDirectoryForVerifications);
+		
+		assert directoryContentsAreEqual;
+	}
+	
+	// Overridable in a near future (when dealing with multiple scms ...)
+	protected String getSCMRepositoryURL(){
+		return "scm:svn:file:///"+this.getCurentLocalSvnRepository().getAbsolutePath();
+	}
+	
+	// Overridable in a near future (when dealing with multiple scms ...)
+	protected Pattern getSpecialSCMDirectoryExcludePattern(){
+		return Pattern.compile("\\.svn");
+	}
+
+	// Overridable in a near future (when dealing with multiple scms ...)
 	protected Class<? extends SCM> getSCMClass(){
 		return SCM.SUBVERSION.getClass();
 	}
