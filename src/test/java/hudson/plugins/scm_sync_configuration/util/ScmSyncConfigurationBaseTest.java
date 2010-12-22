@@ -12,6 +12,7 @@ import hudson.plugins.scm_sync_configuration.SCMManipulator;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.SCMCredentialConfiguration;
+import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncSubversionSCM;
 import hudson.plugins.test.utils.DirectoryUtils;
 
 import java.io.File;
@@ -32,7 +33,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.ClassPathResource;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Hudson.class, SCM.class})
+@PrepareForTest({Hudson.class, SCM.class, ScmSyncSubversionSCM.class})
 public class ScmSyncConfigurationBaseTest {
 	
 	private File currentTestDirectory = null;
@@ -138,7 +139,7 @@ public class ScmSyncConfigurationBaseTest {
 
 	// Overridable in a near future (when dealing with multiple scms ...)
 	protected Class<? extends SCM> getSCMClass(){
-		return SCM.SUBVERSION.getClass();
+		return ScmSyncSubversionSCM.class;
 	}
 	
 	protected File getCurrentTestDirectory() {
