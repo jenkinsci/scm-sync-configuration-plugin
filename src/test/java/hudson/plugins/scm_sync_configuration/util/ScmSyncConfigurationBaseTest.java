@@ -27,6 +27,8 @@ import org.codehaus.plexus.util.FileUtils;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -36,6 +38,7 @@ import org.springframework.core.io.ClassPathResource;
 @PrepareForTest({Hudson.class, SCM.class, ScmSyncSubversionSCM.class})
 public class ScmSyncConfigurationBaseTest {
 	
+	@Rule protected TestName testName = new TestName();
 	private File currentTestDirectory = null;
 	private File curentLocalSvnRepository = null;
 	private File currentHudsonRootDirectory = null;
@@ -123,7 +126,7 @@ public class ScmSyncConfigurationBaseTest {
 		SCMManipulator scmManipulator = createMockedScmManipulator();
 		
 		// Checkouting scm in temp directory
-		File checkoutDirectoryForVerifications = createTmpDirectory("InitRepositoryTest__verifyCurrentScmContentMatchesHierarchy");
+		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getName()+"_"+testName.getMethodName()+"__verifyCurrentScmContentMatchesHierarchy");
 		scmManipulator.checkout(checkoutDirectoryForVerifications);
 		boolean directoryContentsAreEqual = DirectoryUtils.directoryContentsAreEqual(checkoutDirectoryForVerifications, new ClassPathResource(hierarchyPath).getFile(), 
 				getSpecialSCMDirectoryExcludePattern(), true);
