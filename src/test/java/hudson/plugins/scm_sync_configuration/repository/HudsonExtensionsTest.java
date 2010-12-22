@@ -65,5 +65,24 @@ public class HudsonExtensionsTest extends ScmSyncConfigurationBaseTest {
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobRenameBeCorrectlyImpactedOnSCM/");
 	}
 	
-	
+	@Test
+	public void shouldJobDeleteBeCorrectlyImpactedOnSCM() throws Throwable {
+		// Initializing the repository...
+		SCM mockedSCM = createSCMMock(true);
+		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
+		sscBusiness.init(scmContext);
+		
+		// Synchronizing hudson config files
+		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		
+		// Deleting fakeJob
+		Item mockedItem = createMock(Item.class);
+		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/" );
+		expect(mockedItem.getRootDir()).andStubReturn(mockedItemRootDir);
+		replay(mockedItem);
+		
+		sscItemListener.onDeleted(mockedItem);
+		
+		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobDeleteBeCorrectlyImpactedOnSCM/");
+	}
 }
