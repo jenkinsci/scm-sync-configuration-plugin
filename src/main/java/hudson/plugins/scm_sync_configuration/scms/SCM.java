@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.provider.ScmProviderRepository;
@@ -243,4 +244,9 @@ public enum SCM {
 	public abstract String createScmUrlFromRequest(StaplerRequest req);
 	public abstract String extractScmUrlFrom(String scmUrl);
 	public abstract SCMCredentialConfiguration extractScmCredentials(String scmRepositoryURL);
+
+    public String toString(){
+        return new ToStringBuilder(this).append("title", title).append("scmClassName", scmClassName)
+                .append("configPage", configPage).append("repositoryUrlHelpPath", repositoryUrlHelpPath).toString();
+    }
 }
