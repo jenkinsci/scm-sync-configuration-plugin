@@ -108,13 +108,19 @@ public class ScmSyncConfigurationBaseTest {
 		return mockedSCM;
 	}
 
-	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath) throws ComponentLookupException, PlexusContainerException, IOException{
+	protected SCMManipulator createMockedScmManipulator() throws ComponentLookupException, PlexusContainerException{
 		// Settling up scm context
 		SCM mockedSCM = createSCMMock(true);
 		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
 		SCMManipulator scmManipulator = new SCMManipulator(SCMManagerFactory.getInstance().createScmManager());
 		boolean configSettledUp = scmManipulator.scmConfigurationSettledUp(scmContext, true);
 		assert configSettledUp;
+		
+		return scmManipulator;
+	}
+	
+	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath) throws ComponentLookupException, PlexusContainerException, IOException{
+		SCMManipulator scmManipulator = createMockedScmManipulator();
 		
 		// Checkouting scm in temp directory
 		File checkoutDirectoryForVerifications = createTmpDirectory("InitRepositoryTest__verifyCurrentScmContentMatchesHierarchy");
