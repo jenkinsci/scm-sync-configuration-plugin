@@ -126,7 +126,7 @@ public class ScmSyncConfigurationBaseTest {
 		SCMManipulator scmManipulator = createMockedScmManipulator();
 		
 		// Checkouting scm in temp directory
-		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getName()+"_"+testName.getMethodName()+"__verifyCurrentScmContentMatchesHierarchy");
+		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__verifyCurrentScmContentMatchesHierarchy");
 		scmManipulator.checkout(checkoutDirectoryForVerifications);
 		boolean directoryContentsAreEqual = DirectoryUtils.directoryContentsAreEqual(checkoutDirectoryForVerifications, new ClassPathResource(hierarchyPath).getFile(), 
 				getSpecialSCMDirectoryExcludePattern(), true);
