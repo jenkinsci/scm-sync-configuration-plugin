@@ -14,16 +14,20 @@ public class SCMManagerFactory {
 	private SCMManagerFactory(){
 	}
 	
-	public void stop() throws Exception {
-		this.plexus.stop();
-	}
-	
-	public ScmManager createScmManager() throws ComponentLookupException, PlexusContainerException {
+	public void start() throws PlexusContainerException {
 		if(plexus == null){
 			this.plexus = new Embedder();
 			this.plexus.start();
 		}
+	}
+	
+	public ScmManager createScmManager() throws ComponentLookupException {
 		return (ScmManager)this.plexus.lookup(ScmManager.ROLE);
+	}
+	
+	public void stop() throws Exception {
+		this.plexus.stop();
+		this.plexus = null;
 	}
 	
 	public static SCMManagerFactory getInstance(){
