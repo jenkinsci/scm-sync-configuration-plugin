@@ -45,6 +45,8 @@ public class ScmSyncConfigurationBaseTest {
 
 	@Before
 	public void setup() throws Throwable {
+		SCMManagerFactory.getInstance().start();
+		
 		// Mocking Hudson root directory
 		currentTestDirectory = createTmpDirectory("SCMSyncConfigTestsRoot");
 		currentHudsonRootDirectory = new File(currentTestDirectory.getAbsolutePath()+"/hudsonRootDir/");
@@ -79,6 +81,8 @@ public class ScmSyncConfigurationBaseTest {
 	public void teardown() throws Throwable {
 		// Deleting current test directory
 		FileUtils.deleteDirectory(currentTestDirectory);
+		
+		SCMManagerFactory.getInstance().stop();
 	}
 	
 	protected static File createTmpDirectory(String directoryPrefix) throws IOException {

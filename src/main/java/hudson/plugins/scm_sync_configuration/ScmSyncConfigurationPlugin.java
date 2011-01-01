@@ -43,14 +43,18 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void start() throws Exception {
 		super.start();
 		this.load();
+		
+		// SCMManagerFactory.start() must be called here instead of ScmSyncConfigurationItemListener.onLoaded()
+		// because, for some unknown reasons, we reach plexus bootstraping exceptions when
+		// calling Embedder.start() when everything is loaded (very strange...)
+		SCMManagerFactory.getInstance().start();
 	}
 	
 	public void init() {
 		try {
 			this.business.init(createScmContext());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException("Error during ScmSyncConfiguration initialisation !", e);
 		}
 	}
 	
