@@ -1,5 +1,10 @@
 package hudson.plugins.scm_sync_configuration.scms.impl;
 
+import hudson.plugins.scm_sync_configuration.scms.SCM;
+import hudson.plugins.scm_sync_configuration.scms.SCMCredentialConfiguration;
+import hudson.scm.SubversionSCM;
+import hudson.scm.SubversionSCM.DescriptorImpl.Credential;
+
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.logging.Level;
@@ -17,11 +22,6 @@ import org.tmatesoft.svn.core.internal.wc.DefaultSVNAuthenticationManager;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
-
-import hudson.plugins.scm_sync_configuration.scms.SCM;
-import hudson.plugins.scm_sync_configuration.scms.SCMCredentialConfiguration;
-import hudson.scm.SubversionSCM;
-import hudson.scm.SubversionSCM.DescriptorImpl.Credential;
 
 public class ScmSyncSubversionSCM extends SCM {
 

@@ -42,6 +42,9 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	@Override
 	public void start() throws Exception {
 		super.start();
+		
+		Hudson.XSTREAM.registerConverter(new SCM.SCMXStreamConverter());
+		
 		this.load();
 		
 		// SCMManagerFactory.start() must be called here instead of ScmSyncConfigurationItemListener.onLoaded()
