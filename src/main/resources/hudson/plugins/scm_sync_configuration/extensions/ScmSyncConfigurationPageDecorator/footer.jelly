@@ -146,8 +146,11 @@
 	              modal:true
 	            }
 	        ); 
-	        
-		content = "<form id='commentForm' method='post' action='"+rootURL+"/plugin/scm-sync-configuration/submitComment'>Comment :<br/><textarea id='comment' name='comment' cols='80' rows='3'></textarea></form>";
+	    
+		var currentContext = createTemplateContext();
+	    var popupContentTemplate = new Template(getTemplateContent('popupContentTemplate'));
+	    content = popupContentTemplate.evaluate(currentContext);
+	    
 		YAHOO.scm.sync.configuration.modalPopup.setHeader("Commit comment");
 		YAHOO.scm.sync.configuration.modalPopup.setBody(content); 
 	    YAHOO.scm.sync.configuration.modalPopup.setFooter('<span id="panelFooter" class="button-group"></span>'); 
@@ -171,7 +174,29 @@
 		
 		return false;
 	}
+
+	// For some unknown reasons, on firefox, some #{XXX} template variables are replaced by #%7BXXX%7D :(
+	function getTemplateContent(templateId){
+		var content = $(templateId).innerHTML;
+		content = content.replace(new RegExp("%7B", "g"), "{");
+		content = content.replace(new RegExp("%7D", "g"), "}");
+		return content;
+	}
+
+	function createTemplateContext(){
+		// Creating context for creation
+		var currentContext = {
+			rootURL: rootURL
+		};
+		return currentContext;
+	}
 	]]></script>
+	<div style="display:none" id="popupContentTemplate">
+		<form id='commentForm' method='post' action='#{rootURL}/plugin/scm-sync-configuration/submitComment'>
+			Comment :<br/>
+			<textarea id='comment' name='comment' cols='80' rows='3'></textarea>
+		</form>
+	</div>
 </j:if>
 
 </j:jelly>
