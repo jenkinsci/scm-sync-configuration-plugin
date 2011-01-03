@@ -76,13 +76,18 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		if(scmType != null){
 			this.scm = SCM.valueOf(scmType);
 			String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
+			
+			String oldScmRepositoryUrl = this.scmRepositoryUrl;
+			this.scmRepositoryUrl = newScmRepositoryUrl;
+			this.save();
+			
 			// If something changed, let's reinitialize repository in working directory !
-			if(newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(this.scmRepositoryUrl)){
-				this.scmRepositoryUrl = newScmRepositoryUrl;
-				this.save();
-				
+			if(newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(oldScmRepositoryUrl)){
 				this.business.initializeRepository(createScmContext(), true);
 				this.business.synchronizeAllConfigs(createScmContext(), AVAILABLE_STRATEGIES, getCurrentUser());
+			} else if(newScmRepositoryUrl==null && oldScmRepositoryUrl!=null){
+				// Cleaning checkouted repository
+				this.business.cleanChekoutScmDirectory();
 			}
 		}
 	}

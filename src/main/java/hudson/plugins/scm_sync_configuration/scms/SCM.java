@@ -2,6 +2,7 @@ package hudson.plugins.scm_sync_configuration.scms;
 
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
+import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncNoSCM;
 import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncSubversionSCM;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public abstract class SCM {
 	protected static final Logger LOGGER = Logger.getLogger(SCM.class.getName());
 	
 	protected static final List<SCM> SCM_IMPLEMENTATIONS = new ArrayList<SCM>(){ {
+		add(new ScmSyncNoSCM());
 		add(new ScmSyncSubversionSCM());
 	} };
 	

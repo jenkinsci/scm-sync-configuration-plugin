@@ -41,14 +41,8 @@ public class ScmSyncConfigurationBusiness {
 		if(scmManipulator.scmConfigurationSettledUp(scmContext, true)){
 			LOGGER.info("Initializing SCM repository for scm-sync-configuration plugin ...");
 			// If checkoutScmDirectory was not empty and deleteCheckoutScmDir is asked, reinitialize it !
-			if(deleteCheckoutScmDir && checkoutScmDirectory.exists()){
-				LOGGER.info("Deleting old checkout SCM directory ...");
-				try {
-					FileUtils.forceDelete(checkoutScmDirectory);
-				} catch (IOException e) {
-					LOGGER.throwing(FileUtils.class.getName(), "forceDelete", e);
-					LOGGER.severe("Error while deleting <"+checkoutScmDirectory.getAbsolutePath()+"> : "+e.getMessage());
-				}
+			if(deleteCheckoutScmDir){
+				cleanChekoutScmDirectory();
 			}
 			
 			// Creating checkoust scm directory
@@ -63,6 +57,18 @@ public class ScmSyncConfigurationBusiness {
 			
 			if(this.scmManipulator.checkout(this.checkoutScmDirectory)){
 				LOGGER.info("SCM repository initialization done.");
+			}
+		}
+	}
+	
+	public void cleanChekoutScmDirectory(){
+		if(checkoutScmDirectory.exists()){
+			LOGGER.info("Deleting old checkout SCM directory ...");
+			try {
+				FileUtils.forceDelete(checkoutScmDirectory);
+			} catch (IOException e) {
+				LOGGER.throwing(FileUtils.class.getName(), "forceDelete", e);
+				LOGGER.severe("Error while deleting <"+checkoutScmDirectory.getAbsolutePath()+"> : "+e.getMessage());
 			}
 		}
 	}
