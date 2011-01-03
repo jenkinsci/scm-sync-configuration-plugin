@@ -9,7 +9,7 @@
 
   <artifactId>scm-sync-configuration</artifactId>
   <name>SCM Sync Configuration Plugin</name>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.0.3</version>
   <packaging>hpi</packaging>
   <url>http://wiki.hudson-ci.org/display/HUDSON/SCM+Sync+configuration+plugin</url>
   <description>SCM Sync Configuration Hudson plugin is aimed at 2 main features : First, keep sync'ed your config.xml (and other ressources) hudson files with a SCM repository (backup), Secondly, track changes (and author) made on every file with commit messages.</description>
@@ -136,4 +136,10 @@
     </dependency>	
   </dependencies>
   
+
+  <scm>
+    <connection>scm:svn:https://guest@svn.java.net/svn/hudson~svn/tags/scm-sync-configuration/scm-sync-configuration-0.0.3</connection>
+    <developerConnection>scm:svn:https://svn.java.net/svn/hudson~svn/tags/scm-sync-configuration/scm-sync-configuration-0.0.3</developerConnection>
+    <url>scm:svn:https://svn.java.net/svn/hudson~svn/tags/scm-sync-configuration/scm-sync-configuration-0.0.3</url>
+  </scm>
 </project>
