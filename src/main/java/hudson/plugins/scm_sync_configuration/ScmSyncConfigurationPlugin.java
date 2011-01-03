@@ -8,6 +8,7 @@ import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
+import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncNoSCM;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.HudsonConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
@@ -46,6 +47,13 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		Hudson.XSTREAM.registerConverter(new SCM.SCMXStreamConverter());
 		
 		this.load();
+		
+		// If scm has not been read in scm-sync-configuration.xml, let's initialize it
+		// to the "no scm" SCM
+		if(this.scm == null){
+			this.scm = SCM.valueOf(new ScmSyncNoSCM().getId());
+			this.scmRepositoryUrl = null;
+		}
 		
 		// SCMManagerFactory.start() must be called here instead of ScmSyncConfigurationItemListener.onLoaded()
 		// because, for some unknown reasons, we reach plexus bootstraping exceptions when
