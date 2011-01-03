@@ -48,6 +48,7 @@
 				<artifactId>maven-release-plugin</artifactId>
 				<configuration>
 					<tagBase>https://svn.java.net/svn/hudson~svn/tags/scm-sync-configuration/</tagBase>
+                                        <goals>deploy</goals>
 				</configuration>
 			</plugin>
 		</plugins>
