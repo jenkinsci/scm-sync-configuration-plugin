@@ -65,10 +65,10 @@ public class InitRepositoryTest extends ScmSyncConfigurationBaseTest {
 	}
 	
 	@Override
-	public String getSCMRepositoryURL() {
+	protected String getSCMRepositoryURL(){
 		String scmRepositoryURLOnRoot = super.getSCMRepositoryURL();
 		if("shouldInitializeLocalRepositoryWhenScmContextIsCorrentAndEvenIfScmDirectoryDoesntExist".equals(testName.getMethodName())){
-			return scmRepositoryURLOnRoot+"/path/that/doesnt/exist/");
+			return scmRepositoryURLOnRoot+"/path/that/doesnt/exist/";
 		} else {
 			return scmRepositoryURLOnRoot;
 		}
