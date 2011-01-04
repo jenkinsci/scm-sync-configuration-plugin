@@ -57,6 +57,24 @@ public class InitRepositoryTest extends ScmSyncConfigurationBaseTest {
 	}
 	
 	@Test
+	public void shouldInitializeLocalRepositoryWhenScmContextIsCorrentAndEvenIfScmDirectoryDoesntExist() throws Throwable {
+		SCM mockedSCM = createSCMMock(true);
+		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
+		sscBusiness.init(scmContext);
+		assert sscBusiness.scmConfigurationSettledUp(scmContext);
+	}
+	
+	@Override
+	public File getCurrentScmSyncConfigurationCheckoutDirectory() {
+		File scmSyncConfigurationCheckoutRootDir = super.getCurrentScmSyncConfigurationCheckoutDirectory();
+		if("shouldInitializeLocalRepositoryWhenScmContextIsCorrentAndEvenIfScmDirectoryDoesntExist".equals(testName.getMethodName())){
+			return new File(scmSyncConfigurationCheckoutRootDir.getAbsolutePath()+"/path/that/doesnt/exist/");
+		} else {
+			return scmSyncConfigurationCheckoutRootDir;
+		}
+	}
+	
+	@Test
 	public void shouldResetCheckoutConfigurationDirectoryWhenAsked() throws Throwable {
 		// Initializing the repository...
 		SCM mockedSCM = createSCMMock(true);
