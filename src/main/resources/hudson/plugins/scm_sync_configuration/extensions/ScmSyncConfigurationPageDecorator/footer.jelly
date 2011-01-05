@@ -194,7 +194,26 @@
 	<div style="display:none" id="popupContentTemplate">
 		<form id='commentForm' method='post' action='#{rootURL}/plugin/scm-sync-configuration/submitComment'>
 			Comment :<br/>
-			<textarea id='comment' name='comment' cols='80' rows='3'></textarea>
+			<textarea id='comment' name='comment' cols='80' rows='3'></textarea><br/>
+			<input type="checkbox" name="dontBotherMe" value="true" />Don't bother me
+			<select name="botherType">
+				<option value="thisConfig">for this config particularly</option>
+				<option value="anyConfigs">for any configs</option>
+			</select>
+			during
+			<select name="botherTime">
+				<option value="5">5 min</option>
+				<option value="10">10 min</option>
+				<option value="15">15 min</option>
+				<option value="20">20 min</option>
+				<option value="30">30 min</option>
+				<option value="45">45 min</option>
+				<option value="60">1 hour</option>
+				<option value="90">1.5 hour</option>
+				<option value="120">2 hours</option>
+				<option value="240">4 hours</option>
+			</select>
+			<input type="hidden" name="currentURL" value="${url.toString()}" />
 		</form>
 	</div>
 </j:if>

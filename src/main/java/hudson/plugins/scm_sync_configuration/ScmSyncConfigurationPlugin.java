@@ -103,6 +103,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void doSubmitComment(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
 		// TODO: complexify this in order to pass a strategy identifier in the session key
 		ScmSyncConfigurationDataProvider.provideComment(req, req.getParameter("comment"));
+		if(Boolean.valueOf(req.getParameter("dontBotherMe")).booleanValue()){
+			ScmSyncConfigurationDataProvider.provideBotherTimeout(req, req.getParameter("botherType"), 
+					Integer.valueOf(req.getParameter("botherTime")), req.getParameter("currentURL"));
+		}
 	}
 	
 	// TODO: do retrieve help file with an action !
@@ -161,7 +165,13 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public boolean shouldDecorationOccursOnURL(String url){
 		// Removing comment from session here...
 		ScmSyncConfigurationDataProvider.retrieveComment(Stapler.getCurrentRequest(), true);
-		return getStrategyForURL(url) != null && this.business.scmConfigurationSettledUp(createScmContext());
+		
+		// Displaying commit message popup is based on following tests :
+		// First : no botherTimeout should match with current url
+		// Second : a strategy should exist, matching current url
+		// Third : SCM Sync should be settled up
+		return ScmSyncConfigurationDataProvider.retrieveBotherTimeoutMatchingUrl(Stapler.getCurrentRequest(), url) == null
+					&& getStrategyForURL(url) != null && this.business.scmConfigurationSettledUp(createScmContext());
 	}
 	
 	public ScmSyncStrategy getStrategyForURL(String url){
