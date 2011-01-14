@@ -1,26 +1,20 @@
 package hudson.plugins.scm_sync_configuration.repository;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import hudson.model.Hudson;
-import hudson.plugins.scm_sync_configuration.SCMManagerFactory;
-import hudson.plugins.scm_sync_configuration.SCMManipulator;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationBusiness;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationBaseTest;
-import hudson.plugins.test.utils.DirectoryUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.regex.Pattern;
 
-import org.codehaus.plexus.PlexusContainerException;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.springframework.core.io.ClassPathResource;
 
 @PrepareForTest(SCM.class)
 public class InitRepositoryTest extends ScmSyncConfigurationBaseTest {
@@ -36,16 +30,16 @@ public class InitRepositoryTest extends ScmSyncConfigurationBaseTest {
 	public void shouldNotInitializeAnyRepositoryWhenScmContextIsEmpty() throws Throwable {
 		ScmContext emptyContext = new ScmContext(null, null);
 		sscBusiness.init(emptyContext);
-		assert !sscBusiness.scmConfigurationSettledUp(emptyContext);
+		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(emptyContext), is(false));
 		
 		emptyContext = new ScmContext(null, getSCMRepositoryURL());
 		sscBusiness.init(emptyContext);
-		assert !sscBusiness.scmConfigurationSettledUp(emptyContext);
+		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(emptyContext), is(false));
 		
 		SCM mockedSCM = createSCMMock(true);
 		emptyContext = new ScmContext(mockedSCM, null);
 		sscBusiness.init(emptyContext);
-		assert !sscBusiness.scmConfigurationSettledUp(emptyContext);
+		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(emptyContext), is(false));
 	}
 	
 	@Test
@@ -53,25 +47,15 @@ public class InitRepositoryTest extends ScmSyncConfigurationBaseTest {
 		SCM mockedSCM = createSCMMock(true);
 		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
 		sscBusiness.init(scmContext);
-		assert sscBusiness.scmConfigurationSettledUp(scmContext);
+		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(scmContext), is(true));
 	}
 	
 	@Test
 	public void shouldInitializeLocalRepositoryWhenScmContextIsCorrentAndEvenIfScmDirectoryDoesntExist() throws Throwable {
 		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
+		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL()+"/path/that/doesnt/exist/");
 		sscBusiness.init(scmContext);
-		assert sscBusiness.scmConfigurationSettledUp(scmContext);
-	}
-	
-	@Override
-	protected String getSCMRepositoryURL(){
-		String scmRepositoryURLOnRoot = super.getSCMRepositoryURL();
-		if("shouldInitializeLocalRepositoryWhenScmContextIsCorrentAndEvenIfScmDirectoryDoesntExist".equals(testName.getMethodName())){
-			return scmRepositoryURLOnRoot+"/path/that/doesnt/exist/";
-		} else {
-			return scmRepositoryURLOnRoot;
-		}
+		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(scmContext), is(true));
 	}
 	
 	@Test
@@ -82,20 +66,20 @@ public class InitRepositoryTest extends ScmSyncConfigurationBaseTest {
 		sscBusiness.init(scmContext);
 		
 		// After init, local checkouted repository should exists
-		assert getCurrentScmSyncConfigurationCheckoutDirectory().exists();
+		assertThat(getCurrentScmSyncConfigurationCheckoutDirectory().exists(), is(true));
 		
 		// Populating checkoutConfiguration directory ..
 		File fileWhichShouldBeDeletedAfterReset = new File(getCurrentScmSyncConfigurationCheckoutDirectory().getAbsolutePath()+"/hello.txt");
-		assert fileWhichShouldBeDeletedAfterReset.createNewFile();
+		assertThat(fileWhichShouldBeDeletedAfterReset.createNewFile(), is(true));
 		FileUtils.fileWrite(fileWhichShouldBeDeletedAfterReset.getAbsolutePath(), "Hello world !");
 		
 		// Reseting the repository, without cleanup
 		sscBusiness.initializeRepository(scmContext, false);
-		assert fileWhichShouldBeDeletedAfterReset.exists();
+		assertThat(fileWhichShouldBeDeletedAfterReset.exists(), is(true));
 		
 		// Reseting the repository with cleanup
 		sscBusiness.initializeRepository(scmContext, true);
-		assert !fileWhichShouldBeDeletedAfterReset.exists();
+		assertThat(fileWhichShouldBeDeletedAfterReset.exists(), is(false));
 	}
 	
 	@Test
