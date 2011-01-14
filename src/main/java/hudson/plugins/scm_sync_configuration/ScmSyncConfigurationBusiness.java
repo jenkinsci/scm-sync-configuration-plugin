@@ -23,6 +23,7 @@ public class ScmSyncConfigurationBusiness {
 	private static final String CHECKOUT_SCM_DIRECTORY = "checkoutConfiguration";
     private static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationBusiness.class.getName());
 	
+    private boolean checkoutSucceeded;
 	private SCMManipulator scmManipulator;
 	private File checkoutScmDirectory = null;
 	
@@ -33,6 +34,7 @@ public class ScmSyncConfigurationBusiness {
 		ScmManager scmManager = SCMManagerFactory.getInstance().createScmManager();
 		this.scmManipulator = new SCMManipulator(scmManager);
 		this.checkoutScmDirectory = new File(getCheckoutScmDirectoryAbsolutePath());
+		this.checkoutSucceeded = false;
 		initializeRepository(scmContext, false);
 	}
 	
@@ -45,7 +47,7 @@ public class ScmSyncConfigurationBusiness {
 				cleanChekoutScmDirectory();
 			}
 			
-			// Creating checkoust scm directory
+			// Creating checkout scm directory
 			if(!checkoutScmDirectory.exists()){
 				try {
 					FileUtils.forceMkdir(checkoutScmDirectory);
@@ -55,7 +57,8 @@ public class ScmSyncConfigurationBusiness {
 				}
 			}
 			
-			if(this.scmManipulator.checkout(this.checkoutScmDirectory)){
+			this.checkoutSucceeded = this.scmManipulator.checkout(this.checkoutScmDirectory);
+			if(this.checkoutSucceeded){
 				LOGGER.info("SCM repository initialization done.");
 			}
 		}
@@ -70,6 +73,7 @@ public class ScmSyncConfigurationBusiness {
 				LOGGER.throwing(FileUtils.class.getName(), "forceDelete", e);
 				LOGGER.severe("Error while deleting <"+checkoutScmDirectory.getAbsolutePath()+"> : "+e.getMessage());
 			}
+			this.checkoutSucceeded = false;
 		}
 	}
 	
@@ -157,8 +161,8 @@ public class ScmSyncConfigurationBusiness {
 		}
 	}
 
-	public boolean scmConfigurationSettledUp(ScmContext scmContext){
-		return this.scmManipulator.scmConfigurationSettledUp(scmContext, false);
+	public boolean scmCheckoutDirectorySettledUp(ScmContext scmContext){
+		return this.scmManipulator.scmConfigurationSettledUp(scmContext, false) && this.checkoutSucceeded;
 	}
 	
 	private static String createCommitMessage(String messagePrefix, User user, String comment){

@@ -171,7 +171,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		// Second : a strategy should exist, matching current url
 		// Third : SCM Sync should be settled up
 		return ScmSyncConfigurationDataProvider.retrieveBotherTimeoutMatchingUrl(Stapler.getCurrentRequest(), url) == null
-					&& getStrategyForURL(url) != null && this.business.scmConfigurationSettledUp(createScmContext());
+					&& getStrategyForURL(url) != null && this.business.scmCheckoutDirectorySettledUp(createScmContext());
 	}
 	
 	public ScmSyncStrategy getStrategyForURL(String url){
