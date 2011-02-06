@@ -51,7 +51,7 @@ public class ScmSyncConfigurationBaseTest {
 		currentTestDirectory = createTmpDirectory("SCMSyncConfigTestsRoot");
 		currentHudsonRootDirectory = new File(currentTestDirectory.getAbsolutePath()+"/hudsonRootDir/");
 	    if(!(currentHudsonRootDirectory.mkdir())) { throw new IOException("Could not create hudson root directory: " + currentHudsonRootDirectory.getAbsolutePath()); }
-		FileUtils.copyDirectoryStructure(new ClassPathResource("hudsonRootBaseTemplate/").getFile(), currentHudsonRootDirectory);
+		FileUtils.copyDirectoryStructure(new ClassPathResource(getHudsonRootBaseTemplate()).getFile(), currentHudsonRootDirectory);
 
         //EnvVars env = Computer.currentComputer().getEnvironment();
         //env.put("HUDSON_HOME", tmpHudsonRoot.getPath() );
@@ -83,6 +83,11 @@ public class ScmSyncConfigurationBaseTest {
 		FileUtils.deleteDirectory(currentTestDirectory);
 		
 		SCMManagerFactory.getInstance().stop();
+	}
+	
+	// Overridable
+	protected String getHudsonRootBaseTemplate(){
+		return "hudsonRootBaseTemplate/";
 	}
 	
 	protected static File createTmpDirectory(String directoryPrefix) throws IOException {
