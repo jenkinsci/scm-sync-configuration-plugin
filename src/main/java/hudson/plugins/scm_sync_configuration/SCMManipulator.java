@@ -12,10 +12,12 @@ import java.util.logging.Logger;
 
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFileSet;
+import org.apache.maven.scm.ScmResult;
 import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.command.checkin.CheckInScmResult;
 import org.apache.maven.scm.command.checkout.CheckOutScmResult;
 import org.apache.maven.scm.command.export.ExportScmResult;
+import org.apache.maven.scm.command.mkdir.MkdirScmResult;
 import org.apache.maven.scm.command.remove.RemoveScmResult;
 import org.apache.maven.scm.command.update.UpdateScmResult;
 import org.apache.maven.scm.manager.ScmManager;
@@ -336,6 +338,38 @@ public class SCMManipulator {
 		}
 		
 		return checkinOk;
+	}
+	
+	public boolean createSCMDirectory(String commitMessage, boolean logSevereIfMkdirFails){
+		ScmResult res;
+		
+		boolean scmDirectoryCreated = false;
+		try {
+			final String directoryPath = "";
+			MkdirScmResult mkdirResult = this.scmManager.mkdir(
+					this.scmRepository, 
+					new ScmFileSet(new File("."), new ArrayList<File>(){{ add(new File(directoryPath)); }}), 
+					commitMessage, false);
+			if(!mkdirResult.isSuccess()){
+				if(logSevereIfMkdirFails){
+					LOGGER.severe("[mkdir] Problem during creation of repository directory : "+mkdirResult.getCommandOutput());
+				}
+				return scmDirectoryCreated;
+			}
+			scmDirectoryCreated = true;
+		} catch (ScmException e) {
+			if(logSevereIfMkdirFails){
+				LOGGER.throwing(ScmManager.class.getName(), "mkdir", e);
+				LOGGER.severe("[mkdir] Error while mkdir : "+e.getMessage());
+			}
+			return scmDirectoryCreated;
+		}
+		
+		if(scmDirectoryCreated){
+			LOGGER.fine("Created directory !");
+		}
+
+		return scmDirectoryCreated;
 	}
 	
 	private static File createTmpDir() throws IOException {

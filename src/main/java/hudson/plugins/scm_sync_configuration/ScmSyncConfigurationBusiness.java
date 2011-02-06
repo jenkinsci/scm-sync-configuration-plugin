@@ -57,6 +57,8 @@ public class ScmSyncConfigurationBusiness {
 				}
 			}
 			
+			this.scmManipulator.createSCMDirectory("Created root SCM directory", false);
+			
 			this.checkoutSucceeded = this.scmManipulator.checkout(this.checkoutScmDirectory);
 			if(this.checkoutSucceeded){
 				LOGGER.info("SCM repository initialization done.");
