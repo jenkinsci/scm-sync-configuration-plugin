@@ -18,6 +18,10 @@ public class SCMManagerFactory {
 	public void start() throws PlexusContainerException {
 		if(plexus == null){
 			this.plexus = new DefaultPlexusContainer();
+			try {
+		        PlexusContainer.class.getDeclaredMethod("initialize").invoke(this.plexus);
+		        PlexusContainer.class.getDeclaredMethod("start").invoke(this.plexus);
+		    } catch (Throwable e) {}
 			//this.plexus.start();
 		}
 	}

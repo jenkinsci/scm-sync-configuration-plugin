@@ -85,18 +85,22 @@
       <groupId>org.apache.maven.scm</groupId>
       <artifactId>maven-scm-manager-plexus</artifactId>
       <version>1.4</version>
+      <!-- 
       <exclusions>
       	<exclusion>
       		<groupId>org.codehaus.plexus</groupId>
       		<artifactId>plexus-container-default</artifactId>
       	</exclusion>
       </exclusions>
+       -->
     </dependency>
+    <!-- 
     <dependency>
 		<groupId>org.sonatype.sisu</groupId>
 		<artifactId>sisu-inject-plexus</artifactId>
 	    <version>1.4.3.1</version>
     </dependency>
+     -->
     
     <dependency>
       <groupId>org.jvnet.hudson.plugins</groupId>
