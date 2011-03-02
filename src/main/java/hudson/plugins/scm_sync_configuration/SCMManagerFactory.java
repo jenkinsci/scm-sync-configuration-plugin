@@ -19,10 +19,12 @@ public class SCMManagerFactory {
 		if(plexus == null){
 			this.plexus = new DefaultPlexusContainer();
 			try {
+				// These will only be useful for Hudson v1.395 and under
+				// ... Since the use of sisu-plexus-inject will initialize
+				// everything in the constructor
 		        PlexusContainer.class.getDeclaredMethod("initialize").invoke(this.plexus);
 		        PlexusContainer.class.getDeclaredMethod("start").invoke(this.plexus);
-		    } catch (Throwable e) {}
-			//this.plexus.start();
+		    } catch (Throwable e) { /* Don't do anything here ... initialize/start methods should be called prior to v1.395 ! */ }
 		}
 	}
 	
