@@ -40,7 +40,7 @@ public class ScmSyncConfigurationBusiness {
 	
 	public void initializeRepository(ScmContext scmContext, boolean deleteCheckoutScmDir){
 		// Let's check if everything is available to checkout sources
-		if(scmManipulator.scmConfigurationSettledUp(scmContext, true)){
+		if(scmManipulator != null && scmManipulator.scmConfigurationSettledUp(scmContext, true)){
 			LOGGER.info("Initializing SCM repository for scm-sync-configuration plugin ...");
 			// If checkoutScmDirectory was not empty and deleteCheckoutScmDir is asked, reinitialize it !
 			if(deleteCheckoutScmDir){
@@ -82,7 +82,7 @@ public class ScmSyncConfigurationBusiness {
 	}
 	
 	public void deleteHierarchy(ScmContext scmContext, File rootHierarchy, String commitMessage){
-		if(!scmManipulator.scmConfigurationSettledUp(scmContext, false)){
+		if(scmManipulator == null || !scmManipulator.scmConfigurationSettledUp(scmContext, false)){
 			return;
 		}
 		
@@ -93,7 +93,7 @@ public class ScmSyncConfigurationBusiness {
 	}
 	
 	public void renameHierarchy(ScmContext scmContext, File oldDir, File newDir, User user){
-		if(!scmManipulator.scmConfigurationSettledUp(scmContext, false)){
+		if(scmManipulator == null || !scmManipulator.scmConfigurationSettledUp(scmContext, false)){
 			return;
 		}
 		
@@ -108,7 +108,7 @@ public class ScmSyncConfigurationBusiness {
 	}
 	
 	public void synchronizeFile(ScmContext scmContext, File modifiedFile, String comment, User user){
-		if(!scmManipulator.scmConfigurationSettledUp(scmContext, false)){
+		if(scmManipulator == null || !scmManipulator.scmConfigurationSettledUp(scmContext, false)){
 			return;
 		}
 		
@@ -162,7 +162,7 @@ public class ScmSyncConfigurationBusiness {
 	}
 
 	public boolean scmCheckoutDirectorySettledUp(ScmContext scmContext){
-		return this.scmManipulator.scmConfigurationSettledUp(scmContext, false) && this.checkoutSucceeded;
+		return scmManipulator != null && this.scmManipulator.scmConfigurationSettledUp(scmContext, false) && this.checkoutSucceeded;
 	}
 	
 	private static String createCommitMessage(String messagePrefix, User user, String comment){
