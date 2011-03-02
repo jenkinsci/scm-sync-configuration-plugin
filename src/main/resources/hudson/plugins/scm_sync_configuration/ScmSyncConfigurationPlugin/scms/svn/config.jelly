@@ -1,8 +1,0 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project">
-
-	<!-- TODO: fix help url... -->
-	<f:entry title="${%Repository URL}" help="${rootURL}/plugin/scm-sync-configuration/helpForRepositoryUrl?scm=${scm.id}">
-		<f:textbox id="repositoryUrl" name="repositoryUrl" value="${it.scmUrl}" checkUrl="'${rootURL}/plugin/scm-sync-configuration/descriptorForSCM/${scm.id}/checkRemote?value='+toValue(this)" />
-	</f:entry>
-
-</j:jelly>
