@@ -15,7 +15,7 @@ import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.extensions.ScmSyncConfigurationItemListener;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
-import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationBaseTest;
+import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBaseTest;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest(ScmSyncConfigurationPlugin.class)
-public class HudsonExtensionsTest extends ScmSyncConfigurationBaseTest {
+public class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 
 	private ScmSyncConfigurationBusiness sscBusiness;
 	private ScmSyncConfigurationItemListener sscItemListener;

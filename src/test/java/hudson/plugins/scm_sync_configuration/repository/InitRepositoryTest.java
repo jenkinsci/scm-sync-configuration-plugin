@@ -7,7 +7,7 @@ import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationBusiness;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
-import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationBaseTest;
+import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBaseTest;
 
 import java.io.File;
 
@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest(SCM.class)
-public class InitRepositoryTest extends ScmSyncConfigurationBaseTest {
+public class InitRepositoryTest extends ScmSyncConfigurationPluginBaseTest {
 
 	private ScmSyncConfigurationBusiness sscBusiness;
 	
