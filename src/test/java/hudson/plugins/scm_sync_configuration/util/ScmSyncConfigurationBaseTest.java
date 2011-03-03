@@ -5,10 +5,13 @@ import static org.easymock.EasyMock.notNull;
 import static org.powermock.api.easymock.PowerMock.createPartialMock;
 import static org.powermock.api.easymock.PowerMock.mockStatic;
 import static org.powermock.api.easymock.PowerMock.replay;
+import hudson.Plugin;
+import hudson.PluginWrapper;
 import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.SCMManagerFactory;
 import hudson.plugins.scm_sync_configuration.SCMManipulator;
+import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.SCMCredentialConfiguration;
@@ -17,6 +20,7 @@ import hudson.plugins.test.utils.DirectoryUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -30,12 +34,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
+import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.ClassPathResource;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Hudson.class, SCM.class, ScmSyncSubversionSCM.class})
+@PrepareForTest({Hudson.class, SCM.class, ScmSyncSubversionSCM.class, PluginWrapper.class})
 public class ScmSyncConfigurationBaseTest {
 	
 	@Rule protected TestName testName = new TestName();
@@ -45,13 +50,24 @@ public class ScmSyncConfigurationBaseTest {
 
 	@Before
 	public void setup() throws Throwable {
-		SCMManagerFactory.getInstance().start();
+		// Instantiating ScmSyncConfigurationPlugin instance
+		ScmSyncConfigurationPlugin scmSyncConfigPluginInstance = new ScmSyncConfigurationPlugin();
 		
+		// Mocking PluginWrapper attached to current ScmSyncConfigurationPlugin instance
+		PluginWrapper pluginWrapper = PowerMock.createMock(PluginWrapper.class);
+		expect(pluginWrapper.getShortName()).andStubReturn("scm-sync-configuration");
+		// Setting field on current plugin instance
+		Field wrapperField = Plugin.class.getDeclaredField("wrapper");
+		boolean wrapperFieldAccessibility = wrapperField.isAccessible();
+		wrapperField.setAccessible(true);
+		wrapperField.set(scmSyncConfigPluginInstance, pluginWrapper);
+		wrapperField.setAccessible(wrapperFieldAccessibility);
+
 		// Mocking Hudson root directory
 		currentTestDirectory = createTmpDirectory("SCMSyncConfigTestsRoot");
 		currentHudsonRootDirectory = new File(currentTestDirectory.getAbsolutePath()+"/hudsonRootDir/");
 	    if(!(currentHudsonRootDirectory.mkdir())) { throw new IOException("Could not create hudson root directory: " + currentHudsonRootDirectory.getAbsolutePath()); }
-		FileUtils.copyDirectoryStructure(new ClassPathResource("hudsonRootBaseTemplate/").getFile(), currentHudsonRootDirectory);
+		FileUtils.copyDirectoryStructure(new ClassPathResource(getHudsonRootBaseTemplate()).getFile(), currentHudsonRootDirectory);
 
         //EnvVars env = Computer.currentComputer().getEnvironment();
         //env.put("HUDSON_HOME", tmpHudsonRoot.getPath() );
@@ -67,14 +83,17 @@ public class ScmSyncConfigurationBaseTest {
 	    
 		// Mocking Hudson singleton instance ...
 		mockStatic(Hudson.class);
-		Hudson hudsonMockedInstance = createPartialMock(Hudson.class, new String[]{ "getRootDir", "getMe" });
+		Hudson hudsonMockedInstance = createPartialMock(Hudson.class, new String[]{ "getRootDir", "getMe", "getPlugin" });
 		expect(Hudson.getInstance()).andStubReturn(hudsonMockedInstance);
 		expect(hudsonMockedInstance.getRootDir()).andStubReturn(currentHudsonRootDirectory);
 		expect(hudsonMockedInstance.getMe()).andStubReturn(mockedUser);
-
-		replay(hudsonMockedInstance);
-		replay(mockedUser);
+		expect(hudsonMockedInstance.getPlugin(ScmSyncConfigurationPlugin.class)).andStubReturn(scmSyncConfigPluginInstance);
+		
+		replay(hudsonMockedInstance, pluginWrapper, mockedUser);
 		replay(Hudson.class);
+		
+		// Let's start the plugin...
+		scmSyncConfigPluginInstance.start();
 	}
 	
 	@After
@@ -82,7 +101,13 @@ public class ScmSyncConfigurationBaseTest {
 		// Deleting current test directory
 		FileUtils.deleteDirectory(currentTestDirectory);
 		
-		SCMManagerFactory.getInstance().stop();
+		// Stopping current plugin
+		ScmSyncConfigurationPlugin.getInstance().stop();
+	}
+	
+	// Overridable
+	protected String getHudsonRootBaseTemplate(){
+		return "hudsonRootBaseTemplate/";
 	}
 	
 	protected static File createTmpDirectory(String directoryPrefix) throws IOException {
