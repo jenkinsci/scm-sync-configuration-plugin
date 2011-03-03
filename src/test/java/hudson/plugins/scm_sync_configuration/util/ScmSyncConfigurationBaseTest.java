@@ -91,18 +91,12 @@ public class ScmSyncConfigurationBaseTest {
 		
 		replay(hudsonMockedInstance, pluginWrapper, mockedUser);
 		replay(Hudson.class);
-		
-		// Let's start the plugin...
-		scmSyncConfigPluginInstance.start();
 	}
 	
 	@After
 	public void teardown() throws Throwable {
 		// Deleting current test directory
 		FileUtils.deleteDirectory(currentTestDirectory);
-		
-		// Stopping current plugin
-		ScmSyncConfigurationPlugin.getInstance().stop();
 	}
 	
 	// Overridable

@@ -7,11 +7,11 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncSubversionSCM;
-import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationBaseTest;
+import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBaseTest;
 
 import org.junit.Test;
 
-public class CurrentVersionCompatibilityTest extends ScmSyncConfigurationBaseTest {
+public class CurrentVersionCompatibilityTest extends ScmSyncConfigurationPluginBaseTest {
 
 	protected String getHudsonRootBaseTemplate() {
 		// Use default template directory...
