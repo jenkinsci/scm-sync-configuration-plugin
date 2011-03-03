@@ -12,6 +12,8 @@ import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncNoSCM;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.HudsonConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
+import hudson.plugins.scm_sync_configuration.xstream.ScmSyncConfigurationXStreamConverter;
+import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +46,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void start() throws Exception {
 		super.start();
 		
-		Hudson.XSTREAM.registerConverter(new SCM.SCMXStreamConverter());
+		Hudson.XSTREAM.registerConverter(new ScmSyncConfigurationXStreamConverter());
 		
 		this.load();
 		
@@ -59,6 +61,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		// because, for some unknown reasons, we reach plexus bootstraping exceptions when
 		// calling Embedder.start() when everything is loaded (very strange...)
 		SCMManagerFactory.getInstance().start();
+	}
+	
+	public void loadData(ScmSyncConfigurationPOJO pojo){
+		this.scmRepositoryUrl = pojo.getScmRepositoryUrl();
+		this.scm = pojo.getScm();
 	}
 	
 	public void init() {

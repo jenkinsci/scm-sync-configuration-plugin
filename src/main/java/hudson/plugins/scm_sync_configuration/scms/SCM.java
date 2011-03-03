@@ -162,28 +162,4 @@ public abstract class SCM {
     public String getId(){
     	return getClass().getName();
     }
-    
-    public static class SCMXStreamConverter implements Converter {
-    	public boolean canConvert(Class type) {
-    		return SCM.class.isAssignableFrom(type);
-    	}
-    	
-    	public void marshal(Object source, HierarchicalStreamWriter writer,
-    			MarshallingContext context) {
-    		SCM scm = (SCM)source;
-    		// "class" attribute is used for backward compatibility...
-    		// (SCM was, initially, an enum type)
-    		// Underlying line is useless : XStream is already creating a class attribute...
-    		//writer.addAttribute("class", scm.getId());
-    	}
-    	public Object unmarshal(HierarchicalStreamReader reader,
-    			UnmarshallingContext context) {
-    		String id = reader.getAttribute("class");
-    		// For backward compatibility purposes
-    		if(SCM.class.getName().equals(id)){
-    			id = ScmSyncSubversionSCM.class.getName();
-    		}
-    		return SCM.valueOf(id);
-    	}
-    }
 }
