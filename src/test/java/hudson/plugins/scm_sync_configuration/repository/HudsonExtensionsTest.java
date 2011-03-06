@@ -1,11 +1,7 @@
 package hudson.plugins.scm_sync_configuration.repository;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.powermock.api.easymock.PowerMock.createPartialMock;
-import static org.powermock.api.easymock.PowerMock.mockStatic;
-import static org.powermock.api.easymock.PowerMock.replay;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 import hudson.model.Item;
 import hudson.model.Saveable;
 import hudson.model.Hudson;
@@ -23,6 +19,8 @@ import java.util.ArrayList;
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest(ScmSyncConfigurationPlugin.class)
@@ -36,15 +34,10 @@ public class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 		this.sscBusiness = new ScmSyncConfigurationBusiness();
 		this.sscItemListener = new ScmSyncConfigurationItemListener();
 
-		// Mocking ScmSyncConfigurationPlugin singleton ...
-		mockStatic(ScmSyncConfigurationPlugin.class);
-		ScmSyncConfigurationPlugin mockedPlugin = createPartialMock(ScmSyncConfigurationPlugin.class, new String[]{ "getStrategyForSaveable" });
-		mockedPlugin.setBusiness(this.sscBusiness);
-		expect(ScmSyncConfigurationPlugin.getInstance()).andStubReturn(mockedPlugin);
-		expect(mockedPlugin.getStrategyForSaveable(anyObject(Saveable.class), anyObject(File.class))).andStubReturn(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES[0]);
-		
-		replay(mockedPlugin);
-		replay(ScmSyncConfigurationPlugin.class);
+		// Mocking ScmSyncConfigurationPlugin.getStrategyForSaveable()
+		ScmSyncConfigurationPlugin sscPlugin = spy(ScmSyncConfigurationPlugin.getInstance());
+		sscPlugin.setBusiness(this.sscBusiness);
+		PowerMockito.doReturn(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES[0]).when(sscPlugin).getStrategyForSaveable(Mockito.any(Saveable.class), Mockito.any(File.class));
 	}
 	
 	@Test
@@ -58,10 +51,9 @@ public class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
 		
 		// Renaming fakeJob to newFakeJob
-		Item mockedItem = createMock(Item.class);
+		Item mockedItem = Mockito.mock(Item.class);
 		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/newFakeJob/" );
-		expect(mockedItem.getRootDir()).andStubReturn(mockedItemRootDir);
-		replay(mockedItem);
+		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
 		
 		sscItemListener.onRenamed(mockedItem, "fakeJob", "newFakeJob");
 		
@@ -92,10 +84,9 @@ public class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 
 		
 		// Renaming fakeJob to newFakeJob
-		Item mockedItem = createMock(Item.class);
+		Item mockedItem = Mockito.mock(Item.class);
 		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/newFakeJob/" );
-		expect(mockedItem.getRootDir()).andStubReturn(mockedItemRootDir);
-		replay(mockedItem);
+		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
 		
 		sscItemListener.onRenamed(mockedItem, "fakeJob", "newFakeJob");
 		
@@ -115,10 +106,9 @@ public class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
 		
 		// Deleting fakeJob
-		Item mockedItem = createMock(Item.class);
+		Item mockedItem = Mockito.mock(Item.class);
 		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/" );
-		expect(mockedItem.getRootDir()).andStubReturn(mockedItemRootDir);
-		replay(mockedItem);
+		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
 		
 		sscItemListener.onDeleted(mockedItem);
 		
@@ -149,10 +139,9 @@ public class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 
 		
 		// Deleting fakeJob
-		Item mockedItem = createMock(Item.class);
+		Item mockedItem = Mockito.mock(Item.class);
 		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/" );
-		expect(mockedItem.getRootDir()).andStubReturn(mockedItemRootDir);
-		replay(mockedItem);
+		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
 		
 		sscItemListener.onDeleted(mockedItem);
 		

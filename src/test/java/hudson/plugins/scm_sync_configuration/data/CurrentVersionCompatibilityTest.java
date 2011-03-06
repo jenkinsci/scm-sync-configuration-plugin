@@ -1,9 +1,8 @@
 package hudson.plugins.scm_sync_configuration.data;
 
-import static org.easymock.EasyMock.isNull;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncSubversionSCM;
@@ -21,7 +20,7 @@ public class CurrentVersionCompatibilityTest extends ScmSyncConfigurationPluginB
 	@Test
 	public void shouldCurrentVersionpluginConfigurationFileLoadCorrectly() throws Throwable {
 		ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();
-		assertThat(plugin.getSCM(), not(isNull()));
+		assertThat(plugin.getSCM(), is(notNullValue()));
 		assertThat(plugin.getSCM().getId(), is(equalTo(ScmSyncSubversionSCM.class.getName())));
 	}
 }

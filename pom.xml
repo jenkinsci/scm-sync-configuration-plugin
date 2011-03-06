@@ -28,7 +28,7 @@
   </developers>
   
   <properties>
-  	<powermock.version>1.4.6</powermock.version>
+  	<powermock.version>1.4.8</powermock.version>
   </properties>
     
   <!-- get every artifact through maven.glassfish.org, which proxies all the artifacts that we need -->
@@ -124,23 +124,16 @@
 	</dependency>
 	<dependency>
 	   <groupId>org.powermock</groupId>
-	   <artifactId>powermock-api-easymock</artifactId>
+	   <artifactId>powermock-api-mockito</artifactId>
 	   <version>${powermock.version}</version>
 	   <scope>test</scope>
 	</dependency>  
 	<!-- Fixing easymock to 3.0 because transitive dependency grabbed by powermock only allow to mock interfaces -->
 	<dependency>
-	   <groupId>org.easymock</groupId>
-	   <artifactId>easymock</artifactId>
-	   <version>3.0</version>
+	   <groupId>org.mockito</groupId>
+	   <artifactId>mockito-core</artifactId>
+	   <version>1.8.5</version>
 	   <scope>test</scope>
-	</dependency>
-	<!-- Grabbing cglib-nodep, used by easymock to create plain class mocks -->
-	<dependency>
-	    <groupId>cglib</groupId>
-	    <artifactId>cglib-nodep</artifactId>
-	    <version>2.2</version>
-	    <scope>test</scope>
 	</dependency>
 	<dependency>
 		<groupId>junit</groupId>

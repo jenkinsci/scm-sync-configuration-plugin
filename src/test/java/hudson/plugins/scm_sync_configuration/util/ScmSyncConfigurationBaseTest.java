@@ -1,10 +1,7 @@
 package hudson.plugins.scm_sync_configuration.util;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.notNull;
-import static org.powermock.api.easymock.PowerMock.createPartialMock;
-import static org.powermock.api.easymock.PowerMock.mockStatic;
-import static org.powermock.api.easymock.PowerMock.replay;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 import hudson.Plugin;
 import hudson.PluginWrapper;
 import hudson.model.Hudson;
@@ -21,20 +18,19 @@ import hudson.plugins.test.utils.DirectoryUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.FileUtils;
-import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
-import org.powermock.api.easymock.PowerMock;
+import org.mockito.Mockito;
+import org.objenesis.ObjenesisStd;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.ClassPathResource;
@@ -54,8 +50,8 @@ public class ScmSyncConfigurationBaseTest {
 		ScmSyncConfigurationPlugin scmSyncConfigPluginInstance = new ScmSyncConfigurationPlugin();
 		
 		// Mocking PluginWrapper attached to current ScmSyncConfigurationPlugin instance
-		PluginWrapper pluginWrapper = PowerMock.createMock(PluginWrapper.class);
-		expect(pluginWrapper.getShortName()).andStubReturn("scm-sync-configuration");
+		PluginWrapper pluginWrapper = PowerMockito.mock(PluginWrapper.class);
+		when(pluginWrapper.getShortName()).thenReturn("scm-sync-configuration");
 		// Setting field on current plugin instance
 		Field wrapperField = Plugin.class.getDeclaredField("wrapper");
 		boolean wrapperFieldAccessibility = wrapperField.isAccessible();
@@ -78,19 +74,20 @@ public class ScmSyncConfigurationBaseTest {
 	    FileUtils.copyDirectoryStructure(new ClassPathResource("svnEmptyRepository").getFile(), curentLocalSvnRepository);
 
 	    // Mocking user
-	    User mockedUser = EasyMock.createMock(User.class);
-	    expect(mockedUser.getId()).andStubReturn("fcamblor");
+	    User mockedUser = Mockito.mock(User.class);
+	    when(mockedUser.getId()).thenReturn("fcamblor");
 	    
 		// Mocking Hudson singleton instance ...
-		mockStatic(Hudson.class);
-		Hudson hudsonMockedInstance = createPartialMock(Hudson.class, new String[]{ "getRootDir", "getMe", "getPlugin" });
-		expect(Hudson.getInstance()).andStubReturn(hudsonMockedInstance);
-		expect(hudsonMockedInstance.getRootDir()).andStubReturn(currentHudsonRootDirectory);
-		expect(hudsonMockedInstance.getMe()).andStubReturn(mockedUser);
-		expect(hudsonMockedInstance.getPlugin(ScmSyncConfigurationPlugin.class)).andStubReturn(scmSyncConfigPluginInstance);
+	    // Warning : this line will only work on Objenesis supported VMs :
+	    // http://code.google.com/p/objenesis/wiki/ListOfCurrentlySupportedVMs
+	    Hudson hudsonMockedInstance = spy((Hudson) new ObjenesisStd().getInstantiatorOf(Hudson.class).newInstance());
+		PowerMockito.doReturn(currentHudsonRootDirectory).when(hudsonMockedInstance).getRootDir();
+		PowerMockito.doReturn(mockedUser).when(hudsonMockedInstance).getMe();
+		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(hudsonMockedInstance).getPlugin(ScmSyncConfigurationPlugin.class);
 		
-		replay(hudsonMockedInstance, pluginWrapper, mockedUser);
-		replay(Hudson.class);
+	    PowerMockito.mockStatic(Hudson.class);
+	    PowerMockito.doReturn(hudsonMockedInstance).when(Hudson.class); Hudson.getInstance();
+	    //when(Hudson.getInstance()).thenReturn(hudsonMockedInstance);
 	}
 	
 	@After
@@ -113,23 +110,12 @@ public class ScmSyncConfigurationBaseTest {
 	
 	protected SCM createSCMMock(boolean withCredentials){
 		
-		List<String> partiallyMockedMethods = new ArrayList<String>();
-		if(withCredentials){
-			partiallyMockedMethods.add("extractScmCredentials");
-		}
+		SCM mockedSCM = spy(SCM.valueOf(getSCMClass().getName()));
 		
-		SCM mockedSCM = createPartialMock(getSCMClass(), partiallyMockedMethods.toArray(new String[0]));
-		mockStatic(SCM.class);
-		
-		expect(SCM.valueOf(notNull(String.class))).andReturn(mockedSCM);
-
 		if(withCredentials){
 			SCMCredentialConfiguration mockedCredential = new SCMCredentialConfiguration("toto");
-			expect(mockedSCM.extractScmCredentials(notNull(String.class))).andReturn(mockedCredential).anyTimes();
+			PowerMockito.doReturn(mockedCredential).when(mockedSCM).extractScmCredentials((String)Mockito.notNull());
 		}
-		
-		replay(mockedSCM);
-		replay(SCM.class);
 		
 		return mockedSCM;
 	}
