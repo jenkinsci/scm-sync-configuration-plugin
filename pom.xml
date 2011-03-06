@@ -49,10 +49,10 @@
   <build>
 	<pluginManagement>
 		<plugins>
+			<!-- TODO: to remove when migrating to parent pom >= 1.387 -->
 			<plugin>
 				<artifactId>maven-release-plugin</artifactId>
 				<configuration>
-					<tagBase>https://svn.java.net/svn/hudson~svn/tags/scm-sync-configuration/</tagBase>
                     <goals>deploy</goals>
 				</configuration>
 			</plugin>
@@ -157,11 +157,12 @@
     </dependency>	
   </dependencies>
   
+  <!-- TODO: to remove when migrating to parent pom >= 1.395 -->
   <distributionManagement>
-    <repository> 
-      <id>java.net-m2-repository</id> 
-      <url>http://maven.hudson-labs.org/content/repositories/releases/</url> 
-    </repository> 
+    <repository>
+      <id>maven.jenkins-ci.org</id>
+      <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
+    </repository>
   </distributionManagement> 
 
   <scm>
