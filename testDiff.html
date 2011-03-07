@@ -1,0 +1,36 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="diffview.css" media="all" />
+	<script type="text/javascript">
+var exports = "";
+	</script>
+	<script type="text/javascript" src="prettydiff.js" />
+	<script type="text/javascript">
+function clickDiff(){
+	source = document.getElementById("t1").value;
+	mode = "diff";// "beautify"
+	lang="text";//"javascript", "text" plutot !
+	och="";//csvchar.value => osf ("," par défaut) <-
+	publish="webtool";//"webtool"
+	ocn=4;//4
+	ocz=" ";//" "
+	comment="";// "noindent" <-
+	style="indent";//"indent"
+	html=false;//false
+	ocontext="";//contextSize.value => optionnel !
+	quote=false;//false
+	semicolon=false;//false
+	diffsource=document.getElementById("t2").value;
+	diffview="sidebyside";//"sidebyside"
+	output = prettydiff(source, mode, lang, och, publish, ocn, ocz, comment, style, html, ocontext, quote, semicolon, diffsource, diffview, "label depart", "label arrivé");
+}
+	</script>
+</head>
+<body>
+<textarea id="t1"></textarea><br/>
+<textarea id="t2"></textarea><br/>
+<input type="button" onclick="var output = prettydiff(document.getElementById('t1').value, 'diff', 'text', ',', 'webtool', 4, ' ', 'noindent', 'indent', false, '', false, false, document.getElementById('t2').value, 'sidebyside', 'label depart', 'label arrivé'); document.getElementById('diffoutput').innerHTML=output;" value="Diff !" />
+<div id="diffoutput">
+</div>
+</body>
+</html>
