@@ -65,6 +65,9 @@ public class ScmSyncSubversionSCM extends SCM {
 			} catch (SVNException e) {
 				LOGGER.log(Level.WARNING, "Error creating SVN authentication from realm ["+realm+"] !", e);
 			}
+		} else {
+			LOGGER.warning("No credential (realm) found for url ["+scmUrl+"] : it seems that you should enter your credentials in the UI at "
+					+"<a target='_blank' href='../../scm/SubversionSCM/enterCredential?"+scmUrl+"'>this url</a>");
 		}
 		return null;
 	}
