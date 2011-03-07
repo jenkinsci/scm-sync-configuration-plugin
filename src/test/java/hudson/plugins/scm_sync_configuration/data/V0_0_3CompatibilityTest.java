@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
-import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncSubversionSCM;
+import hudson.plugins.scm_sync_configuration.scms.ScmSyncSubversionSCM;
 import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBaseTest;
 
 import org.junit.Test;
