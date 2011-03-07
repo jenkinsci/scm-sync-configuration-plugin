@@ -159,8 +159,8 @@
   </distributionManagement> 
 
   <scm>
-    <connection>scm:svn:https://svn.java.net/svn/hudson~svn/trunk/hudson/plugins/scm-sync-configuration</connection>
-    <developerConnection>scm:svn:https://svn.java.net/svn/hudson~svn/trunk/hudson/plugins/scm-sync-configuration</developerConnection>
-    <url>scm:svn:https://svn.java.net/svn/hudson~svn/trunk/hudson/plugins/scm-sync-configuration</url>
+    <connection>scm:git:ssh://github.com/jenkinsci/scm-sync-configuration.git</connection>
+    <developerConnection>scm:git:ssh://github.com/jenkinsci/scm-sync-configuration.git</developerConnection>
+    <url>scm:git:ssh://github.com/jenkinsci/scm-sync-configuration.git</url>
   </scm>
 </project>
