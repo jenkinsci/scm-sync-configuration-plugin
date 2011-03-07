@@ -8,7 +8,7 @@ import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
-import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncNoSCM;
+import hudson.plugins.scm_sync_configuration.scms.ScmSyncNoSCM;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.HudsonConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
@@ -53,7 +53,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		// If scm has not been read in scm-sync-configuration.xml, let's initialize it
 		// to the "no scm" SCM
 		if(this.scm == null){
-			this.scm = SCM.valueOf(new ScmSyncNoSCM().getId());
+			this.scm = SCM.valueOf(ScmSyncNoSCM.class);
 			this.scmRepositoryUrl = null;
 		}
 		
