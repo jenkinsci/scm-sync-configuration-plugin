@@ -51,9 +51,9 @@ public class ScmSyncConfigurationBusiness {
 			if(!checkoutScmDirectory.exists()){
 				try {
 					FileUtils.forceMkdir(checkoutScmDirectory);
-					LOGGER.info("Directory <"+ checkoutScmDirectory.getAbsolutePath() +"> created !");
+					LOGGER.info("Directory ["+ checkoutScmDirectory.getAbsolutePath() +"] created !");
 				} catch (IOException e) {
-					LOGGER.warning("Directory <"+ checkoutScmDirectory.getAbsolutePath() +"> cannot be created !");
+					LOGGER.warning("Directory ["+ checkoutScmDirectory.getAbsolutePath() +"] cannot be created !");
 				}
 			}
 			
@@ -71,7 +71,7 @@ public class ScmSyncConfigurationBusiness {
 				FileUtils.forceDelete(checkoutScmDirectory);
 			} catch (IOException e) {
 				LOGGER.throwing(FileUtils.class.getName(), "forceDelete", e);
-				LOGGER.severe("Error while deleting <"+checkoutScmDirectory.getAbsolutePath()+"> : "+e.getMessage());
+				LOGGER.severe("Error while deleting ["+checkoutScmDirectory.getAbsolutePath()+"] : "+e.getMessage());
 			}
 			this.checkoutSucceeded = false;
 		}
@@ -102,7 +102,7 @@ public class ScmSyncConfigurationBusiness {
 		File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
 		String commitMessage = createCommitMessage("Moved "+oldDirPathRelativeToHudsonRoot+" hierarchy to "+newDirPathRelativeToHudsonRoot, user, null);
 		
-		LOGGER.info("Renaming hierarchy <"+oldDirPathRelativeToHudsonRoot+"> to <"+newDirPathRelativeToHudsonRoot+">");
+		LOGGER.info("Renaming hierarchy ["+oldDirPathRelativeToHudsonRoot+"] to ["+newDirPathRelativeToHudsonRoot+"]");
 		
 		this.scmManipulator.renameHierarchy(scmRoot, oldDirPathRelativeToHudsonRoot, newDirPathRelativeToHudsonRoot, commitMessage);
 	}
@@ -113,7 +113,7 @@ public class ScmSyncConfigurationBusiness {
 		}
 		
 		String modifiedFilePathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(modifiedFile);
-		LOGGER.info("Synchronizeing file <"+modifiedFilePathRelativeToHudsonRoot+"> to SCM ...");
+		LOGGER.info("Synchronizeing file ["+modifiedFilePathRelativeToHudsonRoot+"] to SCM ...");
 		String commitMessage = createCommitMessage("Modification on file", user, comment);
 		
 		File modifiedFileTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+modifiedFilePathRelativeToHudsonRoot);
@@ -137,7 +137,7 @@ public class ScmSyncConfigurationBusiness {
 		}
 
 		if(this.scmManipulator.checkinFiles(scmRoot, synchronizedFiles, commitMessage)){
-			LOGGER.info("Synchronized file <"+modifiedFilePathRelativeToHudsonRoot+"> to SCM !");
+			LOGGER.info("Synchronized file ["+modifiedFilePathRelativeToHudsonRoot+"] to SCM !");
 		}
 	}
 	

@@ -41,7 +41,7 @@ public class ScmSyncSubversionSCM extends SCM {
 		LOGGER.info("Extracting SVN Credentials for url : "+scmUrl);
 		String realm = retrieveRealmFor(scmUrl);
 		if(realm != null){
-			LOGGER.fine("Extracted realm from "+scmUrl+" is <"+realm+">");
+			LOGGER.fine("Extracted realm from "+scmUrl+" is ["+realm+"]");
 			SubversionSCM.DescriptorImpl subversionDescriptor = (SubversionSCM.DescriptorImpl)getSCMDescriptor();
 			try {
 				Field credentialField = SubversionSCM.DescriptorImpl.class.getDeclaredField("credentials");
@@ -49,7 +49,7 @@ public class ScmSyncSubversionSCM extends SCM {
 				Map<String,Credential> credentials = (Map<String,Credential>)credentialField.get(subversionDescriptor);
 				Credential cred = credentials.get(realm);
 				if(cred == null){
-					LOGGER.severe("No credentials are stored in Hudson for realm <"+realm+"> !");
+					LOGGER.severe("No credentials are stored in Hudson for realm ["+realm+"] !");
 					return null;
 				}
 				String kind = "";
@@ -63,7 +63,7 @@ public class ScmSyncSubversionSCM extends SCM {
 			} catch (IllegalAccessException e) {
 				LOGGER.log(Level.SEVERE, "'credentials' field not accessible on "+String.valueOf(subversionDescriptor)+" !");
 			} catch (SVNException e) {
-				LOGGER.log(Level.WARNING, "Error creating SVN authentication from realm <"+realm+"> !", e);
+				LOGGER.log(Level.WARNING, "Error creating SVN authentication from realm ["+realm+"] !", e);
 			}
 		}
 		return null;

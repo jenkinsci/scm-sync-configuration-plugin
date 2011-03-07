@@ -73,7 +73,7 @@ public class SCMManipulator {
 		}
 		
 		// Checkouting sources
-		LOGGER.fine("Checkouting SCM files into <"+checkoutDirectory.getAbsolutePath()+"> ...");
+		LOGGER.fine("Checkouting SCM files into ["+checkoutDirectory.getAbsolutePath()+"] ...");
 		try {
 			CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory));
 			if(!result.isSuccess()){
@@ -88,7 +88,7 @@ public class SCMManipulator {
 		}
 		
 		if(checkoutOk){
-			LOGGER.fine("Checkouted SCM files into <"+checkoutDirectory.getAbsolutePath()+"> !");
+			LOGGER.fine("Checkouted SCM files into ["+checkoutDirectory.getAbsolutePath()+"] !");
 		}
 
 		return checkoutOk;
@@ -104,7 +104,7 @@ public class SCMManipulator {
 		String directoryName = hierarchyToDelete.getName();
 		File enclosingDirectory = hierarchyToDelete.getParentFile();
 		
-		LOGGER.fine("Deleting SCM hierarchy <"+hierarchyToDelete.getAbsolutePath()+"> from SCM ...");
+		LOGGER.fine("Deleting SCM hierarchy ["+hierarchyToDelete.getAbsolutePath()+"] from SCM ...");
 		ScmFileSet updateFileSet = null;
 		ScmFileSet commitFileSet = null;
 		try {
@@ -151,7 +151,7 @@ public class SCMManipulator {
 		}
 
 		if(deleteOk){
-			LOGGER.fine("Deleted SCM hierarchy <"+hierarchyToDelete.getAbsolutePath()+"> !");
+			LOGGER.fine("Deleted SCM hierarchy ["+hierarchyToDelete.getAbsolutePath()+"] !");
 		}
 
 		return deleteOk;
@@ -164,29 +164,29 @@ public class SCMManipulator {
 			return renameOk;
 		}
 		
-		LOGGER.fine("Renaming SCM hierarchy <"+oldDirPathRelativeToScmRoot+"> to <"+newDirPathRelativeToScmRoot+"> ...");
+		LOGGER.fine("Renaming SCM hierarchy ["+oldDirPathRelativeToScmRoot+"] to ["+newDirPathRelativeToScmRoot+"] ...");
 		File newDir = new File(scmRoot.getAbsoluteFile()+File.separator+newDirPathRelativeToScmRoot);
 		File oldDir = new File(scmRoot.getAbsoluteFile()+File.separator+oldDirPathRelativeToScmRoot);
 		
 		try {
 			if(!newDir.mkdir()){
-				LOGGER.severe("[renameHierarchy] Failed to create <"+newDir.getAbsolutePath()+"> !");
+				LOGGER.severe("[renameHierarchy] Failed to create ["+newDir.getAbsolutePath()+"] !");
 				return renameOk;
 			}
 			if(!export(oldDirPathRelativeToScmRoot, newDir)){
-				LOGGER.severe("[renameHierarchy] Failed to export <"+oldDirPathRelativeToScmRoot+"> !");
+				LOGGER.severe("[renameHierarchy] Failed to export ["+oldDirPathRelativeToScmRoot+"] !");
 				return renameOk;
 			}
 			ScmFileSet addFileset = new ScmFileSet(scmRoot, new File(newDirPathRelativeToScmRoot));
 			AddScmResult addResult = this.scmManager.add(this.scmRepository, addFileset);
 			if(!addResult.isSuccess()){
-				LOGGER.severe("[renameHierarchy] Failed to add <"+newDirPathRelativeToScmRoot+"> : "+addResult.getProviderMessage());
+				LOGGER.severe("[renameHierarchy] Failed to add ["+newDirPathRelativeToScmRoot+"] : "+addResult.getProviderMessage());
 				return renameOk;
 			}
 			ScmFileSet addFilesetWithIncludes = new ScmFileSet(scmRoot, newDirPathRelativeToScmRoot+"/**/*");
 			addResult = this.scmManager.add(this.scmRepository, addFilesetWithIncludes);
 			if(!addResult.isSuccess()){
-				LOGGER.severe("[renameHierarchy] Failed to add <"+newDirPathRelativeToScmRoot+"/**/*> : "+addResult.getProviderMessage());
+				LOGGER.severe("[renameHierarchy] Failed to add ["+newDirPathRelativeToScmRoot+"/**/*] : "+addResult.getProviderMessage());
 				return renameOk;
 			}
 			CheckInScmResult checkInResult = this.scmManager.checkIn(this.scmRepository, addFileset, commitMessage);
@@ -195,7 +195,7 @@ public class SCMManipulator {
 				return renameOk;
 			}
 			if(!this.deleteHierarchy(oldDir, commitMessage)){
-				LOGGER.severe("[renameHierarchy] Failed to deleteHierarchy <"+oldDir.getAbsolutePath()+"> !");
+				LOGGER.severe("[renameHierarchy] Failed to deleteHierarchy ["+oldDir.getAbsolutePath()+"] !");
 				return renameOk;
 			}
 			renameOk = true;
@@ -210,7 +210,7 @@ public class SCMManipulator {
 		}
 		
 		if(renameOk){
-			LOGGER.fine("Renamed SCM hierarchy <"+oldDirPathRelativeToScmRoot+"> to <"+newDirPathRelativeToScmRoot+"> !");
+			LOGGER.fine("Renamed SCM hierarchy ["+oldDirPathRelativeToScmRoot+"] to ["+newDirPathRelativeToScmRoot+"] !");
 		}
 		
 		return renameOk;
@@ -223,7 +223,7 @@ public class SCMManipulator {
 			return exportOk;
 		}
 		
-		LOGGER.fine("Exporting SCM directory <"+syncedHierarchyPathRelativeToScmRoot+"> to <"+outputDirectory.getAbsolutePath()+"> ...");
+		LOGGER.fine("Exporting SCM directory ["+syncedHierarchyPathRelativeToScmRoot+"] to ["+outputDirectory.getAbsolutePath()+"] ...");
 		
 		File tmpDir;
 		try {
@@ -258,7 +258,7 @@ public class SCMManipulator {
 		}
 
 		if(exportOk){
-			LOGGER.fine("Exported SCM directory <"+syncedHierarchyPathRelativeToScmRoot+"> to <"+outputDirectory.getAbsolutePath()+"> !");
+			LOGGER.fine("Exported SCM directory ["+syncedHierarchyPathRelativeToScmRoot+"] to ["+outputDirectory.getAbsolutePath()+"] !");
 		}
 		
 		return exportOk;
@@ -271,7 +271,7 @@ public class SCMManipulator {
 			return synchronizedFiles;
 		}
 		
-		LOGGER.fine("Adding SCM file <"+filePathRelativeToScmRoot+"> ...");
+		LOGGER.fine("Adding SCM file ["+filePathRelativeToScmRoot+"] ...");
 		
 		try {
 			// Split every directory leading through modifiedFilePathRelativeToHudsonRoot
@@ -320,7 +320,7 @@ public class SCMManipulator {
 		try {
 			CheckInScmResult result = this.scmManager.checkIn(this.scmRepository, fileSet, commitMessage);
 			if(!result.isSuccess()){
-				LOGGER.severe("[checkinFiles] Problem during commit of <"+Arrays.toString(filesToCheckin.toArray(new File[0]))+"> : "+result.getCommandOutput());
+				LOGGER.severe("[checkinFiles] Problem during commit of ["+Arrays.toString(filesToCheckin.toArray(new File[0]))+"] : "+result.getCommandOutput());
 				return checkinOk;
 			}
 			checkinOk = true;
