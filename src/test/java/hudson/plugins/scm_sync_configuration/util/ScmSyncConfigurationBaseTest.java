@@ -12,7 +12,7 @@ import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.SCMCredentialConfiguration;
-import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncSubversionSCM;
+import hudson.plugins.scm_sync_configuration.scms.ScmSyncSubversionSCM;
 import hudson.plugins.test.utils.DirectoryUtils;
 
 import java.io.File;
