@@ -1,7 +1,5 @@
-package hudson.plugins.scm_sync_configuration.scms.impl;
+package hudson.plugins.scm_sync_configuration.scms;
 
-import hudson.plugins.scm_sync_configuration.scms.SCM;
-import hudson.plugins.scm_sync_configuration.scms.SCMCredentialConfiguration;
 import hudson.scm.SubversionSCM;
 import hudson.scm.SubversionSCM.DescriptorImpl.Credential;
 
@@ -27,7 +25,7 @@ public class ScmSyncSubversionSCM extends SCM {
 
 	private static final String SCM_URL_PREFIX="scm:svn:";
 	
-	public ScmSyncSubversionSCM(){
+	ScmSyncSubversionSCM(){
 		super("Subversion", "svn/config.jelly", "hudson.scm.SubversionSCM", "/hudson/plugins/scm_sync_configuration/ScmSyncConfigurationPlugin/scms/svn/url-help.jelly");
 	}
 	

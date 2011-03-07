@@ -2,8 +2,6 @@ package hudson.plugins.scm_sync_configuration.scms;
 
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
-import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncNoSCM;
-import hudson.plugins.scm_sync_configuration.scms.impl.ScmSyncSubversionSCM;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +16,6 @@ import org.apache.maven.scm.repository.ScmRepository;
 import org.apache.maven.scm.repository.ScmRepositoryException;
 import org.codehaus.plexus.util.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
-
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public abstract class SCM {
 	
@@ -141,6 +133,10 @@ public abstract class SCM {
 	public abstract String extractScmUrlFrom(String scmUrl);
 	public abstract SCMCredentialConfiguration extractScmCredentials(String scmRepositoryURL);
 
+	public static SCM valueOf(Class<? extends SCM> clazz){
+		return valueOf(getId(clazz));
+	}
+	
 	public static SCM valueOf(String scmId){
 		for(SCM scm : SCM_IMPLEMENTATIONS){
 			if(scmId.equals(scm.getId())){
@@ -159,7 +155,11 @@ public abstract class SCM {
                 .append("configPage", configPage).append("repositoryUrlHelpPath", repositoryUrlHelpPath).toString();
     }
     
+    private static String getId(Class<? extends SCM> clazz){
+    	return clazz.getName();
+    }
+    
     public String getId(){
-    	return getClass().getName();
+    	return getId(getClass());
     }
 }

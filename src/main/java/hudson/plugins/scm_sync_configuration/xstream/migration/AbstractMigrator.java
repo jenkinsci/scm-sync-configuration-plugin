@@ -2,11 +2,15 @@ package hudson.plugins.scm_sync_configuration.xstream.migration;
 
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 
+import java.util.logging.Logger;
+
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, TTO extends ScmSyncConfigurationPOJO> implements ScmSyncConfigurationDataMigrator<TFROM, TTO> {
 	
+    private static final Logger LOGGER = Logger.getLogger(AbstractMigrator.class.getName());
+
 	public TTO migrate(TFROM pojo){
 		TTO migratedPojo = createMigratedPojo();
 		
@@ -21,14 +25,24 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		
 		TTO pojo = createMigratedPojo();
 		
-		reader.moveDown();
-		String scmRepositoryUrl = reader.getValue();
-		reader.moveUp();
-		
-		reader.moveDown();
-		String scmClassAttribute = reader.getAttribute("class");
-		String scmContent = reader.getValue();
-		reader.moveUp();
+		String scmRepositoryUrl = null;
+		String scmClassAttribute = null;
+		String scmContent = null;
+		while(reader.hasMoreChildren()){
+			reader.moveDown();
+			if("scmRepositoryUrl".equals(reader.getNodeName())){
+				scmRepositoryUrl = reader.getValue();
+			} else if("scm".equals(reader.getNodeName())){
+				scmClassAttribute = reader.getAttribute("class");
+				scmContent = reader.getValue();
+			} else {
+				IllegalArgumentException iae = new IllegalArgumentException("Unknown tag : "+reader.getNodeName());
+				LOGGER.throwing(this.getClass().getName(), "readScmSyncConfigurationPOJO", iae);
+				LOGGER.severe("Unknown tag : "+reader.getNodeName());
+				throw iae;
+			}
+			reader.moveUp();
+		}
 		
 		pojo.setScm(createSCMFrom(scmClassAttribute, scmContent));
 		pojo.setScmRepositoryUrl(scmRepositoryUrl);
@@ -38,12 +52,20 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 	
 	// Overridable
 	protected String migrateScmRepositoryUrl(String scmRepositoryUrl){
-		return new String(scmRepositoryUrl);
+		if(scmRepositoryUrl == null){
+			return null;
+		} else {
+			return new String(scmRepositoryUrl);
+		}
 	}
 	
 	// Overridable
 	protected SCM migrateScm(SCM scm){
-		return SCM.valueOf(scm.getClass().getName());
+		if(scm == null){
+			return null;
+		} else {
+			return SCM.valueOf(scm.getClass().getName());
+		}
 	}
 	
 	protected abstract TTO createMigratedPojo();
