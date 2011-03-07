@@ -9,6 +9,9 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, TTO extends ScmSyncConfigurationPOJO> implements ScmSyncConfigurationDataMigrator<TFROM, TTO> {
 	
+	public static final String SCM_REPOSITORY_URL_TAG = "scmRepositoryUrl";
+	public static final String SCM_TAG = "scm";
+	public static final String SCM_CLASS_ATTRIBUTE = "class";
     private static final Logger LOGGER = Logger.getLogger(AbstractMigrator.class.getName());
 
 	public TTO migrate(TFROM pojo){
@@ -30,10 +33,10 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		String scmContent = null;
 		while(reader.hasMoreChildren()){
 			reader.moveDown();
-			if("scmRepositoryUrl".equals(reader.getNodeName())){
+			if(SCM_REPOSITORY_URL_TAG.equals(reader.getNodeName())){
 				scmRepositoryUrl = reader.getValue();
-			} else if("scm".equals(reader.getNodeName())){
-				scmClassAttribute = reader.getAttribute("class");
+			} else if(SCM_TAG.equals(reader.getNodeName())){
+				scmClassAttribute = reader.getAttribute(SCM_CLASS_ATTRIBUTE);
 				scmContent = reader.getValue();
 			} else {
 				IllegalArgumentException iae = new IllegalArgumentException("Unknown tag : "+reader.getNodeName());

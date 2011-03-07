@@ -1,6 +1,7 @@
 package hudson.plugins.scm_sync_configuration.xstream;
 
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
+import hudson.plugins.scm_sync_configuration.xstream.migration.AbstractMigrator;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationDataMigrator;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
 import hudson.plugins.scm_sync_configuration.xstream.migration.v0.InitialMigrator;
@@ -32,6 +33,8 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 	
     private static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationXStreamConverter.class.getName());
     
+    protected static final String VERSION_ATTRIBUTE = "version";
+    
 	/**
 	 * Migrators for old versions of GlobalBuildStatsPlugin data representations
 	 */
@@ -53,9 +56,19 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 		ScmSyncConfigurationPlugin plugin = (ScmSyncConfigurationPlugin)source;
 		
 		// Since "v1", providing version number in scm sync configuration heading tag
-		writer.addAttribute("version", String.valueOf(getCurrentScmSyncConfigurationVersionNumber()));
+		writer.addAttribute(VERSION_ATTRIBUTE, String.valueOf(getCurrentScmSyncConfigurationVersionNumber()));
+	
+		if(plugin.getSCM() != null){
+			writer.startNode(AbstractMigrator.SCM_TAG);
+			writer.addAttribute(AbstractMigrator.SCM_CLASS_ATTRIBUTE, plugin.getSCM().getId());
+			writer.endNode();
+		}
 		
-		context.convertAnother(plugin);
+		if(plugin.getScmRepositoryUrl() != null){
+			writer.startNode(AbstractMigrator.SCM_REPOSITORY_URL_TAG);
+			writer.setValue(plugin.getScmRepositoryUrl());
+			writer.endNode();
+		}
 	}
 	
 	/**
@@ -83,7 +96,7 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 		}
 
 		// Retrieving data representation version number
-		String version = reader.getAttribute("version");
+		String version = reader.getAttribute(VERSION_ATTRIBUTE);
 		// Before version 1 (version 0), there wasn't any version in the scm sync configuration 
 		// configuration file
 		int versionNumber = 0;
