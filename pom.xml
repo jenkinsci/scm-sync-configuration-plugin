@@ -53,7 +53,9 @@
 			<plugin>
 				<artifactId>maven-release-plugin</artifactId>
 				<configuration>
-                    <goals>deploy</goals>
+					<goals>deploy</goals>
+					<localCheckout>true</localCheckout>
+					<pushChanges>false</pushChanges>
 				</configuration>
 			</plugin>
 		</plugins>
