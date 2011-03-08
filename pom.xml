@@ -159,8 +159,8 @@
   </distributionManagement> 
 
   <scm>
-    <connection>scm:git:ssh://github.com/jenkinsci/scm-sync-configuration.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:jenkinsci/scm-sync-configuration.git</developerConnection>
+    <connection>scm:git:git://github.com/jenkinsci/scm-sync-configuration.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/scm-sync-configuration.git</developerConnection>
     <url>https://github.com/jenkinsci/scm-sync-configuration-plugin</url>
   </scm>
 </project>
