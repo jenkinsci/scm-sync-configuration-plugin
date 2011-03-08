@@ -52,6 +52,8 @@
 			<!-- TODO: to remove when migrating to parent pom >= 1.387 -->
 			<plugin>
 				<artifactId>maven-release-plugin</artifactId>
+				<!-- To have pushChanges parameter available -->
+				<version>2.1</version>
 				<configuration>
 					<goals>deploy</goals>
 					<localCheckout>true</localCheckout>
