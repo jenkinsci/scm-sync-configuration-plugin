@@ -163,7 +163,7 @@
   </distributionManagement> 
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/scm-sync-configuration.git</connection>
+    <connection>scm:git:git@github.com:jenkinsci/scm-sync-configuration-plugin.git</connection>
     <developerConnection>scm:git:git://github.com/jenkinsci/scm-sync-configuration.git</developerConnection>
     <url>https://github.com/jenkinsci/scm-sync-configuration-plugin</url>
   </scm>
