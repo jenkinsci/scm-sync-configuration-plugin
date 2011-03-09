@@ -164,7 +164,7 @@
 
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/scm-sync-configuration.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/scm-sync-configuration.git</developerConnection>
+    <developerConnection>scm:git:git://github.com/jenkinsci/scm-sync-configuration.git</developerConnection>
     <url>https://github.com/jenkinsci/scm-sync-configuration-plugin</url>
   </scm>
 </project>
