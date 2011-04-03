@@ -11,6 +11,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.tmatesoft.svn.core.SVNErrorMessage;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.auth.SVNAuthentication;
 import org.tmatesoft.svn.core.auth.SVNPasswordAuthentication;
 import org.tmatesoft.svn.core.auth.SVNSSHAuthentication;
@@ -52,7 +53,10 @@ public class ScmSyncSubversionSCM extends SCM {
 					LOGGER.severe("No credentials are stored in Hudson for realm ["+realm+"] !");
 					return null;
 				}
-				String kind = "";
+				String kind = ISVNAuthenticationManager.PASSWORD;
+				if(scmUrl.startsWith("svn+ssh")){
+					kind = ISVNAuthenticationManager.SSH;
+				}
 				return createSCMCredentialConfiguration(cred.createSVNAuthentication(kind));
 			} catch (SecurityException e) {
 				LOGGER.log(Level.SEVERE, "'credentials' field not readable on SubversionSCM.DescriptorImpl !");
