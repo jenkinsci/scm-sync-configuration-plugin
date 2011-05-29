@@ -12,7 +12,13 @@ import java.util.List;
 
 public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
-	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ { add(new PageMatcher("^configure$", "config")); } };
+	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ {
+        // Global configuration page
+        add(new PageMatcher("^configure$", "config"));
+        // View configuration pages
+        add(new PageMatcher("^(.+/)?view/[^/]+/configure$", "viewConfig"));
+        add(new PageMatcher("^newView$", "createView"));
+    } };
 	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new ClassOnlyConfigurationEntityMatcher(Hudson.class);
 	
 	public JenkinsConfigScmSyncStrategy(){
