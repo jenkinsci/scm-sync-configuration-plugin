@@ -86,7 +86,7 @@ public class ScmSyncConfigurationBusiness {
 			return;
 		}
 		
-		String rootHierarchyPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(rootHierarchy);
+		String rootHierarchyPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(rootHierarchy);
 		File rootHierarchyTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+rootHierarchyPathRelativeToHudsonRoot);
 		
 		scmManipulator.deleteHierarchy(rootHierarchyTranslatedInScm, commitMessage);
@@ -97,8 +97,8 @@ public class ScmSyncConfigurationBusiness {
 			return;
 		}
 		
-		String oldDirPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(oldDir);
-		String newDirPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(newDir);
+		String oldDirPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(oldDir);
+		String newDirPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(newDir);
 		File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
 		String commitMessage = createCommitMessage("Moved "+oldDirPathRelativeToHudsonRoot+" hierarchy to "+newDirPathRelativeToHudsonRoot, user, null);
 		
@@ -112,7 +112,7 @@ public class ScmSyncConfigurationBusiness {
 			return;
 		}
 		
-		String modifiedFilePathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(modifiedFile);
+		String modifiedFilePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(modifiedFile);
 		LOGGER.info("Synchronizing file ["+modifiedFilePathRelativeToHudsonRoot+"] to SCM ...");
 		String commitMessage = createCommitMessage("Modification on file", user, comment);
 		
@@ -149,7 +149,7 @@ public class ScmSyncConfigurationBusiness {
 		}
 		
 		for(File fileToSync : filesToSync){
-			String hudsonConfigPathRelativeToHudsonRoot = HudsonFilesHelper.buildPathRelativeToHudsonRoot(fileToSync);
+			String hudsonConfigPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(fileToSync);
 			File hudsonConfigTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+hudsonConfigPathRelativeToHudsonRoot);
 			try {
 				if(!hudsonConfigTranslatedInScm.exists() 

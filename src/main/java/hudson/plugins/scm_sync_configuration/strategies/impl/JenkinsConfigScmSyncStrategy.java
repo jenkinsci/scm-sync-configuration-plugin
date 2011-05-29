@@ -10,12 +10,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HudsonConfigScmSyncStrategy extends AbstractScmSyncStrategy {
+public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
 	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ { add(new PageMatcher("^configure$", "config")); } };
 	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new ClassOnlyConfigurationEntityMatcher(Hudson.class);
 	
-	public HudsonConfigScmSyncStrategy(){
+	public JenkinsConfigScmSyncStrategy(){
 		super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
 	}
 	

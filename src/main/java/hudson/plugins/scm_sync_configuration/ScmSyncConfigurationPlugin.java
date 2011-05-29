@@ -10,7 +10,7 @@ import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.ScmSyncNoSCM;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
-import hudson.plugins.scm_sync_configuration.strategies.impl.HudsonConfigScmSyncStrategy;
+import hudson.plugins.scm_sync_configuration.strategies.impl.JenkinsConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.xstream.ScmSyncConfigurationXStreamConverter;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
@@ -31,7 +31,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	
 	public static final transient ScmSyncStrategy[] AVAILABLE_STRATEGIES = new ScmSyncStrategy[]{
 			new JobConfigScmSyncStrategy(),
-			new HudsonConfigScmSyncStrategy()
+			new JenkinsConfigScmSyncStrategy()
 	};
 	
 	transient private ScmSyncConfigurationBusiness business;

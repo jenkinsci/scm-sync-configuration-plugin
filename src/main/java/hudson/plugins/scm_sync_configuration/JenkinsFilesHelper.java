@@ -4,7 +4,7 @@ import hudson.model.Hudson;
 
 import java.io.File;
 
-public class HudsonFilesHelper {
+public class JenkinsFilesHelper {
 
 	public static String buildPathRelativeToHudsonRoot(File file){
 		File hudsonRoot = Hudson.getInstance().getRootDir();
