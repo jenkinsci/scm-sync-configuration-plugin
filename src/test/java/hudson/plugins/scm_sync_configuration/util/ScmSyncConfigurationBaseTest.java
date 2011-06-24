@@ -18,6 +18,7 @@ import hudson.plugins.test.utils.DirectoryUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import org.codehaus.plexus.PlexusContainerException;
@@ -39,7 +40,9 @@ import org.springframework.core.io.ClassPathResource;
 @PrepareForTest({Hudson.class, SCM.class, ScmSyncSubversionSCM.class, PluginWrapper.class})
 public class ScmSyncConfigurationBaseTest {
 	
-	@Rule protected TestName testName = new TestName();
+	protected static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationBaseTest.class.getName());
+	@Rule
+	protected TestName testName = new TestName();
 	private File currentTestDirectory = null;
 	private File curentLocalSvnRepository = null;
 	private File currentHudsonRootDirectory = null;
@@ -61,66 +64,80 @@ public class ScmSyncConfigurationBaseTest {
 
 		// Mocking Hudson root directory
 		currentTestDirectory = createTmpDirectory("SCMSyncConfigTestsRoot");
-		currentHudsonRootDirectory = new File(currentTestDirectory.getAbsolutePath()+"/hudsonRootDir/");
-	    if(!(currentHudsonRootDirectory.mkdir())) { throw new IOException("Could not create hudson root directory: " + currentHudsonRootDirectory.getAbsolutePath()); }
+		currentHudsonRootDirectory = new File(currentTestDirectory.getAbsolutePath() + "/hudsonRootDir/");
+		if (!(currentHudsonRootDirectory.mkdir())) {
+			throw new IOException("Could not create hudson root directory: " + currentHudsonRootDirectory.getAbsolutePath());
+		}
 		FileUtils.copyDirectoryStructure(new ClassPathResource(getHudsonRootBaseTemplate()).getFile(), currentHudsonRootDirectory);
 
-        //EnvVars env = Computer.currentComputer().getEnvironment();
-        //env.put("HUDSON_HOME", tmpHudsonRoot.getPath() );
+		//EnvVars env = Computer.currentComputer().getEnvironment();
+		//env.put("HUDSON_HOME", tmpHudsonRoot.getPath() );
 
 		// Creating local SVN repository...
-		curentLocalSvnRepository = new File(currentTestDirectory.getAbsolutePath()+"/svnLocalRepo/");
-	    if(!(curentLocalSvnRepository.mkdir())) { throw new IOException("Could not create SVN local repo directory: " + curentLocalSvnRepository.getAbsolutePath()); }
-	    FileUtils.copyDirectoryStructure(new ClassPathResource("svnEmptyRepository").getFile(), curentLocalSvnRepository);
+		curentLocalSvnRepository = new File(currentTestDirectory.getAbsolutePath() + "/svnLocalRepo/");
+		if (!(curentLocalSvnRepository.mkdir())) {
+			throw new IOException("Could not create SVN local repo directory: " + curentLocalSvnRepository.getAbsolutePath());
+		}
+		FileUtils.copyDirectoryStructure(new ClassPathResource("svnEmptyRepository").getFile(), curentLocalSvnRepository);
 
-	    // Mocking user
-	    User mockedUser = Mockito.mock(User.class);
-	    when(mockedUser.getId()).thenReturn("fcamblor");
-	    
+		// Mocking user
+		User mockedUser = Mockito.mock(User.class);
+		when(mockedUser.getId()).thenReturn("fcamblor");
+		
 		// Mocking Hudson singleton instance ...
-	    // Warning : this line will only work on Objenesis supported VMs :
-	    // http://code.google.com/p/objenesis/wiki/ListOfCurrentlySupportedVMs
-	    Hudson hudsonMockedInstance = spy((Hudson) new ObjenesisStd().getInstantiatorOf(Hudson.class).newInstance());
+		// Warning : this line will only work on Objenesis supported VMs :
+		// http://code.google.com/p/objenesis/wiki/ListOfCurrentlySupportedVMs
+		Hudson hudsonMockedInstance = spy((Hudson) new ObjenesisStd().getInstantiatorOf(Hudson.class).newInstance());
 		PowerMockito.doReturn(currentHudsonRootDirectory).when(hudsonMockedInstance).getRootDir();
 		PowerMockito.doReturn(mockedUser).when(hudsonMockedInstance).getMe();
 		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(hudsonMockedInstance).getPlugin(ScmSyncConfigurationPlugin.class);
 		
-	    PowerMockito.mockStatic(Hudson.class);
-	    PowerMockito.doReturn(hudsonMockedInstance).when(Hudson.class); Hudson.getInstance();
-	    //when(Hudson.getInstance()).thenReturn(hudsonMockedInstance);
+		PowerMockito.mockStatic(Hudson.class);
+		PowerMockito.doReturn(hudsonMockedInstance).when(Hudson.class);
+		Hudson.getInstance();
+		//when(Hudson.getInstance()).thenReturn(hudsonMockedInstance);
 	}
 	
 	@After
 	public void teardown() throws Throwable {
 		// Deleting current test directory
-		FileUtils.deleteDirectory(currentTestDirectory);
+		try {
+			FileUtils.deleteDirectory(currentTestDirectory);
+		} catch (IOException ex) {
+			// Windows does not allow to delete this folder
+			LOGGER.throwing(FileUtils.class.getName(), "deleteDirectory", ex);
+		}
 	}
 	
 	// Overridable
-	protected String getHudsonRootBaseTemplate(){
+	protected String getHudsonRootBaseTemplate() {
 		return "hudsonRootBaseTemplate/";
 	}
 	
 	protected static File createTmpDirectory(String directoryPrefix) throws IOException {
-	    final File temp = File.createTempFile(directoryPrefix, Long.toString(System.nanoTime()));
-	    if(!(temp.delete())) { throw new IOException("Could not delete temp file: " + temp.getAbsolutePath()); }
-	    if(!(temp.mkdir())) { throw new IOException("Could not create temp directory: " + temp.getAbsolutePath()); }
-	    return (temp);
+		final File temp = File.createTempFile(directoryPrefix, Long.toString(System.nanoTime()));
+		if (!(temp.delete())) {
+			throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
+		}
+		if (!(temp.mkdir())) {
+			throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
+		}
+		return (temp);
 	}
 	
-	protected SCM createSCMMock(boolean withCredentials){
-		
+	protected SCM createSCMMock(boolean withCredentials) {
+	
 		SCM mockedSCM = spy(SCM.valueOf(getSCMClass().getName()));
 		
-		if(withCredentials){
+		if (withCredentials) {
 			SCMCredentialConfiguration mockedCredential = new SCMCredentialConfiguration("toto");
-			PowerMockito.doReturn(mockedCredential).when(mockedSCM).extractScmCredentials((String)Mockito.notNull());
+			PowerMockito.doReturn(mockedCredential).when(mockedSCM).extractScmCredentials((String) Mockito.notNull());
 		}
 		
 		return mockedSCM;
 	}
 
-	protected SCMManipulator createMockedScmManipulator() throws ComponentLookupException, PlexusContainerException{
+	protected SCMManipulator createMockedScmManipulator() throws ComponentLookupException, PlexusContainerException {
 		// Settling up scm context
 		SCM mockedSCM = createSCMMock(true);
 		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL(), getSCMCommentPrefix(), getSCMCommentSuffix());
@@ -131,40 +148,46 @@ public class ScmSyncConfigurationBaseTest {
 		return scmManipulator;
 	}
 	
-	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath) throws ComponentLookupException, PlexusContainerException, IOException{
+	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath) throws ComponentLookupException, PlexusContainerException, IOException {
 		SCMManipulator scmManipulator = createMockedScmManipulator();
 		
 		// Checkouting scm in temp directory
-		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__verifyCurrentScmContentMatchesHierarchy");
+		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName() + "_" + testName.getMethodName() + "__verifyCurrentScmContentMatchesHierarchy");
 		scmManipulator.checkout(checkoutDirectoryForVerifications);
-		boolean directoryContentsAreEqual = DirectoryUtils.directoryContentsAreEqual(checkoutDirectoryForVerifications, new ClassPathResource(hierarchyPath).getFile(), 
+		boolean directoryContentsAreEqual = DirectoryUtils.directoryContentsAreEqual(checkoutDirectoryForVerifications, new ClassPathResource(hierarchyPath).getFile(),
 				getSpecialSCMDirectoryExcludePattern(), true);
 		
-		FileUtils.deleteDirectory(checkoutDirectoryForVerifications);
+		
+		try {
+			FileUtils.deleteDirectory(checkoutDirectoryForVerifications);
+		} catch (IOException ex) {
+			// Windows does not allow to delete this folder
+			LOGGER.throwing(FileUtils.class.getName(), "deleteDirectory", ex);
+		}
 		
 		assert directoryContentsAreEqual;
 	}
 	
 	// Overridable in a near future (when dealing with multiple scms ...)
-	protected String getSCMRepositoryURL(){
-		return "scm:svn:file:///"+this.getCurentLocalSvnRepository().getAbsolutePath();
+	protected String getSCMRepositoryURL() {
+		return "scm:svn:file:///" + this.getCurentLocalSvnRepository().getAbsolutePath();
 	}
 
-	protected String getSCMCommentPrefix(){
+	protected String getSCMCommentPrefix() {
 		return "[Prefix]";
 	}
 
-	protected String getSCMCommentSuffix(){
+	protected String getSCMCommentSuffix() {
 		return "\nIssue #123";
 	}
 	
 	// Overridable in a near future (when dealing with multiple scms ...)
-	protected Pattern getSpecialSCMDirectoryExcludePattern(){
+	protected Pattern getSpecialSCMDirectoryExcludePattern() {
 		return Pattern.compile("\\.svn");
 	}
 
 	// Overridable in a near future (when dealing with multiple scms ...)
-	protected Class<? extends SCM> getSCMClass(){
+	protected Class<? extends SCM> getSCMClass() {
 		return ScmSyncSubversionSCM.class;
 	}
 	
@@ -180,7 +203,7 @@ public class ScmSyncConfigurationBaseTest {
 		return currentHudsonRootDirectory;
 	}
 	
-	public File getCurrentScmSyncConfigurationCheckoutDirectory(){
-		return new File(currentHudsonRootDirectory.getAbsolutePath()+"/scm-sync-configuration/checkoutConfiguration/");
+	public File getCurrentScmSyncConfigurationCheckoutDirectory() {
+		return new File(currentHudsonRootDirectory.getAbsolutePath() + "/scm-sync-configuration/checkoutConfiguration/");
 	}
 }
