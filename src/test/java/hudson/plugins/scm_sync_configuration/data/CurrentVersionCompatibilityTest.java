@@ -40,6 +40,8 @@ public class CurrentVersionCompatibilityTest extends ScmSyncConfigurationPluginB
 		
 		// Plugin has been loaded : let's record scm & repository url
 		String expectedRepositoryUrl = plugin.getScmRepositoryUrl();
+		String expectedCommentPrefix = plugin.getScmCommentPrefix();
+		String expectedCommentSuffix = plugin.getScmCommentSuffix();
 		SCM expectedScm = plugin.getSCM();
 		
 		// Persisting data
@@ -53,5 +55,7 @@ public class CurrentVersionCompatibilityTest extends ScmSyncConfigurationPluginB
 		// Verifying repositoryUrl & SCM
 		assertThat(plugin.getSCM().getId(), is(equalTo(expectedScm.getId())));
 		assertThat(plugin.getScmRepositoryUrl(), is(equalTo(expectedRepositoryUrl)));
+		assertThat(plugin.getScmCommentPrefix(), is(equalTo(expectedCommentPrefix)));
+		assertThat(plugin.getScmCommentSuffix(), is(equalTo(expectedCommentSuffix)));
 	}
 }

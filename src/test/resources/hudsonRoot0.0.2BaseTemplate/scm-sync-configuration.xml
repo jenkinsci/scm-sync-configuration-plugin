@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <hudson.plugins.scm__sync__configuration.ScmSyncConfigurationPlugin>
   <scmRepositoryUrl>scm:svn:https://myrepo/synchronizedDirectory/</scmRepositoryUrl>
+  <scmCommentPrefix>[Prefix]</scmCommentPrefix>
+  <scmCommentSuffix>Issue #123</scmCommentSuffix>
   <scm>SUBVERSION</scm>
 </hudson.plugins.scm__sync__configuration.ScmSyncConfigurationPlugin>

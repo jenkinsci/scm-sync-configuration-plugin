@@ -10,6 +10,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, TTO extends ScmSyncConfigurationPOJO> implements ScmSyncConfigurationDataMigrator<TFROM, TTO> {
 	
 	public static final String SCM_REPOSITORY_URL_TAG = "scmRepositoryUrl";
+	public static final String SCM_COMMENT_PREFIX_TAG = "scmCommentPrefix";
+	public static final String SCM_COMMENT_SUFFIX_TAG = "scmCommentSuffix";
 	public static final String SCM_TAG = "scm";
 	public static final String SCM_CLASS_ATTRIBUTE = "class";
     private static final Logger LOGGER = Logger.getLogger(AbstractMigrator.class.getName());
@@ -18,6 +20,8 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		TTO migratedPojo = createMigratedPojo();
 		
 		migratedPojo.setScmRepositoryUrl( migrateScmRepositoryUrl(pojo.getScmRepositoryUrl()) );
+		migratedPojo.setScmCommentPrefix( migrateScmCommentPrefix(pojo.getScmCommentPrefix()) );
+		migratedPojo.setScmCommentSuffix( migrateScmCommentSuffix(pojo.getScmCommentSuffix()) );
 		migratedPojo.setScm( migrateScm(pojo.getScm()) );
 		
 		return migratedPojo;
@@ -29,12 +33,18 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		TTO pojo = createMigratedPojo();
 		
 		String scmRepositoryUrl = null;
+		String scmCommentPrefix = null;
+		String scmCommentSuffix = null;
 		String scmClassAttribute = null;
 		String scmContent = null;
 		while(reader.hasMoreChildren()){
 			reader.moveDown();
 			if(SCM_REPOSITORY_URL_TAG.equals(reader.getNodeName())){
 				scmRepositoryUrl = reader.getValue();
+			} else if(SCM_COMMENT_PREFIX_TAG.equals(reader.getNodeName())){
+				scmCommentPrefix = reader.getValue();
+			} else if(SCM_COMMENT_SUFFIX_TAG.equals(reader.getNodeName())){
+				scmCommentSuffix = reader.getValue();
 			} else if(SCM_TAG.equals(reader.getNodeName())){
 				scmClassAttribute = reader.getAttribute(SCM_CLASS_ATTRIBUTE);
 				scmContent = reader.getValue();
@@ -49,6 +59,8 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		
 		pojo.setScm(createSCMFrom(scmClassAttribute, scmContent));
 		pojo.setScmRepositoryUrl(scmRepositoryUrl);
+		pojo.setScmCommentPrefix(scmCommentPrefix);
+		pojo.setScmCommentSuffix(scmCommentSuffix);
 		
 		return pojo;
 	}
@@ -61,6 +73,25 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 			return new String(scmRepositoryUrl);
 		}
 	}
+	
+	// Overridable
+	protected String migrateScmCommentPrefix(String scmCommentPrefix){
+		if(scmCommentPrefix == null){
+			return null;
+		} else {
+			return new String(scmCommentPrefix);
+		}
+	}
+	
+	// Overridable
+	protected String migrateScmCommentSuffix(String scmCommentSuffix){
+		if(scmCommentSuffix == null){
+			return null;
+		} else {
+			return new String(scmCommentSuffix);
+		}
+	}
+	
 	
 	// Overridable
 	protected SCM migrateScm(SCM scm){

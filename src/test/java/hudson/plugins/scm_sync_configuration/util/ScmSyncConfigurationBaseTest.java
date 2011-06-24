@@ -123,7 +123,7 @@ public class ScmSyncConfigurationBaseTest {
 	protected SCMManipulator createMockedScmManipulator() throws ComponentLookupException, PlexusContainerException{
 		// Settling up scm context
 		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
+		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL(), getSCMCommentPrefix(), getSCMCommentSuffix());
 		SCMManipulator scmManipulator = new SCMManipulator(SCMManagerFactory.getInstance().createScmManager());
 		boolean configSettledUp = scmManipulator.scmConfigurationSettledUp(scmContext, true);
 		assert configSettledUp;
@@ -148,6 +148,14 @@ public class ScmSyncConfigurationBaseTest {
 	// Overridable in a near future (when dealing with multiple scms ...)
 	protected String getSCMRepositoryURL(){
 		return "scm:svn:file:///"+this.getCurentLocalSvnRepository().getAbsolutePath();
+	}
+
+	protected String getSCMCommentPrefix(){
+		return "[Prefix]";
+	}
+
+	protected String getSCMCommentSuffix(){
+		return "\nIssue #123";
 	}
 	
 	// Overridable in a near future (when dealing with multiple scms ...)

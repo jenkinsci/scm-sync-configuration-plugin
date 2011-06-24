@@ -69,6 +69,18 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 			writer.setValue(plugin.getScmRepositoryUrl());
 			writer.endNode();
 		}
+		
+		if(plugin.getScmCommentPrefix() != null){
+			writer.startNode(AbstractMigrator.SCM_COMMENT_PREFIX_TAG);
+			writer.setValue(plugin.getScmCommentPrefix());
+			writer.endNode();
+		}
+		
+		if(plugin.getScmCommentSuffix() != null){
+			writer.startNode(AbstractMigrator.SCM_COMMENT_SUFFIX_TAG);
+			writer.setValue(plugin.getScmCommentSuffix());
+			writer.endNode();
+		}
 	}
 	
 	/**

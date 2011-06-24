@@ -27,18 +27,19 @@ import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
-public class ScmSyncConfigurationPlugin extends Plugin{
+public class ScmSyncConfigurationPlugin extends Plugin {
 	
 	public static final transient ScmSyncStrategy[] AVAILABLE_STRATEGIES = new ScmSyncStrategy[]{
-			new JobConfigScmSyncStrategy(),
-			new JenkinsConfigScmSyncStrategy()
+		new JobConfigScmSyncStrategy(),
+		new JenkinsConfigScmSyncStrategy()
 	};
-	
-	transient private ScmSyncConfigurationBusiness business;
+		transient private ScmSyncConfigurationBusiness business;
 	private String scmRepositoryUrl;
 	private SCM scm;
+	private String scmCommentPrefix;
+	private String scmCommentSuffix;
 
-	public ScmSyncConfigurationPlugin(){
+	public ScmSyncConfigurationPlugin() {
 		setBusiness(new ScmSyncConfigurationBusiness());
 	}
 	
@@ -52,7 +53,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		
 		// If scm has not been read in scm-sync-configuration.xml, let's initialize it
 		// to the "no scm" SCM
-		if(this.scm == null){
+		if (this.scm == null) {
 			this.scm = SCM.valueOf(ScmSyncNoSCM.class);
 			this.scmRepositoryUrl = null;
 		}
@@ -62,10 +63,12 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		// calling Embedder.start() when everything is loaded (very strange...)
 		SCMManagerFactory.getInstance().start();
 	}
-	
-	public void loadData(ScmSyncConfigurationPOJO pojo){
+		
+	public void loadData(ScmSyncConfigurationPOJO pojo) {
 		this.scmRepositoryUrl = pojo.getScmRepositoryUrl();
 		this.scm = pojo.getScm();
+		this.scmCommentPrefix = pojo.getScmCommentPrefix();
+		this.scmCommentSuffix = pojo.getScmCommentSuffix();
 	}
 	
 	public void init() {
@@ -88,19 +91,21 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		super.configure(req, formData);
 		
 		String scmType = req.getParameter("scm");
-		if(scmType != null){
+		if (scmType != null) {
 			this.scm = SCM.valueOf(scmType);
 			String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
 			
 			String oldScmRepositoryUrl = this.scmRepositoryUrl;
 			this.scmRepositoryUrl = newScmRepositoryUrl;
+			this.scmCommentPrefix = req.getParameter("commentPrefix");
+			this.scmCommentSuffix = req.getParameter("commentSuffix");
 			this.save();
 			
 			// If something changed, let's reinitialize repository in working directory !
-			if(newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(oldScmRepositoryUrl)){
+			if (newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(oldScmRepositoryUrl)) {
 				this.business.initializeRepository(createScmContext(), true);
 				this.business.synchronizeAllConfigs(createScmContext(), AVAILABLE_STRATEGIES, getCurrentUser());
-			} else if(newScmRepositoryUrl==null && oldScmRepositoryUrl!=null){
+			} else if (newScmRepositoryUrl == null && oldScmRepositoryUrl != null) {
 				// Cleaning checkouted repository
 				this.business.cleanChekoutScmDirectory();
 			}
@@ -110,54 +115,55 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void doSubmitComment(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
 		// TODO: complexify this in order to pass a strategy identifier in the session key
 		ScmSyncConfigurationDataProvider.provideComment(req, req.getParameter("comment"));
-		if(Boolean.valueOf(req.getParameter("dontBotherMe")).booleanValue()){
-			ScmSyncConfigurationDataProvider.provideBotherTimeout(req, req.getParameter("botherType"), 
+		if (Boolean.valueOf(req.getParameter("dontBotherMe")).booleanValue()) {
+			ScmSyncConfigurationDataProvider.provideBotherTimeout(req, req.getParameter("botherType"),
 					Integer.valueOf(req.getParameter("botherTime")), req.getParameter("currentURL"));
 		}
 	}
 	
 	// TODO: do retrieve help file with an action !
-	public void doHelpForRepositoryUrl(StaplerRequest req, StaplerResponse res) throws ServletException, IOException{
-    	req.getView(this, SCM.valueOf(req.getParameter("scm")).getRepositoryUrlHelpPath()).forward(req, res);
+	public void doHelpForRepositoryUrl(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
+		req.getView(this, SCM.valueOf(req.getParameter("scm")).getRepositoryUrlHelpPath()).forward(req, res);
 	}
 	
-	public void deleteHierarchy(File rootHierarchy){
+	public void deleteHierarchy(File rootHierarchy) {
 		this.business.deleteHierarchy(createScmContext(), rootHierarchy, getCurrentUser());
 	}
 	
-	public void renameHierarchy(File oldDir, File newDir){
+	public void renameHierarchy(File oldDir, File newDir) {
 		this.business.renameHierarchy(createScmContext(), oldDir, newDir, getCurrentUser());
 	}
 	
-	public void synchronizeFile(File modifiedFile){
+	public void synchronizeFile(File modifiedFile) {
 		this.business.synchronizeFile(createScmContext(), modifiedFile, getCurrentComment(), getCurrentUser());
 	}
 	
-	private static String getCurrentComment(){
+	private static String getCurrentComment() {
 		StaplerRequest req = Stapler.getCurrentRequest();
 		// Sometimes, request can be null : when hudson starts for example !
 		String comment = null;
-		if(req != null){
+		if (req != null) {
 			comment = ScmSyncConfigurationDataProvider.retrieveComment(req, false);
 		}
 		return comment;
 	}
 	
-	private User getCurrentUser(){
+	private User getCurrentUser() {
 		User user = null;
 		try {
 			user = Hudson.getInstance().getMe();
-		}catch(AccessDeniedException e){}
+		} catch (AccessDeniedException e) {
+		}
 		return user;
 	}
 	
-	public static ScmSyncConfigurationPlugin getInstance(){
+	public static ScmSyncConfigurationPlugin getInstance() {
 		return Hudson.getInstance().getPlugin(ScmSyncConfigurationPlugin.class);
 	}
 	
-	public ScmSyncStrategy getStrategyForSaveable(Saveable s, File f){
-		for(ScmSyncStrategy strat : AVAILABLE_STRATEGIES){
-			if(strat.isSaveableApplicable(s, f)){
+	public ScmSyncStrategy getStrategyForSaveable(Saveable s, File f) {
+		for (ScmSyncStrategy strat : AVAILABLE_STRATEGIES) {
+			if (strat.isSaveableApplicable(s, f)) {
 				return strat;
 			}
 		}
@@ -165,25 +171,25 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return null;
 	}
 	
-	public ScmContext createScmContext(){
-		return new ScmContext(this.scm, this.scmRepositoryUrl);
+	public ScmContext createScmContext() {
+		return new ScmContext(this.scm, this.scmRepositoryUrl, this.scmCommentPrefix, this.scmCommentSuffix);
 	}
 	
-	public boolean shouldDecorationOccursOnURL(String url){
+	public boolean shouldDecorationOccursOnURL(String url) {
 		// Removing comment from session here...
 		ScmSyncConfigurationDataProvider.retrieveComment(Stapler.getCurrentRequest(), true);
-		
+	
 		// Displaying commit message popup is based on following tests :
 		// First : no botherTimeout should match with current url
 		// Second : a strategy should exist, matching current url
 		// Third : SCM Sync should be settled up
 		return ScmSyncConfigurationDataProvider.retrieveBotherTimeoutMatchingUrl(Stapler.getCurrentRequest(), url) == null
-					&& getStrategyForURL(url) != null && this.business.scmCheckoutDirectorySettledUp(createScmContext());
+				&& getStrategyForURL(url) != null && this.business.scmCheckoutDirectorySettledUp(createScmContext());
 	}
 	
-	public ScmSyncStrategy getStrategyForURL(String url){
-		for(ScmSyncStrategy strat : AVAILABLE_STRATEGIES){
-			if(strat.isCurrentUrlApplicable(url)){
+	public ScmSyncStrategy getStrategyForURL(String url) {
+		for (ScmSyncStrategy strat : AVAILABLE_STRATEGIES) {
+			if (strat.isCurrentUrlApplicable(url)) {
 				return strat;
 			}
 		}
@@ -191,7 +197,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return null;
 	}
 	
-	public SCM[] getScms(){
+	public SCM[] getScms() {
 		return SCM.values();
 	}
 
@@ -203,23 +209,39 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return scmRepositoryUrl;
 	}
 	
-	public boolean isScmSelected(SCM _scm){
+	public String getScmCommentPrefix() {
+		return scmCommentPrefix;
+	}
+	
+	public String getScmCommentSuffix() {
+		return scmCommentSuffix;
+	}
+	
+	public boolean isScmSelected(SCM _scm) {
 		return this.scm == _scm;
 	}
 	
-	public SCM getSCM(){
+	public SCM getSCM() {
 		return this.scm;
 	}
 	
-	public String getScmUrl(){
-		if(this.scm != null){
+	public String getScmUrl() {
+		if (this.scm != null) {
 			return this.scm.extractScmUrlFrom(this.scmRepositoryUrl);
 		} else {
 			return null;
 		}
 	}
 	
-	public Descriptor<? extends hudson.scm.SCM> getDescriptorForSCM(String scmName){
+	public String getCommentPrefix() {
+		return scmCommentPrefix;
+	}
+	
+	public String getCommentSuffix() {
+		return scmCommentSuffix;
+	}
+	
+	public Descriptor<? extends hudson.scm.SCM> getDescriptorForSCM(String scmName) {
 		return SCM.valueOf(scmName).getSCMDescriptor();
 	}
 }

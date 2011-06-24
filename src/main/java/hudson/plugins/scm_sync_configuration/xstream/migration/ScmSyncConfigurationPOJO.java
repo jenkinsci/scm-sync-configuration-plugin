@@ -11,4 +11,8 @@ public interface ScmSyncConfigurationPOJO {
 	public void setScmRepositoryUrl(String scmRepositoryUrl);
 	public SCM getScm();
 	public void setScm(SCM scm);
+	public String getScmCommentPrefix();
+	public void setScmCommentPrefix(String scmCommentPrefix);
+	public String getScmCommentSuffix();
+	public void setScmCommentSuffix(String scmCommentSuffix);
 }
