@@ -34,15 +34,15 @@
   <!-- get every artifact through maven.glassfish.org, which proxies all the artifacts that we need -->
   <repositories>
     <repository>
-      <id>m.g.o-public</id>
-      <url>http://maven.glassfish.org/content/groups/public/</url>
+        <id>m.j.o-public</id>
+        <url>http://maven.jenkins-ci.org/content/repositories/releases/</url>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
-      <id>m.g.o-public</id>
-      <url>http://maven.glassfish.org/content/groups/public/</url>
+        <id>m.j.o-public</id>
+        <url>http://maven.jenkins-ci.org/content/repositories/releases/</url>
     </pluginRepository>
   </pluginRepositories>
   
