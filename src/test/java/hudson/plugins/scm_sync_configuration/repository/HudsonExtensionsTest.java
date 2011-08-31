@@ -44,7 +44,7 @@ public class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 	public void shouldJobRenameBeCorrectlyImpactedOnSCM() throws Throwable {
 		// Initializing the repository...
 		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
+		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL(), getSCMCommentPrefix(), getSCMCommentSuffix());
 		sscBusiness.init(scmContext);
 		
 		// Synchronizing hudson config files
@@ -64,7 +64,7 @@ public class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 	public void shouldJobRenameDoesntPerformAnyScmUpdate() throws Throwable {
 		// Initializing the repository...
 		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
+		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL(), getSCMCommentPrefix(), getSCMCommentSuffix());
 		sscBusiness.init(scmContext);
 		
 		// Synchronizing hudson config files
@@ -99,7 +99,7 @@ public class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 	public void shouldJobDeleteBeCorrectlyImpactedOnSCM() throws Throwable {
 		// Initializing the repository...
 		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
+		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL(), getSCMCommentPrefix(), getSCMCommentSuffix());
 		sscBusiness.init(scmContext);
 		
 		// Synchronizing hudson config files
@@ -119,7 +119,7 @@ public class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 	public void shouldJobDeleteDoesntPerformAnyScmUpdate() throws Throwable {
 		// Initializing the repository...
 		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
+		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL(), getSCMCommentPrefix(), getSCMCommentSuffix());
 		sscBusiness.init(scmContext);
 		
 		// Synchronizing hudson config files

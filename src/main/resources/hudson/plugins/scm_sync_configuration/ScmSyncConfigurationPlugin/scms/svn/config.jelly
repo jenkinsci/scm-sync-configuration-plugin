@@ -4,5 +4,11 @@
 	<f:entry title="${%Repository URL}" help="${rootURL}/plugin/scm-sync-configuration/helpForRepositoryUrl?scm=${scm.id}">
 		<f:textbox id="repositoryUrl" name="repositoryUrl" value="${it.scmUrl}" checkUrl="'${rootURL}/plugin/scm-sync-configuration/descriptorForSCM/${scm.id}/checkRemote?value='+toValue(this)" />
 	</f:entry>
+	<f:entry title="${%Comment prefix}">
+		<f:textbox id="commentPrefix" name="commentPrefix" value="${it.commentPrefix}" />
+	</f:entry>
+	<f:entry title="${%Comment suffix}">
+		<f:textbox id="commentSuffix" name="commentSuffix" value="${it.commentSuffix}" />
+	</f:entry>
 
 </j:jelly>
