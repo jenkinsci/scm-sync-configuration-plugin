@@ -16,12 +16,17 @@ import hudson.plugins.scm_sync_configuration.scms.ScmSyncNoSCM;
 import hudson.plugins.scm_sync_configuration.scms.ScmSyncSubversionSCM;
 import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBaseTest;
 import hudson.plugins.test.utils.PluginUtil;
+import hudson.plugins.test.utils.scms.ScmUnderTestSubversion;
 
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest(SaveableListener.class)
 public class V0_0_2CompatibilityTest extends ScmSyncConfigurationPluginBaseTest {
+	
+	public V0_0_2CompatibilityTest() {
+		super(new ScmUnderTestSubversion());
+	}
 
 	protected String getHudsonRootBaseTemplate() {
 		if("should0_0_2_pluginConfigurationFileShouldLoadCorrectly".equals(testName.getMethodName())){
