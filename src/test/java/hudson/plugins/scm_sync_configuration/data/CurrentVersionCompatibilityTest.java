@@ -15,12 +15,17 @@ import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.ScmSyncSubversionSCM;
 import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBaseTest;
 import hudson.plugins.test.utils.PluginUtil;
+import hudson.plugins.test.utils.scms.ScmUnderTestSubversion;
 
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest(SaveableListener.class)
 public class CurrentVersionCompatibilityTest extends ScmSyncConfigurationPluginBaseTest {
+
+	public CurrentVersionCompatibilityTest() {
+		super(new ScmUnderTestSubversion());
+	}
 
 	protected String getHudsonRootBaseTemplate() {
 		// Use default template directory...

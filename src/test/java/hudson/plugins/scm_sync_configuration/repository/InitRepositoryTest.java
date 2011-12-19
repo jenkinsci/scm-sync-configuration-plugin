@@ -8,6 +8,7 @@ import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBaseTest;
+import hudson.plugins.test.utils.scms.ScmUnderTest;
 
 import java.io.File;
 
@@ -18,13 +19,10 @@ import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest(SCM.class)
-public class InitRepositoryTest extends ScmSyncConfigurationPluginBaseTest {
-
-	private ScmSyncConfigurationBusiness sscBusiness;
+public abstract class InitRepositoryTest extends ScmSyncConfigurationPluginBaseTest {
 	
-	@Before
-	public void initBusiness() throws Throwable{
-		this.sscBusiness = new ScmSyncConfigurationBusiness();
+	protected InitRepositoryTest(ScmUnderTest scmUnderTest) {
+		super(scmUnderTest);
 	}
 	
 	@Test
@@ -37,35 +35,21 @@ public class InitRepositoryTest extends ScmSyncConfigurationPluginBaseTest {
 		sscBusiness.init(emptyContext);
 		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(emptyContext), is(false));
 		
-		SCM mockedSCM = createSCMMock(true);
-		emptyContext = new ScmContext(mockedSCM, null);
-		sscBusiness.init(emptyContext);
+		createSCMMock(null);
 		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(emptyContext), is(false));
-	}
-	
-	@Test
-	public void shouldInitializeLocalRepositoryWhenScmContextIsCorrect() throws Throwable {
-		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
-		sscBusiness.init(scmContext);
-		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(scmContext), is(true));
 	}
 	
 	@Test
 	@Ignore("Not yet implemented ! (it is difficult because svn list/log has not yet been implemented in svnjava impl")
 	public void shouldInitializeLocalRepositoryWhenScmContextIsCorrentAndEvenIfScmDirectoryDoesntExist() throws Throwable {
-		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL()+"/path/that/doesnt/exist/");
-		sscBusiness.init(scmContext);
+		createSCMMock();
 		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(scmContext), is(true));
 	}
 	
 	@Test
 	public void shouldResetCheckoutConfigurationDirectoryWhenAsked() throws Throwable {
 		// Initializing the repository...
-		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
-		sscBusiness.init(scmContext);
+		createSCMMock();
 		
 		// After init, local checkouted repository should exists
 		assertThat(getCurrentScmSyncConfigurationCheckoutDirectory().exists(), is(true));
@@ -87,13 +71,19 @@ public class InitRepositoryTest extends ScmSyncConfigurationPluginBaseTest {
 	@Test
 	public void shouldSynchronizeHudsonFiles() throws Throwable {
 		// Initializing the repository...
-		SCM mockedSCM = createSCMMock(true);
-		ScmContext scmContext = new ScmContext(mockedSCM, getSCMRepositoryURL());
-		sscBusiness.init(scmContext);
+		createSCMMock();
 		
 		// Synchronizing hudson config files
 		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/InitRepositoryTest.shouldSynchronizeHudsonFiles/");
 	}
+	
+	@Test
+	public void shouldInitializeLocalRepositoryWhenScmContextIsCorrect()
+			throws Throwable {
+		createSCMMock();
+		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(scmContext), is(true));
+	}
+
 }

@@ -28,14 +28,19 @@ public class DirectoryUtils {
 	}
 	private static final FileComparator FILE_COMPARATOR = new FileComparator();
 	
-	public static boolean directoryContentsAreEqual(File dir1, File dir2, final Pattern excludePattern, boolean recursive){
+	public static boolean directoryContentsAreEqual(File dir1, File dir2, final List<Pattern> excludePatterns, boolean recursive){
 		if(!dir1.isDirectory() || !dir2.isDirectory()){
 			throw new IllegalArgumentException("dir1 & dir2 should be directories !");
 		}
 		
 		Predicate<File> patternMatcherOnFilenamePredicate = new Predicate<File>() {
 			public boolean apply(File f) {
-				return !excludePattern.matcher(f.getName()).matches();
+				for(Pattern pattern : excludePatterns) {
+					if (pattern.matcher(f.getName()).matches()) {
+						return false;
+					}
+				}
+				return true;
 			}
 		};
 		
@@ -47,7 +52,7 @@ public class DirectoryUtils {
 		
 		Collection<File> dir1FilesCollec = dir1Files;
 		Collection<File> dir2FilesCollec = dir2Files;
-		if(excludePattern != null){
+		if(excludePatterns != null){
 			dir1FilesCollec = Collections2.filter(dir1Files, patternMatcherOnFilenamePredicate);
 			dir2FilesCollec = Collections2.filter(dir2Files, patternMatcherOnFilenamePredicate);
 		}
@@ -80,7 +85,7 @@ public class DirectoryUtils {
 				}
 			}
 			if(recursive && f1.isDirectory()){
-				if(!directoryContentsAreEqual(f1, f2, excludePattern, recursive)){
+				if(!directoryContentsAreEqual(f1, f2, excludePatterns, recursive)){
 					return false;
 				}
 			}
