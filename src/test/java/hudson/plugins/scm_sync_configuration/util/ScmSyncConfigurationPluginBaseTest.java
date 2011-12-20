@@ -27,5 +27,15 @@ public class ScmSyncConfigurationPluginBaseTest extends
 
 		super.teardown();
 	}
+	
+	protected void assertStatusManagerIsOk() {
+		assertThat(sscBusiness.getScmSyncConfigurationStatusManager().getLastFail(), nullValue());
+		assertThat(sscBusiness.getScmSyncConfigurationStatusManager().getLastSuccess(), notNullValue());
+	}
+		    
+	protected void assertStatusManagerIsNull() {
+		assertThat(sscBusiness.getScmSyncConfigurationStatusManager().getLastFail(), nullValue());
+		assertThat(sscBusiness.getScmSyncConfigurationStatusManager().getLastSuccess(), nullValue());
+	}
 
 }

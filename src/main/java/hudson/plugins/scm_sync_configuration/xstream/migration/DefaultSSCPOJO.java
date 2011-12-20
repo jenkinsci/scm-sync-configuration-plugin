@@ -6,6 +6,7 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 
 	private String scmRepositoryUrl;
 	private SCM scm;
+	private boolean displayStatus;
 	
 	public String getScmRepositoryUrl() {
 		return scmRepositoryUrl;
@@ -18,5 +19,11 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 	}
 	public void setScm(SCM scm) {
 		this.scm = scm;
+	}
+	public boolean isDisplayStatus() {
+		return displayStatus;
+	}
+	public void setDisplayStatus(boolean displayStatus) {
+		this.displayStatus = displayStatus;
 	}
 }
