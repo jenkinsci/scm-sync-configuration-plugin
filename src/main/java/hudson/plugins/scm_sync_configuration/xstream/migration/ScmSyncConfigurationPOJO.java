@@ -11,4 +11,6 @@ public interface ScmSyncConfigurationPOJO {
 	public void setScmRepositoryUrl(String scmRepositoryUrl);
 	public SCM getScm();
 	public void setScm(SCM scm);
+	public boolean isDisplayStatus();
+	public void setDisplayStatus(boolean displayStatus);
 }

@@ -34,10 +34,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 			new JenkinsConfigScmSyncStrategy()
 	};
 	
-	transient private ScmSyncConfigurationBusiness business;
+	private transient ScmSyncConfigurationBusiness business;
 	private String scmRepositoryUrl;
 	private SCM scm;
-
+	private boolean displayStatus;
+	
 	public ScmSyncConfigurationPlugin(){
 		setBusiness(new ScmSyncConfigurationBusiness());
 	}
@@ -66,6 +67,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void loadData(ScmSyncConfigurationPOJO pojo){
 		this.scmRepositoryUrl = pojo.getScmRepositoryUrl();
 		this.scm = pojo.getScm();
+		this.displayStatus = pojo.isDisplayStatus();
 	}
 	
 	public void init() {
@@ -89,6 +91,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		
 		String scmType = req.getParameter("scm");
 		if(scmType != null){
+			this.displayStatus = formData.containsKey("displayStatus");
+			
 			this.scm = SCM.valueOf(scmType);
 			String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
 			
@@ -199,6 +203,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		this.business = business;
 	}
 
+	
+	public ScmSyncConfigurationStatusManager getScmSyncConfigurationStatusManager() {
+		return business.getScmSyncConfigurationStatusManager();
+	}
+
 	public String getScmRepositoryUrl() {
 		return scmRepositoryUrl;
 	}
@@ -217,6 +226,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		} else {
 			return null;
 		}
+	}
+	
+	public boolean isDisplayStatus() {
+		return displayStatus;
 	}
 	
 	public Descriptor<? extends hudson.scm.SCM> getDescriptorForSCM(String scmName){

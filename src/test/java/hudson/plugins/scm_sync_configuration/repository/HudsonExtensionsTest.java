@@ -70,6 +70,8 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		sscItemListener.onRenamed(mockedItem, "fakeJob", "newFakeJob");
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobRenameBeCorrectlyImpactedOnSCM/");
+		
+		assertStatusManagerIsOk();
 	}
 	
 	@Test
@@ -96,6 +98,8 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		sscConfigurationSaveableListener.onChange(mockedItem, new XmlFile(configFile));
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobAddBeCorrectlyImpactedOnSCM/");
+		
+		assertStatusManagerIsOk();
 	}
 	
 	@Test
@@ -112,7 +116,6 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		// Creating fake new job
 		Item mockedItem = Mockito.mock(Job.class);
 		when(mockedItem.getRootDir()).thenReturn(jobDirectory);
-		
 		sscItemListener.onCreated(mockedItem);
 		sscConfigurationSaveableListener.onChange(mockedItem, new XmlFile(configFile));
 		
@@ -123,6 +126,8 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		sscConfigurationSaveableListener.onChange(mockedItem, new XmlFile(configFile));
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobModificationBeCorrectlyImpactedOnSCM/");
+		
+		assertStatusManagerIsOk();
 	}
 
 	@Test
@@ -155,6 +160,8 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		// Assert no hello file is present in current hudson root
 		assertThat(new File(this.getCurrentScmSyncConfigurationCheckoutDirectory()+"/jobs/hello.txt").exists(), is(false));
 		assertThat(new File(this.getCurrentScmSyncConfigurationCheckoutDirectory()+"/hello2.txt").exists(), is(false));
+		
+		assertStatusManagerIsOk();
 	}
 
 	@Test
@@ -173,6 +180,8 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		sscItemListener.onDeleted(mockedItem);
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobDeleteBeCorrectlyImpactedOnSCM" + getSuffixForTestFiles() + "/");
+		
+		assertStatusManagerIsOk();
 	}
 	
 	@Test
@@ -194,6 +203,8 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		sscItemListener.onDeleted(mockedItem);
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobDeleteWithTwoJobsBeCorrectlyImpactedOnSCM/");
+		
+		assertStatusManagerIsOk();
 	}
 
 	@Test
@@ -226,6 +237,8 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		// Assert no hello file is present in current hudson root
 		assertThat(new File(this.getCurrentScmSyncConfigurationCheckoutDirectory()+"/jobs/hello.txt").exists(), is(false));
 		assertThat(new File(this.getCurrentScmSyncConfigurationCheckoutDirectory()+"/hello2.txt").exists(), is(false));
+		
+		assertStatusManagerIsOk();
 	}
 
 	private void assertStrategy(Class<? extends ScmSyncStrategy> clazz, Saveable object, String relativePath) {
