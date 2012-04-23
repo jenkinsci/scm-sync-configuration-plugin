@@ -60,9 +60,6 @@ public abstract class SCM {
 
 	public ScmRepository getConfiguredRepository(ScmManager scmManager, String scmRepositoryURL) {
 		SCMCredentialConfiguration credentials = extractScmCredentials( extractScmUrlFrom(scmRepositoryURL) );
-		if(credentials == null){
-			return null;
-		}
 
 		LOGGER.info("Creating SCM repository object for url : "+scmRepositoryURL);
         ScmRepository repository = null;
