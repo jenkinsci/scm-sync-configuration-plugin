@@ -33,7 +33,6 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		String scmRepositoryUrl = null;
 		String scmClassAttribute = null;
 		String scmContent = null;
-		boolean noUserCommitMessage = false;
 		boolean displayStatus = false;
 		
 		while(reader.hasMoreChildren()){
