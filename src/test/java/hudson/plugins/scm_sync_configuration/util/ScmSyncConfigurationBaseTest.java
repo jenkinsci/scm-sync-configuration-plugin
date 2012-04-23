@@ -212,4 +212,5 @@ public abstract class ScmSyncConfigurationBaseTest {
 	public File getCurrentScmSyncConfigurationCheckoutDirectory(){
 		return new File(currentHudsonRootDirectory.getAbsolutePath()+"/scm-sync-configuration/checkoutConfiguration/");
 	}
+	
 }

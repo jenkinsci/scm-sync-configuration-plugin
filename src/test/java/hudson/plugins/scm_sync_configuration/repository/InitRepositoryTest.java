@@ -37,6 +37,8 @@ public abstract class InitRepositoryTest extends ScmSyncConfigurationPluginBaseT
 		
 		createSCMMock(null);
 		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(emptyContext), is(false));
+		
+		assertStatusManagerIsNull();
 	}
 	
 	@Test
@@ -66,6 +68,8 @@ public abstract class InitRepositoryTest extends ScmSyncConfigurationPluginBaseT
 		// Reseting the repository with cleanup
 		sscBusiness.initializeRepository(scmContext, true);
 		assertThat(fileWhichShouldBeDeletedAfterReset.exists(), is(false));
+		
+		assertStatusManagerIsOk();
 	}
 	
 	@Test
@@ -77,6 +81,8 @@ public abstract class InitRepositoryTest extends ScmSyncConfigurationPluginBaseT
 		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/InitRepositoryTest.shouldSynchronizeHudsonFiles/");
+		
+		assertStatusManagerIsOk();
 	}
 	
 	@Test
@@ -84,6 +90,8 @@ public abstract class InitRepositoryTest extends ScmSyncConfigurationPluginBaseT
 			throws Throwable {
 		createSCMMock();
 		assertThat(sscBusiness.scmCheckoutDirectorySettledUp(scmContext), is(true));
+		
+		assertStatusManagerIsOk();
 	}
 
 }
