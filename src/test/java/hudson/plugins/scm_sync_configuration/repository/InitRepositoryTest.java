@@ -3,7 +3,6 @@ package hudson.plugins.scm_sync_configuration.repository;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import hudson.model.Hudson;
-import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationBusiness;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
@@ -13,7 +12,6 @@ import hudson.plugins.test.utils.scms.ScmUnderTest;
 import java.io.File;
 
 import org.codehaus.plexus.util.FileUtils;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
