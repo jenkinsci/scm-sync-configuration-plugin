@@ -37,6 +37,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	private transient ScmSyncConfigurationBusiness business;
 	private String scmRepositoryUrl;
 	private SCM scm;
+	private boolean noUserCommitMessage;
 	private boolean displayStatus;
 	
 	public ScmSyncConfigurationPlugin(){
@@ -67,6 +68,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void loadData(ScmSyncConfigurationPOJO pojo){
 		this.scmRepositoryUrl = pojo.getScmRepositoryUrl();
 		this.scm = pojo.getScm();
+		this.noUserCommitMessage = pojo.isNoUserCommitMessage();
 		this.displayStatus = pojo.isDisplayStatus();
 	}
 	
@@ -91,6 +93,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		
 		String scmType = req.getParameter("scm");
 		if(scmType != null){
+			this.noUserCommitMessage = formData.containsKey("noUserCommitMessage");
 			this.displayStatus = formData.containsKey("displayStatus");
 			
 			this.scm = SCM.valueOf(scmType);
@@ -178,11 +181,12 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		ScmSyncConfigurationDataProvider.retrieveComment(Stapler.getCurrentRequest(), true);
 		
 		// Displaying commit message popup is based on following tests :
+		// Zero : never ask for a commit message
 		// First : no botherTimeout should match with current url
 		// Second : a strategy should exist, matching current url
 		// Third : SCM Sync should be settled up
-		return ScmSyncConfigurationDataProvider.retrieveBotherTimeoutMatchingUrl(Stapler.getCurrentRequest(), url) == null
-					&& getStrategyForURL(url) != null && this.business.scmCheckoutDirectorySettledUp(createScmContext());
+		return !noUserCommitMessage && ScmSyncConfigurationDataProvider.retrieveBotherTimeoutMatchingUrl(Stapler.getCurrentRequest(), url) == null
+                && getStrategyForURL(url) != null && this.business.scmCheckoutDirectorySettledUp(createScmContext());
 	}
 	
 	public ScmSyncStrategy getStrategyForURL(String url){
@@ -195,6 +199,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return null;
 	}
 	
+	public boolean isNoUserCommitMessage() {
+		return noUserCommitMessage;
+	}
+		
 	public SCM[] getScms(){
 		return SCM.values();
 	}

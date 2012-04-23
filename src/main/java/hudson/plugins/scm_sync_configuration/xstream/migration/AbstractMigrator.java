@@ -12,6 +12,7 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 	public static final String SCM_REPOSITORY_URL_TAG = "scmRepositoryUrl";
 	public static final String SCM_TAG = "scm";
 	public static final String SCM_CLASS_ATTRIBUTE = "class";
+	public static final String SCM_NO_USER_COMMIT_MESSAGE = "noUserCommitMessage";
 	public static final String SCM_DISPLAY_STATUS = "displayStatus";
 	
     private static final Logger LOGGER = Logger.getLogger(AbstractMigrator.class.getName());
@@ -33,12 +34,15 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		String scmRepositoryUrl = null;
 		String scmClassAttribute = null;
 		String scmContent = null;
+		boolean noUserCommitMessage = false;
 		boolean displayStatus = false;
 		
 		while(reader.hasMoreChildren()){
 			reader.moveDown();
 			if(SCM_REPOSITORY_URL_TAG.equals(reader.getNodeName())){
 				scmRepositoryUrl = reader.getValue();
+			} else if(SCM_NO_USER_COMMIT_MESSAGE.equals(reader.getNodeName())){
+				noUserCommitMessage = Boolean.parseBoolean(reader.getValue());
 			} else if(SCM_DISPLAY_STATUS.equals(reader.getNodeName())){
 				displayStatus = Boolean.parseBoolean(reader.getValue());
 			} else if(SCM_TAG.equals(reader.getNodeName())){
@@ -55,6 +59,7 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		
 		pojo.setScm(createSCMFrom(scmClassAttribute, scmContent));
 		pojo.setScmRepositoryUrl(scmRepositoryUrl);
+		pojo.setNoUserCommitMessage(noUserCommitMessage);
 		pojo.setDisplayStatus(displayStatus);
 		
 		return pojo;
