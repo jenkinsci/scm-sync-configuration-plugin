@@ -173,7 +173,7 @@ public class SCMManipulator {
 			try {
 				FileUtils.copyDirectory(oldDir, newDir, new FileFilter() {
 					public boolean accept(File pathname) {
-						return !pathname.getAbsolutePath().endsWith(filter);
+						return !pathname.getName().equals(filter);
 					}
 				});
 			}
