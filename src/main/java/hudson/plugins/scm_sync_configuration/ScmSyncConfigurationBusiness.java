@@ -69,7 +69,7 @@ public class ScmSyncConfigurationBusiness {
 			if(this.checkoutSucceeded){
 				LOGGER.info("SCM repository initialization done.");
 			}
-			log("Checkout " + this.checkoutScmDirectory, this.checkoutSucceeded);
+			signal("Checkout " + this.checkoutScmDirectory, this.checkoutSucceeded);
 		}
 	}
 	
@@ -98,7 +98,7 @@ public class ScmSyncConfigurationBusiness {
 		String rootHierarchyPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(rootHierarchy);
 		File rootHierarchyTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+rootHierarchyPathRelativeToHudsonRoot);
 		
-		log("Delete " + rootHierarchy.getAbsolutePath(),
+		signal("Delete " + rootHierarchy.getAbsolutePath(),
 				scmManipulator.deleteHierarchy(rootHierarchyTranslatedInScm, commitMessage));
 	}
 	
@@ -114,7 +114,7 @@ public class ScmSyncConfigurationBusiness {
 		
 		LOGGER.info("Renaming hierarchy ["+oldDirPathRelativeToHudsonRoot+"] to ["+newDirPathRelativeToHudsonRoot+"]");
 		
-		log("Rename " + oldDir.getAbsolutePath() + " to " + newDir.getAbsolutePath(),
+		signal("Rename " + oldDir.getAbsolutePath() + " to " + newDir.getAbsolutePath(),
 				this.scmManipulator.renameHierarchy(scmRoot, oldDirPathRelativeToHudsonRoot, newDirPathRelativeToHudsonRoot, commitMessage));
 	}
 	
@@ -136,7 +136,7 @@ public class ScmSyncConfigurationBusiness {
 		} catch (IOException e) {
 			LOGGER.throwing(FileUtils.class.getName(), "copyFile", e);
 			LOGGER.severe("Error while copying file : "+e.getMessage());
-			log(message, false);
+			signal(message, false);
 		}
 
 		File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
@@ -155,7 +155,7 @@ public class ScmSyncConfigurationBusiness {
 			LOGGER.info("Synchronized file ["+modifiedFilePathRelativeToHudsonRoot+"] to SCM !");
 		}
 		
-		log(message, result);
+		signal(message, result);
 	}
 	
 	public void synchronizeAllConfigs(ScmContext scmContext, ScmSyncStrategy[] availableStrategies, User user){
@@ -182,7 +182,7 @@ public class ScmSyncConfigurationBusiness {
 		return scmManipulator != null && this.scmManipulator.scmConfigurationSettledUp(scmContext, false) && this.checkoutSucceeded;
 	}
 
-	private void log(String operation, boolean result) {
+	private void signal(String operation, boolean result) {
 		if (result) {
 			getScmSyncConfigurationStatusManager().signalSuccess();
 		}

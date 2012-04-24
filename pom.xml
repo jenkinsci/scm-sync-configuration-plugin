@@ -25,6 +25,11 @@
       <name>Frederic Camblor</name>
       <email>fcamblor+jenkinswiki@gmail.com</email>
     </developer>
+    <developer>
+      <id>bpaquet</id>
+      <name>Bertrand Paquet</name>
+      <email>bertrand.paquet@gmail.com</email>
+    </developer>
   </developers>
   
   <properties>

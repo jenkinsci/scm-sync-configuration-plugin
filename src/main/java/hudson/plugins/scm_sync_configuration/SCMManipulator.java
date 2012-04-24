@@ -173,12 +173,12 @@ public class SCMManipulator {
 			try {
 				FileUtils.copyDirectory(oldDir, newDir, new FileFilter() {
 					public boolean accept(File pathname) {
-						return !pathname.getAbsolutePath().endsWith(filter);
+						return !pathname.getName().equals(filter);
 					}
 				});
 			}
 			catch(IOException e) {
-				LOGGER.severe("[renameHierarchy] Unable to copye ["+oldDirPathRelativeToScmRoot+"] to ["+newDirPathRelativeToScmRoot+"] :" + e.getMessage());;
+				LOGGER.severe("[renameHierarchy] Unable to copy ["+oldDirPathRelativeToScmRoot+"] to ["+newDirPathRelativeToScmRoot+"] :" + e.getMessage());;
 				return renameOk;
 			}
 			ScmFileSet addFileset = new ScmFileSet(scmRoot, new File(newDirPathRelativeToScmRoot));

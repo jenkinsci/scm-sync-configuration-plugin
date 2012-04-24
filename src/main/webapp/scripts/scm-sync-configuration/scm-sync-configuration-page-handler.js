@@ -1,7 +1,3 @@
-YAHOO.namespace("scmSyncConfiguration");
-YAHOO.scmSyncConfiguration.targetFormName = '${pageMatcher.targetFormName}';
-YAHOO.scmSyncConfiguration.commentPopupValidated = false;
-
 function retrieveTargetFormOnPage(){
     var formElts = $$("form");
     for(var i=0; i<formElts.length; i++){
