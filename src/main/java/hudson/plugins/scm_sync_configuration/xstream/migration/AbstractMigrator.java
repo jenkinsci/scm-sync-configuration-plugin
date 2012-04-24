@@ -13,8 +13,9 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 	public static final String SCM_TAG = "scm";
 	public static final String SCM_CLASS_ATTRIBUTE = "class";
 	public static final String SCM_NO_USER_COMMIT_MESSAGE = "noUserCommitMessage";
-	public static final String SCM_DISPLAY_STATUS = "displayStatus";
-	
+    public static final String SCM_DISPLAY_STATUS = "displayStatus";
+    public static final String SCM_COMMIT_MESSAGE_PATTERN = "commitMessagePattern";
+
     private static final Logger LOGGER = Logger.getLogger(AbstractMigrator.class.getName());
 
 	public TTO migrate(TFROM pojo){
@@ -36,6 +37,7 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		String scmContent = null;
 		boolean noUserCommitMessage = false;
 		boolean displayStatus = false;
+        String commitMessagePattern = "[message]";
 		
 		while(reader.hasMoreChildren()){
 			reader.moveDown();
@@ -48,6 +50,8 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 			} else if(SCM_TAG.equals(reader.getNodeName())){
 				scmClassAttribute = reader.getAttribute(SCM_CLASS_ATTRIBUTE);
 				scmContent = reader.getValue();
+            } else if(SCM_COMMIT_MESSAGE_PATTERN.equals(reader.getNodeName())){
+                commitMessagePattern = reader.getValue();
 			} else {
 				IllegalArgumentException iae = new IllegalArgumentException("Unknown tag : "+reader.getNodeName());
 				LOGGER.throwing(this.getClass().getName(), "readScmSyncConfigurationPOJO", iae);
@@ -61,6 +65,7 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		pojo.setScmRepositoryUrl(scmRepositoryUrl);
 		pojo.setNoUserCommitMessage(noUserCommitMessage);
 		pojo.setDisplayStatus(displayStatus);
+        pojo.setCommitMessagePattern(commitMessagePattern);
 		
 		return pojo;
 	}

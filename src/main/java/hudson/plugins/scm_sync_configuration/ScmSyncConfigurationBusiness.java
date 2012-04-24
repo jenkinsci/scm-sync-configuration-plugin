@@ -87,7 +87,7 @@ public class ScmSyncConfigurationBusiness {
 	}
 	
 	public void deleteHierarchy(ScmContext scmContext, File rootHierarchy, User user){
-		deleteHierarchy(scmContext, rootHierarchy, createCommitMessage("Hierarchy deleted", user, null));
+		deleteHierarchy(scmContext, rootHierarchy, createCommitMessage(scmContext, "Hierarchy deleted", user, null));
 	}
 	
 	public void deleteHierarchy(ScmContext scmContext, File rootHierarchy, String commitMessage){
@@ -110,7 +110,7 @@ public class ScmSyncConfigurationBusiness {
 		String oldDirPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(oldDir);
 		String newDirPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(newDir);
 		File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
-		String commitMessage = createCommitMessage("Moved "+oldDirPathRelativeToHudsonRoot+" hierarchy to "+newDirPathRelativeToHudsonRoot, user, null);
+		String commitMessage = createCommitMessage(scmContext, "Moved "+oldDirPathRelativeToHudsonRoot+" hierarchy to "+newDirPathRelativeToHudsonRoot, user, null);
 		
 		LOGGER.info("Renaming hierarchy ["+oldDirPathRelativeToHudsonRoot+"] to ["+newDirPathRelativeToHudsonRoot+"]");
 		
@@ -127,7 +127,7 @@ public class ScmSyncConfigurationBusiness {
 		
 		String modifiedFilePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(modifiedFile);
 		LOGGER.info("Synchronizing file ["+modifiedFilePathRelativeToHudsonRoot+"] to SCM ...");
-		String commitMessage = createCommitMessage("Modification on file", user, comment);
+		String commitMessage = createCommitMessage(scmContext, "Modification on file", user, comment);
 		
 		File modifiedFileTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+modifiedFilePathRelativeToHudsonRoot);
 		boolean modifiedFileAlreadySynchronized = modifiedFileTranslatedInScm.exists();
@@ -191,7 +191,7 @@ public class ScmSyncConfigurationBusiness {
 		}
 	}
 	
-	private static String createCommitMessage(String messagePrefix, User user, String comment){
+	private static String createCommitMessage(ScmContext context, String messagePrefix, User user, String comment){
 		StringBuilder commitMessage = new StringBuilder();
 		commitMessage.append(messagePrefix);
 		if(user != null){
@@ -200,7 +200,9 @@ public class ScmSyncConfigurationBusiness {
 		if(comment != null){
 			commitMessage.append(" with following comment : ").append(comment);
 		}
-		return commitMessage.toString();
+		String message = commitMessage.toString();
+
+        return context.getCommitMessagePattern().replaceAll("\\[message\\]", message);
 	}
 	
 	private static String getCheckoutScmDirectoryAbsolutePath(){

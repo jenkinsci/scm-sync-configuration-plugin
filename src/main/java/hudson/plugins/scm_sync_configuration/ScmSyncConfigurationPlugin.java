@@ -39,7 +39,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	private SCM scm;
 	private boolean noUserCommitMessage;
 	private boolean displayStatus;
-	
+    // The [message] is a magic string that will be replaced with commit message
+    // when commit occurs
+    private String commitMessagePattern = "[message]";
+
 	public ScmSyncConfigurationPlugin(){
 		setBusiness(new ScmSyncConfigurationBusiness());
 	}
@@ -70,6 +73,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		this.scm = pojo.getScm();
 		this.noUserCommitMessage = pojo.isNoUserCommitMessage();
 		this.displayStatus = pojo.isDisplayStatus();
+        this.commitMessagePattern = pojo.getCommitMessagePattern();
 	}
 	
 	public void init() {
@@ -95,6 +99,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		if(scmType != null){
 			this.noUserCommitMessage = formData.containsKey("noUserCommitMessage");
 			this.displayStatus = formData.containsKey("displayStatus");
+            this.commitMessagePattern = req.getParameter("commitMessagePattern");
 			
 			this.scm = SCM.valueOf(scmType);
 			String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
@@ -173,7 +178,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	}
 	
 	public ScmContext createScmContext(){
-		return new ScmContext(this.scm, this.scmRepositoryUrl);
+		return new ScmContext(this.scm, this.scmRepositoryUrl, this.commitMessagePattern);
 	}
 	
 	public boolean shouldDecorationOccursOnURL(String url){
@@ -240,6 +245,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return displayStatus;
 	}
 	
+    public String getCommitMessagePattern() {
+        return commitMessagePattern;
+    }
+
 	public Descriptor<? extends hudson.scm.SCM> getDescriptorForSCM(String scmName){
 		return SCM.valueOf(scmName).getSCMDescriptor();
 	}

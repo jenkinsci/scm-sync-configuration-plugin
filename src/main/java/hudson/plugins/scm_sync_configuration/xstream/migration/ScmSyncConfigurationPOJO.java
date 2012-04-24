@@ -15,4 +15,6 @@ public interface ScmSyncConfigurationPOJO {
 	public void setNoUserCommitMessage(boolean noUserCommitMessage);
 	public boolean isDisplayStatus();
 	public void setDisplayStatus(boolean displayStatus);
+    public String getCommitMessagePattern();
+    public void setCommitMessagePattern(String commitMessagePattern);
 }

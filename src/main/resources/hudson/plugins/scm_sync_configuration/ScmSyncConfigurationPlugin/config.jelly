@@ -3,6 +3,9 @@
   <f:section title="${%SCM Sync configuration}">
   	<f:optionalBlock name="noUserCommitMessage" title="Never bother me with commit messages" checked="${it.noUserCommitMessage}"/>
   	<f:optionalBlock name="displayStatus" title="Display SCM Sync Status" checked="${it.displayStatus}"/>
+    <f:entry title="${%Commit message pattern}">
+        <f:textbox name="commitMessagePattern" value="${it.commitMessagePattern}" />
+    </f:entry>
     <j:forEach var="scm" items="${it.scms}">
     	<f:radioBlock name="scm" value="${scm.id}" title="${scm.title}" checked="${it.isScmSelected(scm)}">
     		<st:include from="${it}" page="scms/${scm.configPage}" />

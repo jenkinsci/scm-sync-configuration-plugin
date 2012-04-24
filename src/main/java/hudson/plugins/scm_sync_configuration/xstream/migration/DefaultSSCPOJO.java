@@ -8,6 +8,7 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 	private SCM scm;
 	private boolean noUserCommitMessage;
 	private boolean displayStatus;
+    private String commitMessagePattern;
 	
 	public String getScmRepositoryUrl() {
 		return scmRepositoryUrl;
@@ -33,4 +34,12 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 	public void setDisplayStatus(boolean displayStatus) {
 		this.displayStatus = displayStatus;
 	}
+
+    public String getCommitMessagePattern() {
+        return commitMessagePattern;
+    }
+
+    public void setCommitMessagePattern(String commitMessagePattern) {
+        this.commitMessagePattern = commitMessagePattern;
+    }
 }
