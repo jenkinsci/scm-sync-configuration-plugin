@@ -178,7 +178,7 @@ public class SCMManipulator {
 				});
 			}
 			catch(IOException e) {
-				LOGGER.severe("[renameHierarchy] Unable to copye ["+oldDirPathRelativeToScmRoot+"] to ["+newDirPathRelativeToScmRoot+"] :" + e.getMessage());;
+				LOGGER.severe("[renameHierarchy] Unable to copy ["+oldDirPathRelativeToScmRoot+"] to ["+newDirPathRelativeToScmRoot+"] :" + e.getMessage());;
 				return renameOk;
 			}
 			ScmFileSet addFileset = new ScmFileSet(scmRoot, new File(newDirPathRelativeToScmRoot));
