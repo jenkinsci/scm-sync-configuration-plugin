@@ -10,6 +10,7 @@ import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
@@ -18,7 +19,10 @@ public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
     // Only saving config.xml file located in job directory
     // Some plugins (like maven release plugin) could add their own configuration files in the job directory that we don't want to synchronize
     // ... at least in the current strategy !
-	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MANAGER = new ClassAndFileConfigurationEntityMatcher(Job.class, "^jobs/[^/]+/config\\.xml$");
+	private static final Pattern [] PATTERNS = new Pattern[] {
+		Pattern.compile("^jobs/[^/]+/config\\.xml$")
+	};
+	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MANAGER = new ClassAndFileConfigurationEntityMatcher(Job.class, PATTERNS);
 	
 	public JobConfigScmSyncStrategy(){
 		super(CONFIG_ENTITY_MANAGER, PAGE_MATCHERS);
