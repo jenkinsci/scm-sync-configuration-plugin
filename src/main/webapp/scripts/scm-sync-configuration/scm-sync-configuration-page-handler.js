@@ -140,6 +140,11 @@ function enterCommitComment(form){
                 container: 'panelFooter'
             });
             this._buttons[1].on('click', YAHOO.scm.sync.configuration.handleCancel);
+
+            // Ugly part here ... I dunno why, but directly calling focus() doesn't work
+            // since rendered buttons will steal the textarea's focus
+            // The only workaround found is to delay the textarea focus !
+            setTimeout(function(){ $$("#commentForm #comment")[0].focus(); }, 300);
         }
     }, YAHOO.scm.sync.configuration, true);
     YAHOO.scm.sync.configuration.modalPopup.render(document.body);
