@@ -24,6 +24,7 @@ public abstract class SCM {
 	protected static final List<SCM> SCM_IMPLEMENTATIONS = new ArrayList<SCM>(){ {
 		add(new ScmSyncNoSCM());
 		add(new ScmSyncSubversionSCM());
+		add(new ScmSyncGitSCM());
 	} };
 	
 	transient protected String title;
