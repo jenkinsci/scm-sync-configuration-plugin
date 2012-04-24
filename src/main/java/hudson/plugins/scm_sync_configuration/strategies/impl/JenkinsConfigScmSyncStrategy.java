@@ -15,10 +15,10 @@ public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
 	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ {
         // Global configuration page
-        add(new PageMatcher("^configure$", "config"));
+        add(new PageMatcher("^configure$", "form[name='config']"));
         // View configuration pages
-        add(new PageMatcher("^(.+/)?view/[^/]+/configure$", "viewConfig"));
-        add(new PageMatcher("^newView$", "createView"));
+        add(new PageMatcher("^(.+/)?view/[^/]+/configure$", "form[name='viewConfig']"));
+        add(new PageMatcher("^newView$", "form[name='createView']"));
     } };
     
     private static final Pattern [] PATTERNS = new Pattern[]{

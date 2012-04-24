@@ -1,18 +1,5 @@
 function retrieveTargetFormOnPage(){
-    var formElts = $$("form");
-    for(var i=0; i<formElts.length; i++){
-        var form = formElts[i];
-        // Tested under IE8 & Chrome : it works well
-        // On stackoverflow, doubt are there about IE7 for this implementation ...
-        if(form.attributes["name"] != null && form.attributes["name"].value == YAHOO.scmSyncConfiguration.targetFormName){
-            return form;
-        }
-        // Don't work under IE8.. will work with IE7 ?
-        if(form.getAttribute("name") == YAHOO.scmSyncConfiguration.targetFormName){
-            return form;
-        }
-    }
-    return null;
+    return $$(YAHOO.scmSyncConfiguration.targetFormSelector)[0];
 }
 function decorateOnsubmitForm(){
     try {

@@ -5,18 +5,18 @@ import java.util.regex.Pattern;
 public class PageMatcher {
 
 	private Pattern urlRegex;
-	private String targetFormName;
+	private String targetFormSelector;
 	
-	public PageMatcher(String _urlRegexStr, String _targetFormName){
+	public PageMatcher(String _urlRegexStr, String _targetFormSelector){
 		this.urlRegex = Pattern.compile(_urlRegexStr);
-		this.targetFormName = _targetFormName;
+		this.targetFormSelector = _targetFormSelector;
 	}
 
 	public Pattern getUrlRegex() {
 		return urlRegex;
 	}
 
-	public String getTargetFormName() {
-		return targetFormName;
+	public String getTargetFormSelector() {
+		return targetFormSelector;
 	}
 }
