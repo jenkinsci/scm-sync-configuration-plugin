@@ -78,10 +78,12 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 		writer.setValue(Boolean.toString(plugin.isDisplayStatus()));
 		writer.endNode();
 
-        writer.startNode(AbstractMigrator.SCM_COMMIT_MESSAGE_PATTERN);
-  		writer.setValue(plugin.getCommitMessagePattern());
-   		writer.endNode();
-	}
+        if(plugin.getCommitMessagePattern() != null){
+            writer.startNode(AbstractMigrator.SCM_COMMIT_MESSAGE_PATTERN);
+            writer.setValue(plugin.getCommitMessagePattern());
+            writer.endNode();
+        }
+    }
 	
 	/**
 	 * @return current version number of scm sync configuration plugin
