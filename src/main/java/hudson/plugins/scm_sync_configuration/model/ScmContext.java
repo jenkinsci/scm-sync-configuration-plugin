@@ -10,6 +10,10 @@ public class ScmContext {
 	private SCM scm;
     private String commitMessagePattern;
 
+    public ScmContext(SCM _scm, String _scmRepositoryUrl){
+        this(_scm, _scmRepositoryUrl, "[message]");
+    }
+
 	public ScmContext(SCM _scm, String _scmRepositoryUrl, String _commitMessagePattern){
 		this.scm = _scm;
 		this.scmRepositoryUrl = _scmRepositoryUrl;
