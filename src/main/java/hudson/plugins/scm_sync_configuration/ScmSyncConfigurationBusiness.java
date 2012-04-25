@@ -202,7 +202,11 @@ public class ScmSyncConfigurationBusiness {
 		}
 		String message = commitMessage.toString();
 
-        return context.getCommitMessagePattern().replaceAll("\\[message\\]", message);
+        if(context.getCommitMessagePattern() == null || "".equals(context.getCommitMessagePattern())){
+            return message;
+        } else {
+            return context.getCommitMessagePattern().replaceAll("\\[message\\]", message);
+        }
 	}
 	
 	private static String getCheckoutScmDirectoryAbsolutePath(){
