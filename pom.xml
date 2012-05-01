@@ -49,12 +49,12 @@
   <build>
 	<pluginManagement>
 		<plugins>
-			<!-- TODO: to remove when migrating to parent pom >= 1.387 -->
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
                 <!-- To have pushChanges parameter available -->
                 <version>2.1</version>
                 <configuration>
+                    <!-- Git scm specific behaviour -->
                     <localCheckout>true</localCheckout>
                     <pushChanges>false</pushChanges>
                 </configuration>
@@ -98,6 +98,7 @@
               <version>${project.parent.version}</version>
               <exclusions>
                   <exclusion>
+                      <!-- Conflicts with org.jenkins-ci.plugins:subversion dependency -->
                       <groupId>org.jvnet.hudson.plugins</groupId>
                       <artifactId>subversion</artifactId>
                   </exclusion>
@@ -109,6 +110,7 @@
               <version>${project.parent.version}</version>
               <exclusions>
                   <exclusion>
+                      <!-- Conflicts with org.jenkins-ci.plugins:subversion dependency -->
                       <groupId>org.jvnet.hudson.plugins</groupId>
                       <artifactId>subversion</artifactId>
                   </exclusion>
