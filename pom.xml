@@ -1,14 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-  	<!-- 
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.398</version>
-    -->	
-    <groupId>org.jvnet.hudson.plugins</groupId>
-    <artifactId>plugin</artifactId>
-    <version>1.339</version>
+    <version>1.409</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -55,16 +50,15 @@
 	<pluginManagement>
 		<plugins>
 			<!-- TODO: to remove when migrating to parent pom >= 1.387 -->
-			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<!-- To have pushChanges parameter available -->
-				<version>2.1</version>
-				<configuration>
-					<goals>deploy</goals>
-					<localCheckout>true</localCheckout>
-					<pushChanges>false</pushChanges>
-				</configuration>
-			</plugin>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <!-- To have pushChanges parameter available -->
+                <version>2.1</version>
+                <configuration>
+                    <localCheckout>true</localCheckout>
+                    <pushChanges>false</pushChanges>
+                </configuration>
+            </plugin>
 		</plugins>
 	</pluginManagement>
 	<plugins>
@@ -89,6 +83,33 @@
 	</plugins>
   </build>
 
+  <dependencyManagement>
+      <dependencies>
+          <dependency>
+              <groupId>org.jenkins-ci.main</groupId>
+              <artifactId>maven-plugin</artifactId>
+              <version>${project.parent.version}</version>
+              <exclusions>
+                  <exclusion>
+                      <groupId>org.jvnet.hudson.plugins</groupId>
+                      <artifactId>subversion</artifactId>
+                  </exclusion>
+              </exclusions>
+          </dependency>
+          <dependency>
+              <groupId>org.jenkins-ci.main</groupId>
+              <artifactId>jenkins-test-harness</artifactId>
+              <version>${project.parent.version}</version>
+              <exclusions>
+                  <exclusion>
+                      <groupId>org.jvnet.hudson.plugins</groupId>
+                      <artifactId>subversion</artifactId>
+                  </exclusion>
+              </exclusions>
+          </dependency>
+      </dependencies>
+  </dependencyManagement>
+
   <dependencies>
   	<dependency>
       <groupId>org.apache.maven.scm</groupId>
@@ -112,9 +133,9 @@
      -->
     
     <dependency>
-      <groupId>org.jvnet.hudson.plugins</groupId>
+      <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>subversion</artifactId>
-	  <version>1.8</version>
+	  <version>1.39</version>
     </dependency>    
     <!-- providers declaration -->
     <dependency>
@@ -166,14 +187,6 @@
     </dependency>	
   </dependencies>
   
-  <!-- TODO: to remove when migrating to parent pom >= 1.395 -->
-  <distributionManagement>
-    <repository>
-      <id>maven.jenkins-ci.org</id>
-      <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
-    </repository>
-  </distributionManagement> 
-
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/scm-sync-configuration-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/scm-sync-configuration-plugin.git</developerConnection>
