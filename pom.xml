@@ -59,6 +59,13 @@
                     <pushChanges>false</pushChanges>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Needed to avoid some permgen space errors during test execution ... -->
+                    <argLine>-XX:MaxPermSize=128m</argLine>
+                </configuration>
+            </plugin>
 		</plugins>
 	</pluginManagement>
 	<plugins>
