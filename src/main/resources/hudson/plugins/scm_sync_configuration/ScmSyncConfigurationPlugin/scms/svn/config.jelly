@@ -2,7 +2,7 @@
 
 	<!-- TODO: fix help url... -->
 	<f:entry title="${%Repository URL}" help="${rootURL}/plugin/scm-sync-configuration/helpForRepositoryUrl?scm=${scm.id}">
-		<f:textbox id="repositoryUrl" name="repositoryUrl" value="${it.scmUrl}" checkUrl="'${rootURL}/plugin/scm-sync-configuration/descriptorForSCM/${scm.id}/checkRemote?value='+toValue(this)" />
+		<f:textbox id="repositoryUrl" name="repositoryUrl" value="${it.isScmSelected(scm) ? it.scmUrl : null}" checkUrl="'${rootURL}/plugin/scm-sync-configuration/descriptorForSCM/${scm.id}/checkRemote?value='+toValue(this)" />
 	</f:entry>
 
 </j:jelly>
