@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
@@ -180,6 +181,29 @@ public class ScmSyncConfigurationBusiness {
 
 	public boolean scmCheckoutDirectorySettledUp(ScmContext scmContext){
 		return scmManipulator != null && this.scmManipulator.scmConfigurationSettledUp(scmContext, false) && this.checkoutSucceeded;
+	}
+	
+	public List<File> reloadAllFilesFromScm(ScmSyncStrategy[] availableStrategies) throws IOException, ScmException {
+		this.scmManipulator.update(new File(getCheckoutScmDirectoryAbsolutePath()));
+		List<File> filesToSync = new ArrayList<File>();
+
+		for(ScmSyncStrategy strategy : availableStrategies){
+			filesToSync.addAll(strategy.createInitializationSynchronizedFileset());
+		}
+		
+		List<File> syncedFiles = new ArrayList<File>();
+		
+		for(File fileToSync : filesToSync){
+			String hudsonConfigPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(fileToSync);
+			File hudsonConfigTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+hudsonConfigPathRelativeToHudsonRoot);
+			if (hudsonConfigTranslatedInScm.exists()) {
+				if (!FileUtils.contentEquals(hudsonConfigTranslatedInScm, fileToSync)) {
+					FileUtils.copyFile(hudsonConfigTranslatedInScm, fileToSync);
+					syncedFiles.add(fileToSync);
+				}
+			}
+		}
+		return syncedFiles;
 	}
 
 	private void signal(String operation, boolean result) {

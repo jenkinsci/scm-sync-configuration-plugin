@@ -162,7 +162,21 @@ public abstract class ScmSyncConfigurationBaseTest {
 		return scmManipulator;
 	}
 	
-	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath) throws ComponentLookupException, PlexusContainerException, IOException{
+	protected void verifyCurrentScmContentMatchesCurrentHudsonDir(boolean match) throws ComponentLookupException, PlexusContainerException, IOException{
+		SCMManipulator scmManipulator = createMockedScmManipulator();
+		
+		// Checkouting scm in temp directory
+		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__verifyCurrentScmContentMatchesHierarchy");
+		scmManipulator.checkout(checkoutDirectoryForVerifications);
+		boolean directoryContentsAreEqual = DirectoryUtils.directoryContentsAreEqual(checkoutDirectoryForVerifications, getCurrentHudsonRootDirectory(), 
+				getSpecialSCMDirectoryExcludePatternAndScmSyncFiles(), true);
+		
+		FileUtils.deleteDirectory(checkoutDirectoryForVerifications);
+		
+		assertThat(directoryContentsAreEqual, is(match));
+	}
+	
+	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath, boolean match) throws ComponentLookupException, PlexusContainerException, IOException{
 		SCMManipulator scmManipulator = createMockedScmManipulator();
 		
 		// Checkouting scm in temp directory
@@ -173,7 +187,11 @@ public abstract class ScmSyncConfigurationBaseTest {
 		
 		FileUtils.deleteDirectory(checkoutDirectoryForVerifications);
 		
-		assertThat(directoryContentsAreEqual, is(true));
+		assertThat(directoryContentsAreEqual, is(match));
+	}
+	
+	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath) throws ComponentLookupException, PlexusContainerException, IOException{
+		verifyCurrentScmContentMatchesHierarchy(hierarchyPath, true);
 	}
 	
 	// Overridable in a near future (when dealing with multiple scms ...)
@@ -186,6 +204,12 @@ public abstract class ScmSyncConfigurationBaseTest {
 			add(Pattern.compile("\\.svn"));
 			add(Pattern.compile("\\.git.*"));
 		}};
+	}
+	
+	protected List<Pattern> getSpecialSCMDirectoryExcludePatternAndScmSyncFiles(){
+		List<Pattern> list = getSpecialSCMDirectoryExcludePattern();
+		list.add(Pattern.compile("scm-sync.*"));
+		return list;
 	}
 
 	protected String getSuffixForTestFiles() {

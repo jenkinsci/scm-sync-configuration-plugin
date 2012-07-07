@@ -17,12 +17,14 @@ import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurat
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 
 import net.sf.json.JSONObject;
 
 import org.acegisecurity.AccessDeniedException;
+import org.apache.maven.scm.ScmException;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -117,6 +119,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 				this.business.cleanChekoutScmDirectory();
 			}
 		}
+	}
+	
+	public List<File> reloadAllFilesFromScm() throws IOException, ScmException {
+		return business.reloadAllFilesFromScm(AVAILABLE_STRATEGIES);
 	}
 	
 	public void doSubmitComment(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {

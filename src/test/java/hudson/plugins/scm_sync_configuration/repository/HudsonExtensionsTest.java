@@ -24,6 +24,7 @@ import hudson.plugins.test.utils.scms.ScmUnderTest;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Before;
@@ -267,6 +268,38 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		// Assert no hello file is present in current hudson root
 		assertThat(new File(this.getCurrentScmSyncConfigurationCheckoutDirectory()+"/jobs/hello.txt").exists(), is(false));
 		assertThat(new File(this.getCurrentScmSyncConfigurationCheckoutDirectory()+"/hello2.txt").exists(), is(false));
+		
+		assertStatusManagerIsOk();
+	}
+
+	@Test
+	public void shouldReloadAllFilesUpdateScmAndReloadAllFiles() throws Throwable {
+		// Initializing the repository...
+		createSCMMock();
+		
+		// Synchronizing hudson config files
+		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		
+		// Let's checkout current scm view ... and commit something in it ...
+		SCMManipulator scmManipulator = createMockedScmManipulator();
+		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__tmpHierarchyForCommit");
+		scmManipulator.checkout(checkoutDirectoryForVerifications);
+		
+		verifyCurrentScmContentMatchesCurrentHudsonDir(true);
+		
+		final File configFile = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/config.xml");
+		FileUtils.fileAppend(configFile.getAbsolutePath(), "toto");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(configFile); }}, "external commit");
+		
+		verifyCurrentScmContentMatchesCurrentHudsonDir(false);
+		
+		// Reload config
+		List<File> syncedFiles = sscBusiness.reloadAllFilesFromScm(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
+		
+		verifyCurrentScmContentMatchesCurrentHudsonDir(true);
+		
+		assertThat(syncedFiles.size(), is(1));
+		assertThat(syncedFiles.get(0).getAbsolutePath(), is(getCurrentHudsonRootDirectory().getAbsolutePath() + "/config.xml"));
 		
 		assertStatusManagerIsOk();
 	}

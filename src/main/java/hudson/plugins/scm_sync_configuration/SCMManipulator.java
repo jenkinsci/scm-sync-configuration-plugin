@@ -65,6 +65,9 @@ public class SCMManipulator {
 		return scmRepositoryInitiated;
 	}
 	
+	public void update(File root) throws ScmException {
+		this.scmManager.update(scmRepository, new ScmFileSet(root));
+	}
 	public boolean checkout(File checkoutDirectory){
 		boolean checkoutOk = false;
 		
