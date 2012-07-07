@@ -11,6 +11,9 @@
     		<st:include from="${it}" page="scms/${scm.configPage}" />
     	</f:radioBlock>
     </j:forEach>
+    <f:entry title="${%Reload config from SCM}">
+    	<a href="${rootUrl}/plugin/scm-sync-configuration/reloadAllFilesFromScm" onClick="return confirm('WARNING : the Jenkins config will be reloaded from SCM.\nOnly file modifications are handled. File added or removed will not be handled !\n\nContinue ?')">Reload</a>
+    </f:entry>
   </f:section>
   
 </j:jelly>

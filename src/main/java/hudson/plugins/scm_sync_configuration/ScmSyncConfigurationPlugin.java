@@ -1,9 +1,9 @@
 package hudson.plugins.scm_sync_configuration;
 
 import hudson.Plugin;
+import hudson.model.Saveable;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
-import hudson.model.Saveable;
 import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
@@ -44,6 +44,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     // The [message] is a magic string that will be replaced with commit message
     // when commit occurs
     private String commitMessagePattern = "[message]";
+    private List<File> filesModifiedByLastReload;
 
 	public ScmSyncConfigurationPlugin(){
 		setBusiness(new ScmSyncConfigurationBusiness());
@@ -121,8 +122,14 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		}
 	}
 	
-	public List<File> reloadAllFilesFromScm() throws IOException, ScmException {
-		return business.reloadAllFilesFromScm(AVAILABLE_STRATEGIES);
+	public void doReloadAllFilesFromScm(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
+		try {
+			filesModifiedByLastReload = business.reloadAllFilesFromScm(AVAILABLE_STRATEGIES);
+			req.getView(this, "/hudson/plugins/scm_sync_configuration/reload.jelly").forward(req, res);
+		}
+		catch(ScmException e) {
+			throw new ServletException("Unable to reload SCM " + scm.getTitle() + ":" + getScmUrl(), e);
+		}
 	}
 	
 	public void doSubmitComment(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
@@ -247,6 +254,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		}
 	}
 	
+	public List<File> getFilesModifiedByLastReload() {
+		return filesModifiedByLastReload;
+	}
+
 	public boolean isDisplayStatus() {
 		return displayStatus;
 	}
