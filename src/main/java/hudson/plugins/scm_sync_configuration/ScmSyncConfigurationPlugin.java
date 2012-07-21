@@ -18,6 +18,7 @@ import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurat
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
@@ -36,6 +37,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 			new JenkinsConfigScmSyncStrategy()
 	};
 	
+    private static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationPlugin.class.getName());
+
 	private transient ScmSyncConfigurationBusiness business;
 	private String scmRepositoryUrl;
 	private SCM scm;
@@ -49,7 +52,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public ScmSyncConfigurationPlugin(){
 		setBusiness(new ScmSyncConfigurationBusiness());
 	}
-	
+
 	@Override
 	public void start() throws Exception {
 		super.start();
@@ -97,11 +100,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void configure(StaplerRequest req, JSONObject formData)
 			throws IOException, ServletException, FormException {
 		super.configure(req, formData);
-		
+
 		String scmType = req.getParameter("scm");
 		if(scmType != null){
-			this.noUserCommitMessage = formData.containsKey("noUserCommitMessage");
-			this.displayStatus = formData.containsKey("displayStatus");
+			this.noUserCommitMessage = formData.getBoolean("noUserCommitMessage");
+			this.displayStatus = formData.getBoolean("displayStatus");
             this.commitMessagePattern = req.getParameter("commitMessagePattern");
 			
 			this.scm = SCM.valueOf(scmType);

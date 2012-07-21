@@ -11,10 +11,24 @@
         </table>
     </f:entry>
     <f:entry title="${%Never bother me with commit messages}" help="${rootUrl}/plugin/scm-sync-configuration/help/noUserCommitMessage-help.html">
-        <f:checkbox name="noUserCommitMessage" checked="${it.noUserCommitMessage}" />
+        <j:choose>
+            <j:when test="${it.noUserCommitMessage}">
+                <f:checkbox name="noUserCommitMessage" checked="${it.noUserCommitMessage}" value="true" />
+            </j:when>
+            <j:otherwise>
+                <f:checkbox name="noUserCommitMessage" value="true" />
+            </j:otherwise>
+        </j:choose>
     </f:entry>
     <f:entry title="${%Display SCM Sync Status}" help="${rootUrl}/plugin/scm-sync-configuration/help/displayStatus-help.html">
-        <f:checkbox name="displayStatus" checked="${it.displayStatus}" />
+        <j:choose>
+            <j:when test="${it.displayStatus}">
+                <f:checkbox name="displayStatus" checked="${it.displayStatus}" value="true" />
+            </j:when>
+            <j:otherwise>
+                <f:checkbox name="displayStatus" value="true" />
+            </j:otherwise>
+        </j:choose>
     </f:entry>
     <f:entry title="${%Commit message pattern}" help="${rootUrl}/plugin/scm-sync-configuration/help/commitMessagePattern-help.html">
         <f:textbox name="commitMessagePattern" value="${it.commitMessagePattern}" />
