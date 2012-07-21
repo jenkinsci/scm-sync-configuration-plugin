@@ -191,9 +191,8 @@
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>r07</version>
-        <scope>test</scope>
-    </dependency>	
+        <version>12.0.1</version>
+    </dependency>
   </dependencies>
   
   <scm>
