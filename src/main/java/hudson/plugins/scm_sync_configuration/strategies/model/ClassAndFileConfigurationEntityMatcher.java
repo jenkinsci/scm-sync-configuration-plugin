@@ -9,7 +9,7 @@ public class ClassAndFileConfigurationEntityMatcher extends PatternsEntityMatche
 		
 	private Class<? extends Saveable> saveableClazz;
 	
-	public ClassAndFileConfigurationEntityMatcher(Class<? extends Saveable> clazz, Pattern [] patterns){
+	public ClassAndFileConfigurationEntityMatcher(Class<? extends Saveable> clazz, String[] patterns){
 		super(patterns);
 		this.saveableClazz = clazz;
 	}

@@ -21,27 +21,14 @@ public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
         add(new PageMatcher("^newView$", "form[name='createView']"));
     } };
     
-    private static final Pattern [] PATTERNS = new Pattern[]{
-    	Pattern.compile("^config\\.xml$"),
-    	Pattern.compile("^hudson[^\\/]+\\.xml$")
+    private static final String[] PATTERNS = new String[]{
+        "config.xml",
+        "hudson*.xml"
     };
     
 	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new PatternsEntityMatcher(PATTERNS);
 	
 	public JenkinsConfigScmSyncStrategy(){
 		super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
-	}
-	
-	public List<File> createInitializationSynchronizedFileset() {
-		return new ArrayList<File>(){{
-			File root = new File(Hudson.getInstance().getRootDir().getAbsolutePath());
-			for(String f : root.list()) {
-				for(Pattern pattern : PATTERNS) {
-					if (pattern.matcher(f).matches()) {
-						add(new File(root.getAbsolutePath()+File.separator+f));
-					}
-				}
-			}
-		}};
 	}
 }
