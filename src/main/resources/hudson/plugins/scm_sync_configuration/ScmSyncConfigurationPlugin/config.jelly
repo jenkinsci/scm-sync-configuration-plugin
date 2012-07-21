@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project">
 
   <f:section title="${%SCM Sync configuration}">
-    <f:entry title="${%SCM}">
+    <f:entry title="${%SCM}" help="${rootUrl}/plugin/scm-sync-configuration/help/scm-help.html">
         <table width="100%">
             <j:forEach var="scm" items="${it.scms}">
                 <f:radioBlock name="scm" value="${scm.id}" title="${scm.title}" checked="${it.isScmSelected(scm)}">
@@ -10,17 +10,17 @@
             </j:forEach>
         </table>
     </f:entry>
-    <f:entry title="${%Never bother me with commit messages}">
+    <f:entry title="${%Never bother me with commit messages}" help="${rootUrl}/plugin/scm-sync-configuration/help/noUserCommitMessage-help.html">
         <f:checkbox name="noUserCommitMessage" checked="${it.noUserCommitMessage}" />
     </f:entry>
-    <f:entry title="${%Display SCM Sync Status}">
+    <f:entry title="${%Display SCM Sync Status}" help="${rootUrl}/plugin/scm-sync-configuration/help/displayStatus-help.html">
         <f:checkbox name="displayStatus" checked="${it.displayStatus}" />
     </f:entry>
-    <f:entry title="${%Commit message pattern}">
+    <f:entry title="${%Commit message pattern}" help="${rootUrl}/plugin/scm-sync-configuration/help/commitMessagePattern-help.html">
         <f:textbox name="commitMessagePattern" value="${it.commitMessagePattern}" />
     </f:entry>
-    <f:entry title="${%Reload config from SCM}">
-    	<a href="${rootUrl}/plugin/scm-sync-configuration/reloadAllFilesFromScm" onClick="return confirm('WARNING : the Jenkins config will be reloaded from SCM.\nOnly file modifications are handled. File added or removed will not be handled !\n\nContinue ?')">Reload</a>
+    <f:entry title="${%Reload config from SCM}" help="${rootUrl}/plugin/scm-sync-configuration/help/reloadScmConfig-help.html">
+    	<a href="${rootUrl}/plugin/scm-sync-configuration/reloadAllFilesFromScm" onClick="return confirm('${%WARNING : the Jenkins config will be reloaded from SCM}.\n${%Only file modifications are handled}. ${%File added or removed will not be handled} !\n\n${%Continue} ?')">${%Reload}</a>
     </f:entry>
   </f:section>
   
