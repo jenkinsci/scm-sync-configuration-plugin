@@ -62,7 +62,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	private String scmRepositoryUrl;
 	private SCM scm;
 	private boolean noUserCommitMessage;
-	private boolean displayStatus;
+	private boolean displayStatus = true;
     // The [message] is a magic string that will be replaced with commit message
     // when commit occurs
     private String commitMessagePattern = "[message]";

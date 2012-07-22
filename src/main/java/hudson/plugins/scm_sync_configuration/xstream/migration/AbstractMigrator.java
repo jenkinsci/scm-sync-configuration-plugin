@@ -39,7 +39,7 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		String scmClassAttribute = null;
 		String scmContent = null;
 		boolean noUserCommitMessage = false;
-		boolean displayStatus = false;
+		boolean displayStatus = true;
         String commitMessagePattern = "[message]";
         List<String> manualIncludes = null;
 		
