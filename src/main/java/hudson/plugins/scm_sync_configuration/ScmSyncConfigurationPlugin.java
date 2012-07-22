@@ -104,6 +104,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		this.noUserCommitMessage = pojo.isNoUserCommitMessage();
 		this.displayStatus = pojo.isDisplayStatus();
         this.commitMessagePattern = pojo.getCommitMessagePattern();
+        this.manualSynchronizationIncludes = pojo.getManualSynchronizationIncludes();
 	}
 	
 	public void init() {
@@ -137,7 +138,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 			this.noUserCommitMessage = formData.getBoolean("noUserCommitMessage");
 			this.displayStatus = formData.getBoolean("displayStatus");
             this.commitMessagePattern = req.getParameter("commitMessagePattern");
-			
+
 			this.scm = SCM.valueOf(scmType);
 			String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
 			

@@ -2,6 +2,8 @@ package hudson.plugins.scm_sync_configuration.xstream.migration;
 
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 
+import java.util.List;
+
 public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 
 	private String scmRepositoryUrl;
@@ -9,6 +11,7 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 	private boolean noUserCommitMessage;
 	private boolean displayStatus;
     private String commitMessagePattern;
+    private List<String> manualSynchronizationIncludes;
 	
 	public String getScmRepositoryUrl() {
 		return scmRepositoryUrl;
@@ -41,5 +44,13 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 
     public void setCommitMessagePattern(String commitMessagePattern) {
         this.commitMessagePattern = commitMessagePattern;
+    }
+
+    public void setManualSynchronizationIncludes(List<String> _manualSynchronizationIncludes){
+        this.manualSynchronizationIncludes = _manualSynchronizationIncludes;
+    }
+
+    public List<String> getManualSynchronizationIncludes(){
+        return this.manualSynchronizationIncludes;
     }
 }
