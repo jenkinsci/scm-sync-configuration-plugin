@@ -1,16 +1,13 @@
 package hudson.plugins.scm_sync_configuration.strategies.impl;
 
-import hudson.model.Hudson;
 import hudson.model.Job;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.model.ClassAndFileConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 

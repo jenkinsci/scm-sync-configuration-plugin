@@ -1,10 +1,11 @@
 package hudson.plugins.scm_sync_configuration;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import hudson.Plugin;
-import hudson.model.*;
+import hudson.model.Saveable;
+import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
+import hudson.model.Hudson;
+import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.ScmSyncNoSCM;
@@ -32,8 +33,9 @@ import org.apache.maven.scm.ScmException;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.export.Exported;
-import org.kohsuke.stapler.export.ExportedBean;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 
 public class ScmSyncConfigurationPlugin extends Plugin{
 	

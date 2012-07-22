@@ -1,15 +1,12 @@
 package hudson.plugins.scm_sync_configuration.strategies.impl;
 
-import hudson.model.Hudson;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PatternsEntityMatcher;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 

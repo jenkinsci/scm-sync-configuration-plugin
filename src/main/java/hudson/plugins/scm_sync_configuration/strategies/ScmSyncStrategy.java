@@ -1,10 +1,9 @@
 package hudson.plugins.scm_sync_configuration.strategies;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
-
 import hudson.model.Saveable;
+
+import java.io.File;
+import java.util.List;
 
 public interface ScmSyncStrategy {
 
