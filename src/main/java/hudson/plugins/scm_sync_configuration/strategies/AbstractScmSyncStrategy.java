@@ -2,7 +2,6 @@ package hudson.plugins.scm_sync_configuration.strategies;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-import com.sun.istack.internal.Nullable;
 import hudson.model.Saveable;
 import hudson.model.Hudson;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
@@ -12,6 +11,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 
