@@ -183,27 +183,36 @@ public class ScmSyncConfigurationBusiness {
 		return scmManipulator != null && this.scmManipulator.scmConfigurationSettledUp(scmContext, false) && this.checkoutSucceeded;
 	}
 	
-	public List<File> reloadAllFilesFromScm(ScmSyncStrategy[] availableStrategies) throws IOException, ScmException {
+	public List<File> reloadAllFilesFromScm() throws IOException, ScmException {
 		this.scmManipulator.update(new File(getCheckoutScmDirectoryAbsolutePath()));
-		List<File> filesToSync = new ArrayList<File>();
-
-		for(ScmSyncStrategy strategy : availableStrategies){
-			filesToSync.addAll(strategy.createInitializationSynchronizedFileset());
-		}
-		
-		List<File> syncedFiles = new ArrayList<File>();
-		
-		for(File fileToSync : filesToSync){
-			String hudsonConfigPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(fileToSync);
-			File hudsonConfigTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+hudsonConfigPathRelativeToHudsonRoot);
-			if (hudsonConfigTranslatedInScm.exists()) {
-				if (!FileUtils.contentEquals(hudsonConfigTranslatedInScm, fileToSync)) {
-					FileUtils.copyFile(hudsonConfigTranslatedInScm, fileToSync);
-					syncedFiles.add(fileToSync);
+		return syncDirectories(new File(getCheckoutScmDirectoryAbsolutePath() + File.separator), "");
+	}
+	
+	private List<File> syncDirectories(File from, String relative) throws IOException {
+		List<File> l = new ArrayList<File>();
+		for(File f : from.listFiles()) {
+			String newRelative = relative + File.separator + f.getName();
+			File jenkinsFile = new File(Hudson.getInstance().getRootDir() + newRelative);
+			if (f.getName().equals(scmManipulator.getScmSpecificFilename())) {
+				// nothing to do
+			}
+			else if (f.isDirectory()) {
+				if (!jenkinsFile.exists()) {
+					FileUtils.copyDirectory(f, jenkinsFile, null, scmManipulator.getScmSpecificFilename());
+					l.add(jenkinsFile);
+				}
+				else {
+					l.addAll(syncDirectories(f, newRelative));
 				}
 			}
+			else {
+				if (!jenkinsFile.exists() || !FileUtils.contentEquals(f, jenkinsFile)) {
+					FileUtils.copyFile(f, jenkinsFile);
+					l.add(jenkinsFile);
+				}	
+			}
 		}
-		return syncedFiles;
+		return l;
 	}
 
 	private void signal(String operation, boolean result) {

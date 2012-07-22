@@ -289,17 +289,61 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		
 		final File configFile = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/config.xml");
 		FileUtils.fileAppend(configFile.getAbsolutePath(), "toto");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(configFile); }}, "external commit");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(configFile); }}, "external commit on config file");
+		
+		final File configJobFile = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/jobs/fakeJob/config.xml");
+		FileUtils.fileAppend(configJobFile.getAbsolutePath(), "titi");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(configJobFile); }}, "external commit on jonb file");
 		
 		verifyCurrentScmContentMatchesCurrentHudsonDir(false);
 		
 		// Reload config
-		List<File> syncedFiles = sscBusiness.reloadAllFilesFromScm(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
+		List<File> syncedFiles = sscBusiness.reloadAllFilesFromScm();
 		
 		verifyCurrentScmContentMatchesCurrentHudsonDir(true);
 		
-		assertThat(syncedFiles.size(), is(1));
-		assertThat(syncedFiles.get(0).getAbsolutePath(), is(getCurrentHudsonRootDirectory().getAbsolutePath() + "/config.xml"));
+		assertThat(syncedFiles.size(), is(2));
+		assertThat(syncedFiles.contains(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/config.xml")), is(true));
+		assertThat(syncedFiles.contains(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/jobs/fakeJob/config.xml")), is(true));
+		
+		assertStatusManagerIsOk();
+	}
+
+	@Test
+	public void shouldReloadAllFilesUpdateScmAndReloadAllFilesWithFileAdd() throws Throwable {
+		// Initializing the repository...
+		createSCMMock();
+		
+		// Synchronizing hudson config files
+		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		
+		// Let's checkout current scm view ... and commit something in it ...
+		SCMManipulator scmManipulator = createMockedScmManipulator();
+		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__tmpHierarchyForCommit");
+		scmManipulator.checkout(checkoutDirectoryForVerifications);
+		
+		verifyCurrentScmContentMatchesCurrentHudsonDir(true);
+		
+		final File addedFile = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/myConfigFile.xml");
+		FileUtils.fileWrite(addedFile.getAbsolutePath(), "toto");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(addedFile); }}, "external commit for add file");
+
+		String jobDir = checkoutDirectoryForVerifications.getAbsolutePath() + "/jobs/myJob";
+		FileUtils.mkdir(jobDir);
+		final File addedJobFile = new File(jobDir + "/config.xml");
+		FileUtils.fileWrite(addedJobFile.getAbsolutePath(), "titi");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(addedJobFile); }}, "external commit for add job file");
+
+		verifyCurrentScmContentMatchesCurrentHudsonDir(false);
+		
+		// Reload config
+		List<File> syncedFiles = sscBusiness.reloadAllFilesFromScm();
+		
+		verifyCurrentScmContentMatchesCurrentHudsonDir(true);
+		
+		assertThat(syncedFiles.size(), is(2));
+		assertThat(syncedFiles.contains(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/myConfigFile.xml")), is(true));
+		assertThat(syncedFiles.contains(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/jobs/myJob")), is(true));
 		
 		assertStatusManagerIsOk();
 	}

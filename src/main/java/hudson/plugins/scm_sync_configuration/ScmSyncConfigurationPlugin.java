@@ -127,7 +127,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	
 	public void doReloadAllFilesFromScm(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
 		try {
-			filesModifiedByLastReload = business.reloadAllFilesFromScm(AVAILABLE_STRATEGIES);
+			filesModifiedByLastReload = business.reloadAllFilesFromScm();
 			req.getView(this, "/hudson/plugins/scm_sync_configuration/reload.jelly").forward(req, res);
 		}
 		catch(ScmException e) {

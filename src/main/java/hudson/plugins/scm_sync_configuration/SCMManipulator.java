@@ -19,6 +19,7 @@ import org.apache.maven.scm.command.checkin.CheckInScmResult;
 import org.apache.maven.scm.command.checkout.CheckOutScmResult;
 import org.apache.maven.scm.command.remove.RemoveScmResult;
 import org.apache.maven.scm.command.update.UpdateScmResult;
+import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.repository.ScmRepository;
 
@@ -33,8 +34,9 @@ public class SCMManipulator {
 
 	private ScmManager scmManager;
 	private ScmRepository scmRepository = null;
+	private String scmSpecificFilename = null;
 
-	public SCMManipulator(ScmManager _scmManager){
+	public SCMManipulator(ScmManager _scmManager) {
 		this.scmManager = _scmManager;
 	}
 	
@@ -54,6 +56,14 @@ public class SCMManipulator {
 		if(resetScmRepository){
 			LOGGER.info("Creating scmRepository connection data ..");
 			this.scmRepository = scm.getConfiguredRepository(this.scmManager, scmRepositoryUrl);
+			try {
+				this.scmSpecificFilename = this.scmManager.getProviderByRepository(this.scmRepository).getScmSpecificFilename();
+			}
+			catch(NoSuchScmProviderException e) {
+				LOGGER.throwing(ScmManager.class.getName(), "getScmSpecificFilename", e);
+				LOGGER.severe("[getScmSpecificFilename] Error while getScmSpecificFilename : "+e.getMessage());
+				return false;
+			}
 		}
 		
 		return expectScmRepositoryInitiated();
@@ -172,7 +182,7 @@ public class SCMManipulator {
 		File oldDir = new File(scmRoot.getAbsoluteFile()+File.separator+oldDirPathRelativeToScmRoot);
 		
 		try {
-			final String filter = scmManager.getProviderByRepository(scmRepository).getScmSpecificFilename();
+			final String filter = getScmSpecificFilename();
 			try {
 				FileUtils.copyDirectory(oldDir, newDir, new FileFilter() {
 					public boolean accept(File pathname) {
@@ -295,6 +305,10 @@ public class SCMManipulator {
 		}
 		
 		return checkinOk;
+	}
+	
+	public String getScmSpecificFilename() {
+		return scmSpecificFilename;
 	}
 	
 }
