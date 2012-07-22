@@ -133,28 +133,31 @@ public class ScmSyncConfigurationPlugin extends Plugin{
             this.manualSynchronizationIncludes = new ArrayList<String>();
         }
 
+        this.noUserCommitMessage = formData.getBoolean("noUserCommitMessage");
+        this.displayStatus = formData.getBoolean("displayStatus");
+        this.commitMessagePattern = req.getParameter("commitMessagePattern");
+
+        String oldScmRepositoryUrl = this.scmRepositoryUrl;
+        String newScmRepositoryUrl = null;
 		String scmType = req.getParameter("scm");
 		if(scmType != null){
-			this.noUserCommitMessage = formData.getBoolean("noUserCommitMessage");
-			this.displayStatus = formData.getBoolean("displayStatus");
-            this.commitMessagePattern = req.getParameter("commitMessagePattern");
-
 			this.scm = SCM.valueOf(scmType);
-			String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
+			newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
 			
-			String oldScmRepositoryUrl = this.scmRepositoryUrl;
 			this.scmRepositoryUrl = newScmRepositoryUrl;
-			this.save();
+        }
+
+        // Persisting plugin data
+		this.save();
 			
-			// If something changed, let's reinitialize repository in working directory !
-			if(newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(oldScmRepositoryUrl)){
-				this.business.initializeRepository(createScmContext(), true);
-				this.business.synchronizeAllConfigs(createScmContext(), AVAILABLE_STRATEGIES, getCurrentUser());
-			} else if(newScmRepositoryUrl==null && oldScmRepositoryUrl!=null){
-				// Cleaning checkouted repository
-				this.business.cleanChekoutScmDirectory();
-			}
-		}
+        // If something changed, let's reinitialize repository in working directory !
+        if(newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(oldScmRepositoryUrl)){
+            this.business.initializeRepository(createScmContext(), true);
+            this.business.synchronizeAllConfigs(createScmContext(), AVAILABLE_STRATEGIES, getCurrentUser());
+        } else if(newScmRepositoryUrl==null && oldScmRepositoryUrl!=null){
+            // Cleaning checkouted repository
+            this.business.cleanChekoutScmDirectory();
+        }
 	}
 	
 	public void doReloadAllFilesFromScm(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
