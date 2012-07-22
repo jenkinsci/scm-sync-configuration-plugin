@@ -20,7 +20,8 @@ public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
     
     private static final String[] PATTERNS = new String[]{
         "config.xml",
-        "hudson*.xml"
+        "hudson*.xml",
+        "scm-sync-configuration.xml"
     };
     
 	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new PatternsEntityMatcher(PATTERNS);
