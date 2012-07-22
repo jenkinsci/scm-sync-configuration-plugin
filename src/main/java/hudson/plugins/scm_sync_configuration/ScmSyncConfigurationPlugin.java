@@ -126,38 +126,58 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 			throws IOException, ServletException, FormException {
 		super.configure(req, formData);
 
-        // TODO: Detect new includes and synchronize files corresponding to them !!!
-        if(req.getParameterValues("manualSynchronizationIncludes") != null){
-            this.manualSynchronizationIncludes = new ArrayList<String>(Arrays.asList(req.getParameterValues("manualSynchronizationIncludes")));
-        } else {
-            this.manualSynchronizationIncludes = new ArrayList<String>();
-        }
+        boolean repoInitializationRequired = false;
+        boolean configsResynchronizationRequired = false;
+        boolean repoCleaningRequired = false;
 
         this.noUserCommitMessage = formData.getBoolean("noUserCommitMessage");
         this.displayStatus = formData.getBoolean("displayStatus");
         this.commitMessagePattern = req.getParameter("commitMessagePattern");
 
         String oldScmRepositoryUrl = this.scmRepositoryUrl;
-        String newScmRepositoryUrl = null;
 		String scmType = req.getParameter("scm");
 		if(scmType != null){
 			this.scm = SCM.valueOf(scmType);
-			newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
+			String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
 			
 			this.scmRepositoryUrl = newScmRepositoryUrl;
+
+            // If something changed, let's reinitialize repository in working directory !
+            repoInitializationRequired = newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(oldScmRepositoryUrl);
+            configsResynchronizationRequired = repoInitializationRequired;
+            repoCleaningRequired = newScmRepositoryUrl==null && oldScmRepositoryUrl!=null;
         }
 
-        // Persisting plugin data
-		this.save();
-			
-        // If something changed, let's reinitialize repository in working directory !
-        if(newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(oldScmRepositoryUrl)){
+        if(req.getParameterValues("manualSynchronizationIncludes") != null){
+            List<String> submittedManualIncludes = new ArrayList<String>(Arrays.asList(req.getParameterValues("manualSynchronizationIncludes")));
+            List<String> newManualIncludes = new ArrayList<String>(submittedManualIncludes);
+            if(this.manualSynchronizationIncludes != null){
+                newManualIncludes.removeAll(this.manualSynchronizationIncludes);
+            }
+            this.manualSynchronizationIncludes = submittedManualIncludes;
+
+            configsResynchronizationRequired = !newManualIncludes.isEmpty();
+        } else {
+            this.manualSynchronizationIncludes = new ArrayList<String>();
+        }
+
+        // Repo initialization should be made _before_ plugin save, in order to let scm-sync-configuration.xml
+        // file synchronizable
+        if(repoInitializationRequired){
             this.business.initializeRepository(createScmContext(), true);
+        }
+        if(configsResynchronizationRequired){
             this.business.synchronizeAllConfigs(createScmContext(), AVAILABLE_STRATEGIES, getCurrentUser());
-        } else if(newScmRepositoryUrl==null && oldScmRepositoryUrl!=null){
+        }
+        if(repoCleaningRequired){
             // Cleaning checkouted repository
             this.business.cleanChekoutScmDirectory();
         }
+
+        // Persisting plugin data
+        // Note that save() is made _after_ the synchronizeAllConfigs() because, otherwise, scm-sync-configuration.xml
+        // file would be commited _before_ every other jenkins configuration file, which doesn't seem "natural"
+		this.save();
 	}
 	
 	public void doReloadAllFilesFromScm(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
