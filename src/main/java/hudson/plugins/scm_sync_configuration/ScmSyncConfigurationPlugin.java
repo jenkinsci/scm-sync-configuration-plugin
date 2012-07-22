@@ -69,7 +69,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
 	public ScmSyncConfigurationPlugin(){
 		setBusiness(new ScmSyncConfigurationBusiness());
-        manualSynchronizationIncludes = new ArrayList<String>();
 	}
 
     public List<String> getManualSynchronizationIncludes(){
@@ -124,8 +123,12 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 			throws IOException, ServletException, FormException {
 		super.configure(req, formData);
 
-        // TODO: Detect new includes and synchronize files corresponding to them
-        this.manualSynchronizationIncludes = new ArrayList<String>(Arrays.asList(req.getParameterValues("manualSynchronizationIncludes")));
+        // TODO: Detect new includes and synchronize files corresponding to them !!!
+        if(req.getParameterValues("manualSynchronizationIncludes") != null){
+            this.manualSynchronizationIncludes = new ArrayList<String>(Arrays.asList(req.getParameterValues("manualSynchronizationIncludes")));
+        } else {
+            this.manualSynchronizationIncludes = new ArrayList<String>();
+        }
 
 		String scmType = req.getParameter("scm");
 		if(scmType != null){
