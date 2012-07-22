@@ -40,6 +40,10 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
 		return false;
 	}
 
+    public List<String> getIncludes(){
+        return Arrays.asList(patterns);
+    }
+
     public String[] matchingFilesFrom(File rootDirectory) {
         DirectoryScanner scanner = new DirectoryScanner();
         scanner.setIncludes(patterns);

@@ -8,4 +8,5 @@ import java.util.List;
 public interface ConfigurationEntityMatcher {
 	public boolean matches(Saveable saveable, File file);
     public String[] matchingFilesFrom(File rootDirectory);
+    List<String> getIncludes();
 }

@@ -1,25 +1,28 @@
 package hudson.plugins.scm_sync_configuration;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import hudson.Plugin;
-import hudson.model.Saveable;
-import hudson.model.Descriptor;
+import hudson.model.*;
 import hudson.model.Descriptor.FormException;
-import hudson.model.Hudson;
-import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.ScmSyncNoSCM;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JenkinsConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
+import hudson.plugins.scm_sync_configuration.strategies.impl.ManualIncludesScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.xstream.ScmSyncConfigurationXStreamConverter;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.annotation.Nullable;
 import javax.servlet.ServletException;
 
 import net.sf.json.JSONObject;
@@ -29,13 +32,27 @@ import org.apache.maven.scm.ScmException;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 public class ScmSyncConfigurationPlugin extends Plugin{
 	
 	public static final transient ScmSyncStrategy[] AVAILABLE_STRATEGIES = new ScmSyncStrategy[]{
 			new JobConfigScmSyncStrategy(),
-			new JenkinsConfigScmSyncStrategy()
+			new JenkinsConfigScmSyncStrategy(),
+            new ManualIncludesScmSyncStrategy()
 	};
+
+    /**
+     * Strategies that cannot be updated by user
+     */
+    public static final transient List<ScmSyncStrategy> DEFAULT_STRATEGIES = new ArrayList<ScmSyncStrategy>(){{
+        addAll(Collections2.filter(Arrays.asList(AVAILABLE_STRATEGIES), new Predicate<ScmSyncStrategy>() {
+            public boolean apply(@Nullable ScmSyncStrategy scmSyncStrategy) {
+                return !( scmSyncStrategy instanceof ManualIncludesScmSyncStrategy );
+            }
+        }));
+    }};
 	
     private static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationPlugin.class.getName());
 
@@ -48,10 +65,16 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     // when commit occurs
     private String commitMessagePattern = "[message]";
     private List<File> filesModifiedByLastReload;
+    private List<String> manualSynchronizationIncludes;
 
 	public ScmSyncConfigurationPlugin(){
 		setBusiness(new ScmSyncConfigurationBusiness());
+        manualSynchronizationIncludes = new ArrayList<String>();
 	}
+
+    public List<String> getManualSynchronizationIncludes(){
+        return manualSynchronizationIncludes;
+    }
 
 	@Override
 	public void start() throws Exception {
@@ -101,6 +124,9 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 			throws IOException, ServletException, FormException {
 		super.configure(req, formData);
 
+        // TODO: Detect new includes and synchronize files corresponding to them
+        this.manualSynchronizationIncludes = new ArrayList<String>(Arrays.asList(req.getParameterValues("manualSynchronizationIncludes")));
+
 		String scmType = req.getParameter("scm");
 		if(scmType != null){
 			this.noUserCommitMessage = formData.getBoolean("noUserCommitMessage");
@@ -148,7 +174,21 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void doHelpForRepositoryUrl(StaplerRequest req, StaplerResponse res) throws ServletException, IOException{
     	req.getView(this, SCM.valueOf(req.getParameter("scm")).getRepositoryUrlHelpPath()).forward(req, res);
 	}
-	
+
+    // Help url for manualSynchronizationIncludes field is a jelly script and not a html file
+    // because we need default includes list to be displayed in it !
+    public void doManualIncludesHelp(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
+        req.getView(this, "/hudson/plugins/scm_sync_configuration/ScmSyncConfigurationPlugin/help/manualSynchronizationIncludes.jelly").forward(req, res);
+    }
+
+    public List<String> getDefaultIncludes(){
+        List<String> includes = new ArrayList<String>();
+        for(ScmSyncStrategy strategy : DEFAULT_STRATEGIES){
+            includes.addAll(strategy.getSyncIncludes());
+        }
+        return includes;
+    }
+
 	public void deleteHierarchy(File rootHierarchy){
 		this.business.deleteHierarchy(createScmContext(), rootHierarchy, getCurrentUser());
 	}

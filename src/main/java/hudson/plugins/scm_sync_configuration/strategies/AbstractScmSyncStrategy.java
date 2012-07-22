@@ -28,9 +28,13 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 		this.configEntityMatcher = _configEntityMatcher;
 		this.pageMatchers = _pageMatchers;
 	}
+
+    protected ConfigurationEntityMatcher createConfigEntityMatcher(){
+        return configEntityMatcher;
+    }
 	
 	public boolean isSaveableApplicable(Saveable saveable, File file) {
-		return configEntityMatcher.matches(saveable, file);
+		return createConfigEntityMatcher().matches(saveable, file);
 	}
 
 	public PageMatcher getPageMatcherMatching(String url){
@@ -51,7 +55,7 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 
     public List<File> createInitializationSynchronizedFileset() {
         File hudsonRoot = Hudson.getInstance().getRootDir();
-        String[] matchingFilePaths = configEntityMatcher.matchingFilesFrom(hudsonRoot);
+        String[] matchingFilePaths = createConfigEntityMatcher().matchingFilesFrom(hudsonRoot);
         return new ArrayList(Collections2.transform(Arrays.asList(matchingFilePaths), PATH_TO_FILE_IN_HUDSON));
     }
 
@@ -59,4 +63,7 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 		return getPageMatcherMatching(url)!=null;
 	}
 
+    public List<String> getSyncIncludes(){
+        return createConfigEntityMatcher().getIncludes();
+    }
 }
