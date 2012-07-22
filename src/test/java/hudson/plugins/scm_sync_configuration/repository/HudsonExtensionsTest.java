@@ -326,13 +326,16 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		
 		final File addedFile = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/myConfigFile.xml");
 		FileUtils.fileWrite(addedFile.getAbsolutePath(), "toto");
+		scmManipulator.addFile(checkoutDirectoryForVerifications, "/myConfigFile.xml");
 		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(addedFile); }}, "external commit for add file");
 
-		String jobDir = checkoutDirectoryForVerifications.getAbsolutePath() + "/jobs/myJob";
+		final String jobDir = checkoutDirectoryForVerifications.getAbsolutePath() + "/jobs/myJob";
 		FileUtils.mkdir(jobDir);
 		final File addedJobFile = new File(jobDir + "/config.xml");
 		FileUtils.fileWrite(addedJobFile.getAbsolutePath(), "titi");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(addedJobFile); }}, "external commit for add job file");
+		scmManipulator.addFile(checkoutDirectoryForVerifications, "/jobs/myJob");
+		scmManipulator.addFile(checkoutDirectoryForVerifications, "/jobs/myJob/config.xml");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(addedJobFile); add(new File(jobDir)); }}, "external commit for add job file");
 
 		verifyCurrentScmContentMatchesCurrentHudsonDir(false);
 		

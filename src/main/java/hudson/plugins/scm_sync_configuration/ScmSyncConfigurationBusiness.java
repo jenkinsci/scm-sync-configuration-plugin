@@ -6,16 +6,18 @@ import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.codehaus.plexus.util.FileUtils;
+//import org.codehaus.plexus.util.FileUtils;
 
 
 public class ScmSyncConfigurationBusiness {
@@ -198,7 +200,13 @@ public class ScmSyncConfigurationBusiness {
 			}
 			else if (f.isDirectory()) {
 				if (!jenkinsFile.exists()) {
-					FileUtils.copyDirectory(f, jenkinsFile, null, scmManipulator.getScmSpecificFilename());
+					FileUtils.copyDirectory(f, jenkinsFile, new FileFilter() {
+						
+						public boolean accept(File f) {
+							return !f.getName().equals(scmManipulator.getScmSpecificFilename());
+						}
+						
+					});
 					l.add(jenkinsFile);
 				}
 				else {
