@@ -30,6 +30,7 @@ import net.sf.json.JSONObject;
 
 import org.acegisecurity.AccessDeniedException;
 import org.apache.maven.scm.ScmException;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -210,6 +211,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         req.getView(this, "/hudson/plugins/scm_sync_configuration/ScmSyncConfigurationPlugin/help/manualSynchronizationIncludes.jelly").forward(req, res);
     }
 
+    public void doSynchronizeFile(@QueryParameter String path){
+        File fileToSync = JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(path);
+        this.synchronizeFile(fileToSync);
+    }
+
     public List<String> getDefaultIncludes(){
         List<String> includes = new ArrayList<String>();
         for(ScmSyncStrategy strategy : DEFAULT_STRATEGIES){
@@ -225,7 +231,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void renameHierarchy(File oldDir, File newDir){
 		this.business.renameHierarchy(createScmContext(), oldDir, newDir, getCurrentUser());
 	}
-	
+
 	public void synchronizeFile(File modifiedFile){
 		this.business.synchronizeFile(createScmContext(), modifiedFile, getCurrentComment(), getCurrentUser());
 	}

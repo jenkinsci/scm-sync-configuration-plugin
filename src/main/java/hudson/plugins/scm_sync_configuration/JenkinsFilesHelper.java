@@ -14,4 +14,9 @@ public class JenkinsFilesHelper {
 		String truncatedPath = file.getAbsolutePath().substring(hudsonRoot.getAbsolutePath().length()+1); // "+1" because we don't need ending file separator
 		return truncatedPath.replaceAll("\\\\", "/"); 
 	}
+
+    public static File buildFileFromPathRelativeToHudsonRoot(String pathRelativeToHudsonRoot){
+        File hudsonRoot = Hudson.getInstance().getRootDir();
+        return new File(hudsonRoot.getAbsolutePath()+File.separator+pathRelativeToHudsonRoot);
+    }
 }
