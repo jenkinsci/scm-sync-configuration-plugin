@@ -40,7 +40,7 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 	}
 
 	public PageMatcher getPageMatcherMatching(String url){
-		String rootUrl = Hudson.getInstance().getRootUrl();
+		String rootUrl = Hudson.getInstance().getRootUrlFromRequest();
 		String cleanedUrl = null;
 		if(url.startsWith(rootUrl)){
 			cleanedUrl = url.substring(rootUrl.length());
