@@ -232,21 +232,27 @@ public class ScmSyncConfigurationBusiness {
 		}
 	}
 	
-	private static String createCommitMessage(ScmContext context, String messagePrefix, User user, String comment){
-		StringBuilder commitMessage = new StringBuilder();
-		commitMessage.append(messagePrefix);
+	private static String createCommitMessage(ScmContext context, String technicalMessage, User user, String comment){
+		StringBuilder messageBuilder = new StringBuilder();
+		messageBuilder.append(technicalMessage);
 		if(user != null){
-			commitMessage.append(" by ").append(user.getId());
+			messageBuilder.append(" by ").append(user.getId());
 		}
 		if(comment != null){
-			commitMessage.append(" with following comment : ").append(comment);
+			messageBuilder.append(" with following comment : ").append(comment);
 		}
-		String message = commitMessage.toString();
+		String message = messageBuilder.toString();
 
         if(context.getCommitMessagePattern() == null || "".equals(context.getCommitMessagePattern())){
             return message;
         } else {
-            return context.getCommitMessagePattern().replaceAll("\\[message\\]", message);
+            String returnString = context.getCommitMessagePattern().replaceAll("\\[message\\]", message);
+            returnString = returnString.replaceAll("\\[commitMessage\\]", comment);
+            returnString = returnString.replaceAll("\\[technicalMessage\\]", technicalMessage);
+            if(user != null) {
+                returnString = returnString.replaceAll("\\[user\\]", user.getId());
+            }
+            return returnString;
         }
 	}
 	
