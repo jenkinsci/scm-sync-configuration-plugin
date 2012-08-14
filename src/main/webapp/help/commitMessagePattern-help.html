@@ -5,17 +5,21 @@
     You can use following "special" strings in the pattern :
     <ul>
         <li>`[message]` : Will be replaced by the generated commit message</li>
-        <li>`[comment]` : Will replace the commit message with your comment as is (i.e not the generated parts of the message)</li>
+        <li>`[commitMessage]` : Will be replaced by the the comment you specified</li>
+        <li>`[technicalMessage] : Will be replaced by the the technical details of the current commit`</li>
+        <li>`[user] : Will be replaced by your Jenkins username`</li>
     </ul>
-    <br/><br/>
+    <br/>
+    <br/>
     Example for using `[message]`:
     Writing a commit message of "Synchronization init" and defining a commit message pattern of "ISSUE-1234: [message]" <br/>
     will make following commit message :<br/>
     ISSUE-1234: Modification on file with following comment : Synchronization init
     <br/>
-    Example for using `[comment]`:
-    Making a commit comment of "Synchronization init" and defining a commit message pattern of "ISSUE-1234: [comment]" <br/> 
-    will make following commit message :<br/>
-    ISSUE-1234: Synchronization init
+    <br/>
+    If you need finer grained control the message above is equivalent to using a message pattern of:<br/>
+    ISSUE-1234 [technicalMessage] by [user] with following comment: [commitMessage]
+    <br/>
+    
     
 </div>
