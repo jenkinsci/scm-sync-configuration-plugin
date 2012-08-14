@@ -5,8 +5,17 @@
     You can use following "special" strings in the pattern :
     <ul>
         <li>`[message]` : Will be replaced by the generated commit message</li>
+        <li>`[comment]` : Will replace the commit message with your comment as is (i.e not the generated parts of the message)</li>
     </ul>
     <br/><br/>
-    For instance, defining a commit message pattern of "ISSUE-1234: [message]" will make following commit message :<br/>
+    Example for using `[message]`:
+    Writing a commit message of "Synchronization init" and defining a commit message pattern of "ISSUE-1234: [message]" <br/>
+    will make following commit message :<br/>
     ISSUE-1234: Modification on file with following comment : Synchronization init
+    <br/>
+    Example for using `[comment]`:
+    Making a commit comment of "Synchronization init" and defining a commit message pattern of "ISSUE-1234: [comment]" <br/> 
+    will make following commit message :<br/>
+    ISSUE-1234: Synchronization init
+    
 </div>

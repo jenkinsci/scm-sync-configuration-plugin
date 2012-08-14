@@ -246,7 +246,9 @@ public class ScmSyncConfigurationBusiness {
         if(context.getCommitMessagePattern() == null || "".equals(context.getCommitMessagePattern())){
             return message;
         } else {
-            return context.getCommitMessagePattern().replaceAll("\\[message\\]", message);
+            String returnString = context.getCommitMessagePattern().replaceAll("\\[message\\]", message);
+            returnString = context.getCommitMessagePattern().replaceAll("\\[comment\\]", comment);
+            return returnString;
         }
 	}
 	
