@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.kohsuke.stapler.StaplerRequest;
+import javax.servlet.http.HttpServletRequest;
 
 public class ScmSyncConfigurationDataProvider {
 
 	private static final String COMMENT_SESSION_KEY = "__commitMessage";
 	private static final String BOTHER_TIMEOUTS_SESSION_KEY = "__botherTimeouts"; 
 	
-	public static void provideBotherTimeout(StaplerRequest request, String type, int timeoutMinutesFromNow, String currentUrl){
+	public static void provideBotherTimeout(HttpServletRequest request, String type, int timeoutMinutesFromNow, String currentUrl){
 		// FIXME: see if it wouldn't be possible to replace "currentURL" by "current file path"
 		// in order to be able to target same files with different urls (jobs via views for example)
 		
@@ -45,7 +45,7 @@ public class ScmSyncConfigurationDataProvider {
 		request.getSession().setAttribute(BOTHER_TIMEOUTS_SESSION_KEY, botherTimeouts);
 	}
 	
-	public static Date retrieveBotherTimeoutMatchingUrl(StaplerRequest request, String currentURL){
+	public static Date retrieveBotherTimeoutMatchingUrl(HttpServletRequest request, String currentURL){
 		Map<BotherTimeout, Date> botherTimeouts = retrievePurgedBotherTimeouts(request);
 		Date timeoutMatchingUrl = null;
 		if(botherTimeouts != null){
@@ -59,7 +59,7 @@ public class ScmSyncConfigurationDataProvider {
 		return timeoutMatchingUrl;
 	}
 	
-	protected static Map<BotherTimeout, Date> retrievePurgedBotherTimeouts(StaplerRequest request){
+	protected static Map<BotherTimeout, Date> retrievePurgedBotherTimeouts(HttpServletRequest request){
 		Map<BotherTimeout, Date> botherTimeouts = (Map<BotherTimeout, Date>)retrieveObject(request, BOTHER_TIMEOUTS_SESSION_KEY, false);
 		if(botherTimeouts != null){
 			purgeOutdatedBotherTimeouts(botherTimeouts);
@@ -78,15 +78,15 @@ public class ScmSyncConfigurationDataProvider {
 		botherTimeouts.entrySet().removeAll(entriesToDelete);
 	}
 	
-	public static void provideComment(StaplerRequest request, String comment){
+	public static void provideComment(HttpServletRequest request, String comment){
 		request.getSession().setAttribute(COMMENT_SESSION_KEY, comment);
 	}
 	
-	public static String retrieveComment(StaplerRequest request, boolean cleanComment){
+	public static String retrieveComment(HttpServletRequest request, boolean cleanComment){
 		return (String)retrieveObject(request, COMMENT_SESSION_KEY, cleanComment);
 	}
 	
-	private static Object retrieveObject(StaplerRequest request, String key, boolean cleanObject){
+	private static Object retrieveObject(HttpServletRequest request, String key, boolean cleanObject){
 		Object obj = request.getSession().getAttribute(key);
 		if(cleanObject){
 			request.getSession().removeAttribute(key);
