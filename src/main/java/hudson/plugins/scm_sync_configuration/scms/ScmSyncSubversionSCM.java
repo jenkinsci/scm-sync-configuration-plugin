@@ -120,19 +120,25 @@ public class ScmSyncSubversionSCM extends SCM {
 	 * Ugly method to convert a SVN authentication into a SCMCredentialConfiguration
 	 */
 	public SCMCredentialConfiguration createSCMCredentialConfiguration(SVNAuthentication auth){
+        SCMCredentialConfiguration credentials = null;
 		if(auth instanceof SVNPasswordAuthentication){
 			SVNPasswordAuthentication passAuth = (SVNPasswordAuthentication)auth;
-			return new SCMCredentialConfiguration(passAuth.getUserName(), passAuth.getPassword());
+			credentials = new SCMCredentialConfiguration(passAuth.getUserName(), passAuth.getPassword());
 		} else if(auth instanceof SVNSSHAuthentication){
 			SVNSSHAuthentication sshAuth = (SVNSSHAuthentication)auth;
-			return new SCMCredentialConfiguration(sshAuth.getUserName(), sshAuth.getPassword(), sshAuth.getPassphrase(), sshAuth.getPrivateKey());
+			credentials = new SCMCredentialConfiguration(sshAuth.getUserName(), sshAuth.getPassword(), sshAuth.getPassphrase(), sshAuth.getPrivateKey());
 		} else if(auth instanceof SVNSSLAuthentication){
 			SVNSSLAuthentication sslAuth = (SVNSSLAuthentication)auth;
-			return new SCMCredentialConfiguration(sslAuth.getUserName(), sslAuth.getPassword());
+			credentials = new SCMCredentialConfiguration(sslAuth.getUserName(), sslAuth.getPassword());
 		} else if(auth instanceof SVNUserNameAuthentication){
 			SVNUserNameAuthentication unameAuth = (SVNUserNameAuthentication)auth;
-			return new SCMCredentialConfiguration(unameAuth.getUserName());
+			credentials = new SCMCredentialConfiguration(unameAuth.getUserName());
 		}
-		return null;
+
+        if(credentials != null){
+            LOGGER.info("Created SCM Credentials for user "+credentials.getUsername()+"...");
+        }
+
+		return credentials;
 	}
 }
