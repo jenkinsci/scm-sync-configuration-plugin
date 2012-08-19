@@ -90,7 +90,7 @@ public class SCMManipulator {
 		try {
 			CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory));
 			if(!result.isSuccess()){
-				LOGGER.severe("[checkout] Error during checkout : "+result.getProviderMessage());
+				LOGGER.severe("[checkout] Error during checkout : "+result.getProviderMessage()+" || "+result.getCommandOutput());
 				return checkoutOk;
 			}
 			checkoutOk = true;
@@ -258,7 +258,9 @@ public class SCMManipulator {
 				// If current has not yet been synchronized, addResult.isSuccess() should be true
 				if(addResult.isSuccess()){
 					synchronizedFiles.add(currentFile);
-				}
+				} else {
+                    LOGGER.severe("Error while adding SCM file : "+addResult.getCommandOutput());
+                }
 			}
 		} catch (ScmException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "add", e);
