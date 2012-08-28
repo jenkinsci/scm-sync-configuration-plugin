@@ -1,12 +1,14 @@
 package hudson.plugins.scm_sync_configuration.extensions;
 
-import java.io.File;
-
 import hudson.Extension;
 import hudson.model.Item;
 import hudson.model.listeners.ItemListener;
+import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
+import hudson.plugins.scm_sync_configuration.model.ChangeSet;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
+
+import java.io.File;
 
 @Extension
 public class ScmSyncConfigurationItemListener extends ItemListener {
@@ -17,7 +19,10 @@ public class ScmSyncConfigurationItemListener extends ItemListener {
 		
 		// After every plugin is loaded, let's init ScmSyncConfigurationPlugin
 		// Init is needed after plugin loads since it relies on scm implementations plugins loaded
-		ScmSyncConfigurationPlugin.getInstance().init();
+        ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();
+        if(plugin != null){
+            plugin.init();
+        }
 	}
 	
 	@Override
@@ -25,11 +30,16 @@ public class ScmSyncConfigurationItemListener extends ItemListener {
 		super.onDeleted(item);
 		
 		ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();
-		ScmSyncStrategy strategy = plugin.getStrategyForSaveable(item, null);
-		
-		if(strategy != null){
-			plugin.deleteHierarchy(item.getRootDir());
-		}
+        if(plugin != null){
+            ScmSyncStrategy strategy = plugin.getStrategyForSaveable(item, null);
+
+            if(strategy != null){
+                String path = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(item.getRootDir());
+                plugin.getTransaction().defineCommitMessage("File hierarchy deleted", ChangeSet.MessageWeight.NORMAL);
+                plugin.getTransaction().registerPathForDeletion(path);
+                // plugin.deleteHierarchy(item.getRootDir());
+            }
+        }
 	}
 	
 	@Override
@@ -46,13 +56,20 @@ public class ScmSyncConfigurationItemListener extends ItemListener {
 	public void onRenamed(Item item, String oldName, String newName) {
 		super.onRenamed(item, oldName, newName);
 		ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();
-		ScmSyncStrategy strategy = plugin.getStrategyForSaveable(item, null);
-		
-		if(strategy != null){
-			File parentDir = item.getRootDir().getParentFile();
-			File oldDir = new File( parentDir.getAbsolutePath()+File.separator+oldName );
-			File newDir = new File( parentDir.getAbsolutePath()+File.separator+newName );
-			plugin.renameHierarchy(oldDir, newDir);
-		}
+        if(plugin != null){
+            ScmSyncStrategy strategy = plugin.getStrategyForSaveable(item, null);
+
+            if(strategy != null){
+                File parentDir = item.getRootDir().getParentFile();
+                File oldDir = new File( parentDir.getAbsolutePath()+File.separator+oldName );
+                File newDir = new File( parentDir.getAbsolutePath()+File.separator+newName );
+
+                String oldPath = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(oldDir);
+                String newPath = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(newDir);
+                plugin.getTransaction().defineCommitMessage("Item renamed", ChangeSet.MessageWeight.NORMAL);
+                plugin.getTransaction().registerRenamedPath(oldPath, newPath);
+                //plugin.renameHierarchy(oldDir, newDir);
+            }
+        }
 	}
 }

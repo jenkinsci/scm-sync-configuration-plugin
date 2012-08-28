@@ -8,6 +8,7 @@ import hudson.model.Descriptor.FormException;
 import hudson.model.Hudson;
 import hudson.model.Saveable;
 import hudson.model.User;
+import hudson.plugins.scm_sync_configuration.extensions.ScmSyncConfigurationFilter;
 import hudson.plugins.scm_sync_configuration.model.ChangeSet;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
@@ -21,6 +22,7 @@ import hudson.plugins.scm_sync_configuration.transactions.ScmTransaction;
 import hudson.plugins.scm_sync_configuration.transactions.ThreadedTransaction;
 import hudson.plugins.scm_sync_configuration.xstream.ScmSyncConfigurationXStreamConverter;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
+import hudson.util.PluginServletFilter;
 import net.sf.json.JSONObject;
 import org.acegisecurity.AccessDeniedException;
 import org.apache.maven.scm.ScmException;
@@ -79,6 +81,12 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
 	public ScmSyncConfigurationPlugin(){
 		setBusiness(new ScmSyncConfigurationBusiness());
+
+        try {
+            PluginServletFilter.addFilter(new ScmSyncConfigurationFilter());
+        } catch (ServletException e) {
+            throw new RuntimeException(e);
+        }
 	}
 
     public List<String> getManualSynchronizationIncludes(){
@@ -236,10 +244,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
 	public void renameHierarchy(File oldDir, File newDir){
 		this.business.renameHierarchy(createScmContext(), oldDir, newDir, getCurrentUser());
-	}
-
-	public void synchronizeFile(File modifiedFile){
-		this.business.synchronizeFile(createScmContext(), modifiedFile, ScmSyncConfigurationDataProvider.retrieveComment(false), getCurrentUser());
 	}
 
 	private User getCurrentUser(){
