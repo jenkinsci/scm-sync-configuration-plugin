@@ -37,7 +37,6 @@ public class ScmSyncConfigurationItemListener extends ItemListener {
                 String path = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(item.getRootDir());
                 plugin.getTransaction().defineCommitMessage("File hierarchy deleted", ChangeSet.MessageWeight.NORMAL);
                 plugin.getTransaction().registerPathForDeletion(path);
-                // plugin.deleteHierarchy(item.getRootDir());
             }
         }
 	}
@@ -68,7 +67,6 @@ public class ScmSyncConfigurationItemListener extends ItemListener {
                 String newPath = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(newDir);
                 plugin.getTransaction().defineCommitMessage("Item renamed", ChangeSet.MessageWeight.NORMAL);
                 plugin.getTransaction().registerRenamedPath(oldPath, newPath);
-                //plugin.renameHierarchy(oldDir, newDir);
             }
         }
 	}
