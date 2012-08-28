@@ -238,14 +238,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         return includes;
     }
 
-	public void deleteHierarchy(File rootHierarchy){
-		this.business.deleteHierarchy(createScmContext(), rootHierarchy, getCurrentUser());
-	}
-
-	public void renameHierarchy(File oldDir, File newDir){
-		this.business.renameHierarchy(createScmContext(), oldDir, newDir, getCurrentUser());
-	}
-
 	private User getCurrentUser(){
 		User user = null;
 		try {

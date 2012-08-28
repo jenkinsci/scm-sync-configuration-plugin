@@ -2,7 +2,6 @@ package hudson.plugins.scm_sync_configuration;
 
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFileSet;
 import org.apache.maven.scm.command.add.AddScmResult;
@@ -15,7 +14,6 @@ import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.repository.ScmRepository;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -152,70 +150,6 @@ public class SCMManipulator {
             return null;
         }
     }
-
-
-    public boolean renameHierarchy(File scmRoot, String oldDirPathRelativeToScmRoot, String newDirPathRelativeToScmRoot, String commitMessage){
-   		boolean renameOk = false;
-
-   		if(!expectScmRepositoryInitiated()){
-   			return renameOk;
-   		}
-
-   		LOGGER.fine("Renaming SCM hierarchy ["+oldDirPathRelativeToScmRoot+"] to ["+newDirPathRelativeToScmRoot+"] ...");
-   		File newDir = new File(scmRoot.getAbsoluteFile()+File.separator+newDirPathRelativeToScmRoot);
-   		File oldDir = new File(scmRoot.getAbsoluteFile()+File.separator+oldDirPathRelativeToScmRoot);
-
-   		try {
-   			final String filter = getScmSpecificFilename();
-   			try {
-   				FileUtils.copyDirectory(oldDir, newDir, new FileFilter() {
-                       public boolean accept(File pathname) {
-                           return !pathname.getName().equals(filter);
-                       }
-                   });
-   			}
-   			catch(IOException e) {
-   				LOGGER.severe("[renameHierarchy] Unable to copy ["+oldDirPathRelativeToScmRoot+"] to ["+newDirPathRelativeToScmRoot+"] :" + e.getMessage());;
-   				return renameOk;
-   			}
-   			ScmFileSet addFileset = new ScmFileSet(scmRoot, new File(newDirPathRelativeToScmRoot));
-   			AddScmResult addResult = this.scmManager.add(this.scmRepository, addFileset);
-   			if(!addResult.isSuccess()){
-   				LOGGER.severe("[renameHierarchy] Failed to add ["+newDirPathRelativeToScmRoot+"] : "+addResult.getProviderMessage());
-   				return renameOk;
-   			}
-   			ScmFileSet addFilesetWithIncludes = new ScmFileSet(scmRoot, newDirPathRelativeToScmRoot+"/**/*");
-   			addResult = this.scmManager.add(this.scmRepository, addFilesetWithIncludes);
-   			if(!addResult.isSuccess()){
-   				LOGGER.severe("[renameHierarchy] Failed to add ["+newDirPathRelativeToScmRoot+"/**/*] : "+addResult.getProviderMessage());
-   				return renameOk;
-   			}
-   			CheckInScmResult checkInResult = this.scmManager.checkIn(this.scmRepository, addFileset, commitMessage);
-   			if(!checkInResult.isSuccess()){
-   				LOGGER.severe("[renameHierarchy] Failed to checkin : "+checkInResult.getProviderMessage());
-   				return renameOk;
-   			}
-   			if(this.deleteHierarchy(oldDir) == null){
-   				LOGGER.severe("[renameHierarchy] Failed to deleteHierarchy ["+oldDir.getAbsolutePath()+"] !");
-   				return renameOk;
-   			}
-   			renameOk = true;
-   		} catch (ScmException e) {
-   			LOGGER.throwing(ScmManager.class.getName(), "add, export or remove", e);
-   			LOGGER.severe("[renameHierarchy] Error during add, export or remove : "+e.getMessage());
-   			return renameOk;
-   		} catch (IOException e) {
-   			LOGGER.throwing(ScmFileSet.class.getName(), "<init>", e);
-   			LOGGER.severe("[renameHierarchy] Error during scmFileSet creation : "+e.getMessage());
-   			return renameOk;
-   		}
-
-   		if(renameOk){
-   			LOGGER.fine("Renamed SCM hierarchy ["+oldDirPathRelativeToScmRoot+"] to ["+newDirPathRelativeToScmRoot+"] !");
-   		}
-
-   		return renameOk;
-   	}
 
 	public List<File> addFile(File scmRoot, String filePathRelativeToScmRoot){
 		List<File> synchronizedFiles = new ArrayList<File>();
