@@ -1,27 +1,24 @@
 package hudson.plugins.scm_sync_configuration;
 
 import hudson.plugins.scm_sync_configuration.model.BotherTimeout;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import org.kohsuke.stapler.Stapler;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
 
 public class ScmSyncConfigurationDataProvider {
 
+    private static final ThreadLocal<HttpServletRequest> CURRENT_REQUEST = new ThreadLocal<HttpServletRequest>();
 	private static final String COMMENT_SESSION_KEY = "__commitMessage";
 	private static final String BOTHER_TIMEOUTS_SESSION_KEY = "__botherTimeouts"; 
 	
-	public static void provideBotherTimeout(HttpServletRequest request, String type, int timeoutMinutesFromNow, String currentUrl){
+	public static void provideBotherTimeout(String type, int timeoutMinutesFromNow, String currentUrl){
 		// FIXME: see if it wouldn't be possible to replace "currentURL" by "current file path"
 		// in order to be able to target same files with different urls (jobs via views for example)
 		
-		Map<BotherTimeout, Date> botherTimeouts = retrievePurgedBotherTimeouts(request);
+		Map<BotherTimeout, Date> botherTimeouts = retrievePurgedBotherTimeouts();
 		if(botherTimeouts == null){
 			botherTimeouts = new HashMap<BotherTimeout, Date>();
 		}
@@ -42,11 +39,11 @@ public class ScmSyncConfigurationDataProvider {
 		botherTimeouts.put(bt, cal.getTime());
 		
 		// Updating session
-		request.getSession().setAttribute(BOTHER_TIMEOUTS_SESSION_KEY, botherTimeouts);
+		currentRequest().getSession().setAttribute(BOTHER_TIMEOUTS_SESSION_KEY, botherTimeouts);
 	}
 	
-	public static Date retrieveBotherTimeoutMatchingUrl(HttpServletRequest request, String currentURL){
-		Map<BotherTimeout, Date> botherTimeouts = retrievePurgedBotherTimeouts(request);
+	public static Date retrieveBotherTimeoutMatchingUrl(String currentURL){
+		Map<BotherTimeout, Date> botherTimeouts = retrievePurgedBotherTimeouts();
 		Date timeoutMatchingUrl = null;
 		if(botherTimeouts != null){
 			for(Entry<BotherTimeout, Date> entry : botherTimeouts.entrySet()){
@@ -59,8 +56,8 @@ public class ScmSyncConfigurationDataProvider {
 		return timeoutMatchingUrl;
 	}
 	
-	protected static Map<BotherTimeout, Date> retrievePurgedBotherTimeouts(HttpServletRequest request){
-		Map<BotherTimeout, Date> botherTimeouts = (Map<BotherTimeout, Date>)retrieveObject(request, BOTHER_TIMEOUTS_SESSION_KEY, false);
+	protected static Map<BotherTimeout, Date> retrievePurgedBotherTimeouts(){
+		Map<BotherTimeout, Date> botherTimeouts = (Map<BotherTimeout, Date>)retrieveObject(BOTHER_TIMEOUTS_SESSION_KEY, false);
 		if(botherTimeouts != null){
 			purgeOutdatedBotherTimeouts(botherTimeouts);
 		}
@@ -78,19 +75,42 @@ public class ScmSyncConfigurationDataProvider {
 		botherTimeouts.entrySet().removeAll(entriesToDelete);
 	}
 	
-	public static void provideComment(HttpServletRequest request, String comment){
-		request.getSession().setAttribute(COMMENT_SESSION_KEY, comment);
+	public static void provideComment(String comment){
+		currentRequest().getSession().setAttribute(COMMENT_SESSION_KEY, comment);
 	}
 	
-	public static String retrieveComment(HttpServletRequest request, boolean cleanComment){
-		return (String)retrieveObject(request, COMMENT_SESSION_KEY, cleanComment);
+	public static String retrieveComment(boolean cleanComment){
+		return (String)retrieveObject(COMMENT_SESSION_KEY, cleanComment);
 	}
 	
-	private static Object retrieveObject(HttpServletRequest request, String key, boolean cleanObject){
-		Object obj = request.getSession().getAttribute(key);
-		if(cleanObject){
-			request.getSession().removeAttribute(key);
-		}
+	private static Object retrieveObject(String key, boolean cleanObject){
+        HttpServletRequest request = currentRequest();
+        Object obj = null;
+   		// Sometimes, request can be null : when hudson starts for instance !
+        if(request != null){
+            obj = request.getSession().getAttribute(key);
+            if(cleanObject){
+                request.getSession().removeAttribute(key);
+            }
+        }
 		return obj;
 	}
+
+    public static void provideRequestDuring(HttpServletRequest request, Callable<Void> callable) throws Exception {
+        CURRENT_REQUEST.set(request);
+
+        try {
+            callable.call();
+        } finally {
+            CURRENT_REQUEST.set(null);
+        }
+    }
+
+    protected static HttpServletRequest currentRequest(){
+        if(Stapler.getCurrentRequest() == null){
+            return CURRENT_REQUEST.get();
+        } else {
+            return Stapler.getCurrentRequest();
+        }
+    }
 }

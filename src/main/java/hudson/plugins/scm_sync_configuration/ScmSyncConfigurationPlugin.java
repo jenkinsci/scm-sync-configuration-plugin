@@ -1,10 +1,12 @@
 package hudson.plugins.scm_sync_configuration;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import hudson.Plugin;
-import hudson.model.Saveable;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
 import hudson.model.Hudson;
+import hudson.model.Saveable;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
@@ -15,28 +17,21 @@ import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStr
 import hudson.plugins.scm_sync_configuration.strategies.impl.ManualIncludesScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.xstream.ScmSyncConfigurationXStreamConverter;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
+import net.sf.json.JSONObject;
+import org.acegisecurity.AccessDeniedException;
+import org.apache.maven.scm.ScmException;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
+import javax.annotation.Nullable;
+import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
-
-import javax.annotation.Nullable;
-import javax.servlet.ServletException;
-
-import net.sf.json.JSONObject;
-
-import org.acegisecurity.AccessDeniedException;
-import org.apache.maven.scm.ScmException;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 
 public class ScmSyncConfigurationPlugin extends Plugin{
 	
@@ -193,9 +188,9 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	
 	public void doSubmitComment(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
 		// TODO: complexify this in order to pass a strategy identifier in the session key
-		ScmSyncConfigurationDataProvider.provideComment(req, req.getParameter("comment"));
+		ScmSyncConfigurationDataProvider.provideComment(req.getParameter("comment"));
 		if(Boolean.valueOf(req.getParameter("dontBotherMe")).booleanValue()){
-			ScmSyncConfigurationDataProvider.provideBotherTimeout(req, req.getParameter("botherType"), 
+			ScmSyncConfigurationDataProvider.provideBotherTimeout(req.getParameter("botherType"),
 					Integer.valueOf(req.getParameter("botherTime")), req.getParameter("currentURL"));
 		}
 	}
@@ -233,19 +228,9 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	}
 
 	public void synchronizeFile(File modifiedFile){
-		this.business.synchronizeFile(createScmContext(), modifiedFile, getCurrentComment(), getCurrentUser());
+		this.business.synchronizeFile(createScmContext(), modifiedFile, ScmSyncConfigurationDataProvider.retrieveComment(false), getCurrentUser());
 	}
-	
-	private static String getCurrentComment(){
-		StaplerRequest req = Stapler.getCurrentRequest();
-		// Sometimes, request can be null : when hudson starts for example !
-		String comment = null;
-		if(req != null){
-			comment = ScmSyncConfigurationDataProvider.retrieveComment(req, false);
-		}
-		return comment;
-	}
-	
+
 	private User getCurrentUser(){
 		User user = null;
 		try {
@@ -274,14 +259,14 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	
 	public boolean shouldDecorationOccursOnURL(String url){
 		// Removing comment from session here...
-		ScmSyncConfigurationDataProvider.retrieveComment(Stapler.getCurrentRequest(), true);
+		ScmSyncConfigurationDataProvider.retrieveComment(true);
 		
 		// Displaying commit message popup is based on following tests :
 		// Zero : never ask for a commit message
 		// First : no botherTimeout should match with current url
 		// Second : a strategy should exist, matching current url
 		// Third : SCM Sync should be settled up
-		return !noUserCommitMessage && ScmSyncConfigurationDataProvider.retrieveBotherTimeoutMatchingUrl(Stapler.getCurrentRequest(), url) == null
+		return !noUserCommitMessage && ScmSyncConfigurationDataProvider.retrieveBotherTimeoutMatchingUrl(url) == null
                 && getStrategyForURL(url) != null && this.business.scmCheckoutDirectorySettledUp(createScmContext());
 	}
 	
@@ -307,7 +292,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		this.business = business;
 	}
 
-	
 	public ScmSyncConfigurationStatusManager getScmSyncConfigurationStatusManager() {
 		return business.getScmSyncConfigurationStatusManager();
 	}
