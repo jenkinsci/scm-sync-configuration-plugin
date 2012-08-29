@@ -1,5 +1,9 @@
 package hudson.plugins.scm_sync_configuration.strategies.impl;
 
+import hudson.XmlFile;
+import hudson.model.Item;
+import hudson.model.Saveable;
+import hudson.plugins.scm_sync_configuration.model.ChangeSet;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
@@ -29,4 +33,18 @@ public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 	public JenkinsConfigScmSyncStrategy(){
 		super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
 	}
+
+    public CommitMessageFactory getCommitMessageFactory(){
+        return new CommitMessageFactory(){
+            public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
+                return new WeightedMessage("Jenkins configuration files updated", ChangeSet.MessageWeight.IMPORTANT);
+            }
+            public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
+                throw new IllegalStateException("Jenkins configuration files should never be renamed !");
+            }
+            public WeightedMessage getMessageWhenItemDeleted(Item item) {
+                throw new IllegalStateException("Jenkins configuration files should never be deleted !");
+            }
+        };
+    }
 }

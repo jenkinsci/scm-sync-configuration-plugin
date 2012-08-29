@@ -1,6 +1,10 @@
 package hudson.plugins.scm_sync_configuration.strategies.impl;
 
+import hudson.XmlFile;
+import hudson.model.Item;
 import hudson.model.Job;
+import hudson.model.Saveable;
+import hudson.plugins.scm_sync_configuration.model.ChangeSet;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.model.ClassAndFileConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
@@ -26,4 +30,18 @@ public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 	public JobConfigScmSyncStrategy(){
 		super(CONFIG_ENTITY_MANAGER, PAGE_MATCHERS);
 	}
+
+    public CommitMessageFactory getCommitMessageFactory(){
+        return new CommitMessageFactory(){
+            public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
+                return new WeightedMessage("Job ["+((Job)s).getName()+"] configuration updated", ChangeSet.MessageWeight.IMPORTANT);
+            }
+            public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
+                return new WeightedMessage("Job ["+item.getName()+"] hierarchy renamed", ChangeSet.MessageWeight.IMPORTANT);
+            }
+            public WeightedMessage getMessageWhenItemDeleted(Item item) {
+                return new WeightedMessage("Job ["+item.getName()+"] hierarchy deleted", ChangeSet.MessageWeight.IMPORTANT);
+            }
+        };
+    }
 }

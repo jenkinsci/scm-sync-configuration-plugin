@@ -1,11 +1,35 @@
 package hudson.plugins.scm_sync_configuration.strategies;
 
+import hudson.XmlFile;
+import hudson.model.Item;
 import hudson.model.Saveable;
+import hudson.plugins.scm_sync_configuration.model.ChangeSet;
 
 import java.io.File;
 import java.util.List;
 
 public interface ScmSyncStrategy {
+
+    public static interface CommitMessageFactory {
+        public static class WeightedMessage{
+            String message;
+            ChangeSet.MessageWeight weight;
+            public WeightedMessage(String message, ChangeSet.MessageWeight weight) {
+                this.message = message;
+                this.weight = weight;
+            }
+            public String getMessage() {
+                return message;
+            }
+            public ChangeSet.MessageWeight getWeight() {
+                return weight;
+            }
+        }
+
+        public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file);
+        public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath);
+        public WeightedMessage getMessageWhenItemDeleted(Item item);
+    }
 
 	/**
 	 * Is the given Saveable eligible for the current strategy ?
@@ -32,4 +56,9 @@ public interface ScmSyncStrategy {
      * @return List of sync'ed file includes brought by current strategy
      */
     List<String> getSyncIncludes();
+
+    /**
+     * @return A Factory intended to generate commit message depending on contexts
+     */
+    CommitMessageFactory getCommitMessageFactory();
 }

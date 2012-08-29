@@ -1,19 +1,20 @@
 package hudson.plugins.scm_sync_configuration.strategies;
 
-import hudson.model.Saveable;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import hudson.XmlFile;
 import hudson.model.Hudson;
+import hudson.model.Item;
+import hudson.model.Saveable;
+import hudson.plugins.scm_sync_configuration.model.ChangeSet;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.annotation.Nullable;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 
 public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 
@@ -22,6 +23,18 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
             return new File(Hudson.getInstance().getRootDir()+File.separator+path);
         }
     };
+
+    protected static class DefaultCommitMessageFactory implements CommitMessageFactory {
+        public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
+            return new WeightedMessage("Modification on configuration(s)", ChangeSet.MessageWeight.NORMAL);
+        }
+        public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
+            return new WeightedMessage("Item renamed", ChangeSet.MessageWeight.NORMAL);
+        }
+        public WeightedMessage getMessageWhenItemDeleted(Item item) {
+            return new WeightedMessage("File hierarchy deleted", ChangeSet.MessageWeight.NORMAL);
+        }
+    }
 
 	private ConfigurationEntityMatcher configEntityMatcher;
 	private List<PageMatcher> pageMatchers;
@@ -67,5 +80,9 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 
     public List<String> getSyncIncludes(){
         return createConfigEntityMatcher().getIncludes();
+    }
+
+    public CommitMessageFactory getCommitMessageFactory(){
+        return new DefaultCommitMessageFactory();
     }
 }

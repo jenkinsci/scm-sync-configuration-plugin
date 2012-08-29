@@ -5,7 +5,6 @@ import hudson.model.Item;
 import hudson.model.listeners.ItemListener;
 import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
-import hudson.plugins.scm_sync_configuration.model.ChangeSet;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 
 import java.io.File;
@@ -34,8 +33,9 @@ public class ScmSyncConfigurationItemListener extends ItemListener {
             ScmSyncStrategy strategy = plugin.getStrategyForSaveable(item, null);
 
             if(strategy != null){
+                ScmSyncStrategy.CommitMessageFactory.WeightedMessage message = strategy.getCommitMessageFactory().getMessageWhenItemDeleted(item);
+                plugin.getTransaction().defineCommitMessage(message.getMessage(), message.getWeight());
                 String path = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(item.getRootDir());
-                plugin.getTransaction().defineCommitMessage("File hierarchy deleted", ChangeSet.MessageWeight.NORMAL);
                 plugin.getTransaction().registerPathForDeletion(path);
             }
         }
@@ -65,7 +65,8 @@ public class ScmSyncConfigurationItemListener extends ItemListener {
 
                 String oldPath = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(oldDir);
                 String newPath = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(newDir);
-                plugin.getTransaction().defineCommitMessage("Item renamed", ChangeSet.MessageWeight.NORMAL);
+                ScmSyncStrategy.CommitMessageFactory.WeightedMessage message = strategy.getCommitMessageFactory().getMessageWhenItemRenamed(item, oldPath, newPath);
+                plugin.getTransaction().defineCommitMessage(message.getMessage(), message.getWeight());
                 plugin.getTransaction().registerRenamedPath(oldPath, newPath);
             }
         }
