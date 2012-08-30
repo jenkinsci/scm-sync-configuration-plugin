@@ -8,15 +8,15 @@ package hudson.plugins.scm_sync_configuration.model;
  */
 public class WeightedMessage {
     String message;
-    ChangeSet.MessageWeight weight;
-    public WeightedMessage(String message, ChangeSet.MessageWeight weight) {
+    MessageWeight weight;
+    public WeightedMessage(String message, MessageWeight weight) {
         this.message = message;
         this.weight = weight;
     }
     public String getMessage() {
         return message;
     }
-    public ChangeSet.MessageWeight getWeight() {
+    public MessageWeight getWeight() {
         return weight;
     }
 }

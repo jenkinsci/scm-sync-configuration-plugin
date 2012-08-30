@@ -6,7 +6,7 @@ import hudson.XmlFile;
 import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.model.Saveable;
-import hudson.plugins.scm_sync_configuration.model.ChangeSet;
+import hudson.plugins.scm_sync_configuration.model.MessageWeight;
 import hudson.plugins.scm_sync_configuration.model.WeightedMessage;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
@@ -27,13 +27,13 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 
     protected static class DefaultCommitMessageFactory implements CommitMessageFactory {
         public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
-            return new WeightedMessage("Modification on configuration(s)", ChangeSet.MessageWeight.MINIMAL);
+            return new WeightedMessage("Modification on configuration(s)", MessageWeight.MINIMAL);
         }
         public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
-            return new WeightedMessage("Item renamed", ChangeSet.MessageWeight.MINIMAL);
+            return new WeightedMessage("Item renamed", MessageWeight.MINIMAL);
         }
         public WeightedMessage getMessageWhenItemDeleted(Item item) {
-            return new WeightedMessage("File hierarchy deleted", ChangeSet.MessageWeight.MINIMAL);
+            return new WeightedMessage("File hierarchy deleted", MessageWeight.MINIMAL);
         }
     }
 

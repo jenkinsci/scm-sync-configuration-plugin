@@ -3,7 +3,7 @@ package hudson.plugins.scm_sync_configuration.strategies.impl;
 import hudson.XmlFile;
 import hudson.model.Item;
 import hudson.model.Saveable;
-import hudson.plugins.scm_sync_configuration.model.ChangeSet;
+import hudson.plugins.scm_sync_configuration.model.MessageWeight;
 import hudson.plugins.scm_sync_configuration.model.WeightedMessage;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
@@ -39,7 +39,7 @@ public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
                 return new WeightedMessage("Jenkins configuration files updated",
                         // Jenkins config update message should be considered as "important", especially
                         // more important than the plugin descriptors Saveable updates
-                        ChangeSet.MessageWeight.IMPORTANT);
+                        MessageWeight.IMPORTANT);
             }
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
                 throw new IllegalStateException("Jenkins configuration files should never be renamed !");

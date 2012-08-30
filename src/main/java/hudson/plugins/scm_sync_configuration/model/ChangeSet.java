@@ -16,18 +16,6 @@ import java.util.logging.Logger;
 public class ChangeSet {
     private static final Logger LOGGER = Logger.getLogger(ChangeSet.class.getName());
 
-    public static enum MessageWeight {
-        MINIMAL(0),NORMAL(1),IMPORTANT(2);
-
-        private int weight;
-        private MessageWeight(int _weight){
-            this.weight = _weight;
-        }
-        public boolean weighterThan(MessageWeight ms){
-            return this.weight > ms.weight;
-        }
-    };
-
     // Changeset commit message
     WeightedMessage message = null;
     // [Path, content in bytes] which are queued for addition/modification

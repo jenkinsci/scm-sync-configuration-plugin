@@ -4,7 +4,7 @@ import hudson.XmlFile;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.Saveable;
-import hudson.plugins.scm_sync_configuration.model.ChangeSet;
+import hudson.plugins.scm_sync_configuration.model.MessageWeight;
 import hudson.plugins.scm_sync_configuration.model.WeightedMessage;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.model.ClassAndFileConfigurationEntityMatcher;
@@ -38,19 +38,19 @@ public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
                 return new WeightedMessage("Job ["+((Job)s).getName()+"] configuration updated",
                         // Job config update message should be considered as "important", especially
                         // more important than the plugin descriptors Saveable updates
-                        ChangeSet.MessageWeight.IMPORTANT);
+                        MessageWeight.IMPORTANT);
             }
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
                 return new WeightedMessage("Job ["+item.getName()+"] hierarchy renamed",
                         // Job config rename message should be considered as "important", especially
                         // more important than the plugin descriptors Saveable renames
-                        ChangeSet.MessageWeight.IMPORTANT);
+                        MessageWeight.IMPORTANT);
             }
             public WeightedMessage getMessageWhenItemDeleted(Item item) {
                 return new WeightedMessage("Job ["+item.getName()+"] hierarchy deleted",
                         // Job config deletion message should be considered as "important", especially
                         // more important than the plugin descriptors Saveable deletions
-                        ChangeSet.MessageWeight.IMPORTANT);
+                        MessageWeight.IMPORTANT);
             }
         };
     }
