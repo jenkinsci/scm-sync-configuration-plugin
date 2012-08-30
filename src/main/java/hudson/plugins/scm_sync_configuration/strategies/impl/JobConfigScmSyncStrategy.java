@@ -35,13 +35,22 @@ public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
     public CommitMessageFactory getCommitMessageFactory(){
         return new CommitMessageFactory(){
             public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
-                return new WeightedMessage("Job ["+((Job)s).getName()+"] configuration updated", ChangeSet.MessageWeight.IMPORTANT);
+                return new WeightedMessage("Job ["+((Job)s).getName()+"] configuration updated",
+                        // Job config update message should be considered as "important", especially
+                        // more important than the plugin descriptors Saveable updates
+                        ChangeSet.MessageWeight.IMPORTANT);
             }
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
-                return new WeightedMessage("Job ["+item.getName()+"] hierarchy renamed", ChangeSet.MessageWeight.IMPORTANT);
+                return new WeightedMessage("Job ["+item.getName()+"] hierarchy renamed",
+                        // Job config rename message should be considered as "important", especially
+                        // more important than the plugin descriptors Saveable renames
+                        ChangeSet.MessageWeight.IMPORTANT);
             }
             public WeightedMessage getMessageWhenItemDeleted(Item item) {
-                return new WeightedMessage("Job ["+item.getName()+"] hierarchy deleted", ChangeSet.MessageWeight.IMPORTANT);
+                return new WeightedMessage("Job ["+item.getName()+"] hierarchy deleted",
+                        // Job config deletion message should be considered as "important", especially
+                        // more important than the plugin descriptors Saveable deletions
+                        ChangeSet.MessageWeight.IMPORTANT);
             }
         };
     }
