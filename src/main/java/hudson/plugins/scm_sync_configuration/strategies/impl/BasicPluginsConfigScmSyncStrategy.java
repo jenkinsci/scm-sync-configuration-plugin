@@ -12,36 +12,35 @@ import hudson.plugins.scm_sync_configuration.strategies.model.PatternsEntityMatc
 import java.util.ArrayList;
 import java.util.List;
 
-public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
+public class BasicPluginsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
 	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ {
-        // Global configuration page
-        add(new PageMatcher("^configure$", "form[name='config']"));
-        // View configuration pages
-        add(new PageMatcher("^(.+/)?view/[^/]+/configure$", "form[name='viewConfig']"));
-        add(new PageMatcher("^newView$", "form[name='createView']"));
+        // No page matchers for this strategy ... for the moment
     } };
-    
+
     private static final String[] PATTERNS = new String[]{
-        "config.xml"
+        "hudson*.xml",
+        "scm-sync-configuration.xml"
     };
-    
+
 	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new PatternsEntityMatcher(PATTERNS);
-	
-	public JenkinsConfigScmSyncStrategy(){
+
+	public BasicPluginsConfigScmSyncStrategy(){
 		super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
 	}
 
     public CommitMessageFactory getCommitMessageFactory(){
         return new CommitMessageFactory(){
             public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
-                return new WeightedMessage("Jenkins configuration files updated", ChangeSet.MessageWeight.IMPORTANT);
+                return new WeightedMessage("Plugin configuration files updated", ChangeSet.MessageWeight.NORMAL);
             }
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
-                throw new IllegalStateException("Jenkins configuration files should never be renamed !");
+                // It should never happen... but who cares how will behave *every* plugin in the jenkins land ?
+                return new WeightedMessage("Plugin configuration files renamed", ChangeSet.MessageWeight.NORMAL);
             }
             public WeightedMessage getMessageWhenItemDeleted(Item item) {
-                throw new IllegalStateException("Jenkins configuration files should never be deleted !");
+                // It should never happen... but who cares how will behave *every* plugin in the jenkins land ?
+                return new WeightedMessage("Plugin configuration files deleted", ChangeSet.MessageWeight.NORMAL);
             }
         };
     }

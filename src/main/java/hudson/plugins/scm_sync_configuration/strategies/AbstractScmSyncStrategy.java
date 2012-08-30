@@ -26,13 +26,13 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 
     protected static class DefaultCommitMessageFactory implements CommitMessageFactory {
         public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
-            return new WeightedMessage("Modification on configuration(s)", ChangeSet.MessageWeight.NORMAL);
+            return new WeightedMessage("Modification on configuration(s)", ChangeSet.MessageWeight.MINIMAL);
         }
         public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
-            return new WeightedMessage("Item renamed", ChangeSet.MessageWeight.NORMAL);
+            return new WeightedMessage("Item renamed", ChangeSet.MessageWeight.MINIMAL);
         }
         public WeightedMessage getMessageWhenItemDeleted(Item item) {
-            return new WeightedMessage("File hierarchy deleted", ChangeSet.MessageWeight.NORMAL);
+            return new WeightedMessage("File hierarchy deleted", ChangeSet.MessageWeight.MINIMAL);
         }
     }
 

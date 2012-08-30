@@ -14,6 +14,7 @@ import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.ScmSyncNoSCM;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
+import hudson.plugins.scm_sync_configuration.strategies.impl.BasicPluginsConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JenkinsConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.ManualIncludesScmSyncStrategy;
@@ -42,8 +43,9 @@ import java.util.logging.Logger;
 public class ScmSyncConfigurationPlugin extends Plugin{
 
 	public static final transient ScmSyncStrategy[] AVAILABLE_STRATEGIES = new ScmSyncStrategy[]{
-			new JobConfigScmSyncStrategy(),
-			new JenkinsConfigScmSyncStrategy(),
+            new JenkinsConfigScmSyncStrategy(),
+            new BasicPluginsConfigScmSyncStrategy(),
+            new JobConfigScmSyncStrategy(),
             new ManualIncludesScmSyncStrategy()
 	};
 
