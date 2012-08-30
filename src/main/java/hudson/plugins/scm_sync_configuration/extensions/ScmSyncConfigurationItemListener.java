@@ -35,7 +35,7 @@ public class ScmSyncConfigurationItemListener extends ItemListener {
 
             if(strategy != null){
                 WeightedMessage message = strategy.getCommitMessageFactory().getMessageWhenItemDeleted(item);
-                plugin.getTransaction().defineCommitMessage(message.getMessage(), message.getWeight());
+                plugin.getTransaction().defineCommitMessage(message);
                 String path = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(item.getRootDir());
                 plugin.getTransaction().registerPathForDeletion(path);
             }
@@ -67,7 +67,7 @@ public class ScmSyncConfigurationItemListener extends ItemListener {
                 String oldPath = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(oldDir);
                 String newPath = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(newDir);
                 WeightedMessage message = strategy.getCommitMessageFactory().getMessageWhenItemRenamed(item, oldPath, newPath);
-                plugin.getTransaction().defineCommitMessage(message.getMessage(), message.getWeight());
+                plugin.getTransaction().defineCommitMessage(message);
                 plugin.getTransaction().registerRenamedPath(oldPath, newPath);
             }
         }

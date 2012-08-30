@@ -2,6 +2,7 @@ package hudson.plugins.scm_sync_configuration.transactions;
 
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.model.ChangeSet;
+import hudson.plugins.scm_sync_configuration.model.WeightedMessage;
 
 /**
  * @author fcamblor
@@ -13,8 +14,8 @@ public abstract class ScmTransaction {
         this.changeset = new ChangeSet();
     }
 
-    public void defineCommitMessage(String message, ChangeSet.MessageWeight weight){
-        this.changeset.defineMessage(message, weight);
+    public void defineCommitMessage(WeightedMessage weightedMessage){
+        this.changeset.defineMessage(weightedMessage);
     }
 
     public void commit(){

@@ -29,9 +29,7 @@ public class ChangeSet {
     };
 
     // Changeset commit message
-    String message = null;
-    // Commit message weight, used to prioritize message which will be used for commit
-    MessageWeight messageWeight;
+    WeightedMessage message = null;
     // [Path, content in bytes] which are queued for addition/modification
     Map<Path, byte[]> pathContents;
     // Paths which are queued for deletion
@@ -101,15 +99,14 @@ public class ChangeSet {
         return Collections.unmodifiableList(pathsToDelete);
     }
 
-    public void defineMessage(String message, MessageWeight weight) {
+    public void defineMessage(WeightedMessage weightedMessage) {
         // Defining message only once !
-        if(this.message == null || weight.weighterThan(this.messageWeight)){
-            this.message = message;
-            this.messageWeight = weight;
+        if(this.message == null || weightedMessage.getWeight().weighterThan(message.getWeight())){
+            this.message = weightedMessage;
         }
     }
 
     public String getMessage(){
-        return this.message;
+        return this.message.getMessage();
     }
 }
