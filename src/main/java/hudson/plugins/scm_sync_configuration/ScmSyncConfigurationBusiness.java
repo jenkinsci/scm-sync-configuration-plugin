@@ -113,113 +113,115 @@ public class ScmSyncConfigurationBusiness {
         return filesToCommit;
     }
 
-    public void queueChangeSet(final ScmContext scmContext, ChangeSet changeset, User user, String commitMessage) {
-        // TODO: ensure commitMessage is the _complete_ message (and not just current session comment)
-        // It should change compared to synchronizeFile() ...
+    public void queueChangeSet(final ScmContext scmContext, ChangeSet changeset, User user, String userMessage) {
         if(scmManipulator == null || !scmManipulator.scmConfigurationSettledUp(scmContext, false)){
             LOGGER.info("Queue of changeset "+changeset.toString()+" aborted (scm manipulator not settled !)");
             return;
       	}
 
-        Commit commit = new Commit(createCommitMessage(scmContext, changeset.getMessage(), user, commitMessage), changeset);
+        Commit commit = new Commit(changeset, user, userMessage, scmContext);
         LOGGER.info("Queuing commit "+commit.toString()+" to SCM ...");
         commitsQueue.add(commit);
 
         writer.execute(new Runnable() {
             public void run() {
-                File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
-
-                // Copying shared commitQueue in order to allow conccurrent modification
-                List<Commit> currentCommitQueue = new ArrayList<Commit>(commitsQueue);
-                List<Commit> checkedInCommits = new ArrayList<Commit>();
-
-                try {
-                    // Reading commit queue and commiting changeset
-                    for(Commit commit: currentCommitQueue){
-                        String logMessage = "Processing commit "+commit.toString();
-                        LOGGER.info(logMessage);
-
-                        List<File> synchronizedFiles = new ArrayList<File>();
-                        for(Map.Entry<Path,byte[]> pathContent : commit.getChangeset().getPathContents().entrySet()){
-                            Path pathRelativeToJenkinsRoot = pathContent.getKey();
-                            byte[] content = pathContent.getValue();
-
-                            File fileTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+pathRelativeToJenkinsRoot.getPath());
-                            boolean fileAlreadySynchronized = fileTranslatedInScm.exists();
-                            if(!fileAlreadySynchronized){
-                                Stack<File> directoriesToCreate = new Stack<File>();
-                                File directory = fileTranslatedInScm.getParentFile();
-                                while(!directory.exists()){
-                                    directoriesToCreate.push(directory);
-                                    directory = directory.getParentFile();
-                                }
-                                while(!directoriesToCreate.empty()){
-                                    directory = directoriesToCreate.pop();
-                                    if(!directory.mkdir()){
-                                        throw new LoggableException("Error while creating directory "+directory.getAbsolutePath(), File.class, "mkdir");
-                                    }
-                                }
-                                try {
-                                    if(pathRelativeToJenkinsRoot.isDirectory()){
-                                        if(!fileTranslatedInScm.mkdir()){
-                                            throw new LoggableException("Error while creating directory "+fileTranslatedInScm.getAbsolutePath(), File.class, "mkdir");
-                                        }
-                                    } else {
-                                        Files.write(content, fileTranslatedInScm);
-                                    }
-                                } catch (IOException e) {
-                                    throw new LoggableException("Error while creating file in checkouted directory", Files.class, "write", e);
-                                }
-                                synchronizedFiles.addAll(scmManipulator.addFile(scmRoot, pathRelativeToJenkinsRoot.getPath()));
-                            } else {
-                                boolean contentAlreadyPresent = false;
-                                try {
-                                    contentAlreadyPresent = Checksums.fileAndByteArrayContentAreEqual(fileTranslatedInScm, content);
-                                } catch (IOException e) {
-                                    throw new LoggableException(logMessage, Checksums.class, "fileAndByteArrayContentAreEqual", e);
-                                }
-                                if(contentAlreadyPresent){
-                                    // Don't do anything
-                                } else {
-                                    try {
-                                        Files.write(content, fileTranslatedInScm);
-                                    } catch (IOException e) {
-                                        throw new LoggableException(logMessage, Files.class, "write", e);
-                                    }
-                                    synchronizedFiles.add(fileTranslatedInScm);
-                                }
-                            }
-                        }
-
-                        for(Path path : commit.getChangeset().getPathsToDelete()){
-                            List<File> deletedFiles = deleteHierarchy(scmContext, path.getPath());
-                            synchronizedFiles.addAll(deletedFiles);
-                        }
-
-                        if(synchronizedFiles.isEmpty()){
-                            LOGGER.info("Empty changeset to commit (no changes found on files) => commit skipped !");
-                        } else {
-                            boolean result = scmManipulator.checkinFiles(scmRoot, synchronizedFiles, commit.getMessage());
-
-                            if(result){
-                                LOGGER.info("Commit "+commit.toString()+" pushed to SCM !");
-                                checkedInCommits.add(commit);
-                            } else {
-                                throw new LoggableException(logMessage, SCMManipulator.class, "checkinFiles");
-                            }
-
-                            signal(logMessage, result);
-                        }
-                    }
-                }catch(LoggableException e){
-                    LOGGER.throwing(e.getClazz().getName(), e.getMethodName(), e);
-                    LOGGER.severe("Error while copying file : "+e.getMessage());
-                    signal(e.getMessage(), false);
-                }
-
-                commitsQueue.removeAll(checkedInCommits);
+                processCommitsQueue();
             }
         });
+    }
+
+    private void processCommitsQueue() {
+        File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
+
+        // Copying shared commitQueue in order to allow conccurrent modification
+        List<Commit> currentCommitQueue = new ArrayList<Commit>(commitsQueue);
+        List<Commit> checkedInCommits = new ArrayList<Commit>();
+
+        try {
+            // Reading commit queue and commiting changeset
+            for(Commit commit: currentCommitQueue){
+                String logMessage = "Processing commit "+commit.toString();
+                LOGGER.info(logMessage);
+
+                List<File> synchronizedFiles = new ArrayList<File>();
+                for(Map.Entry<Path,byte[]> pathContent : commit.getChangeset().getPathContents().entrySet()){
+                    Path pathRelativeToJenkinsRoot = pathContent.getKey();
+                    byte[] content = pathContent.getValue();
+
+                    File fileTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+pathRelativeToJenkinsRoot.getPath());
+                    boolean fileAlreadySynchronized = fileTranslatedInScm.exists();
+                    if(!fileAlreadySynchronized){
+                        Stack<File> directoriesToCreate = new Stack<File>();
+                        File directory = fileTranslatedInScm.getParentFile();
+                        while(!directory.exists()){
+                            directoriesToCreate.push(directory);
+                            directory = directory.getParentFile();
+                        }
+                        while(!directoriesToCreate.empty()){
+                            directory = directoriesToCreate.pop();
+                            if(!directory.mkdir()){
+                                throw new LoggableException("Error while creating directory "+directory.getAbsolutePath(), File.class, "mkdir");
+                            }
+                        }
+                        try {
+                            if(pathRelativeToJenkinsRoot.isDirectory()){
+                                if(!fileTranslatedInScm.mkdir()){
+                                    throw new LoggableException("Error while creating directory "+fileTranslatedInScm.getAbsolutePath(), File.class, "mkdir");
+                                }
+                            } else {
+                                Files.write(content, fileTranslatedInScm);
+                            }
+                        } catch (IOException e) {
+                            throw new LoggableException("Error while creating file in checkouted directory", Files.class, "write", e);
+                        }
+                        synchronizedFiles.addAll(scmManipulator.addFile(scmRoot, pathRelativeToJenkinsRoot.getPath()));
+                    } else {
+                        boolean contentAlreadyPresent = false;
+                        try {
+                            contentAlreadyPresent = Checksums.fileAndByteArrayContentAreEqual(fileTranslatedInScm, content);
+                        } catch (IOException e) {
+                            throw new LoggableException(logMessage, Checksums.class, "fileAndByteArrayContentAreEqual", e);
+                        }
+                        if(contentAlreadyPresent){
+                            // Don't do anything
+                        } else {
+                            try {
+                                Files.write(content, fileTranslatedInScm);
+                            } catch (IOException e) {
+                                throw new LoggableException(logMessage, Files.class, "write", e);
+                            }
+                            synchronizedFiles.add(fileTranslatedInScm);
+                        }
+                    }
+                }
+
+                for(Path path : commit.getChangeset().getPathsToDelete()){
+                    List<File> deletedFiles = deleteHierarchy(commit.getScmContext(), path.getPath());
+                    synchronizedFiles.addAll(deletedFiles);
+                }
+
+                if(synchronizedFiles.isEmpty()){
+                    LOGGER.info("Empty changeset to commit (no changes found on files) => commit skipped !");
+                } else {
+                    boolean result = scmManipulator.checkinFiles(scmRoot, synchronizedFiles, commit.getMessage());
+
+                    if(result){
+                        LOGGER.info("Commit "+commit.toString()+" pushed to SCM !");
+                        checkedInCommits.add(commit);
+                    } else {
+                        throw new LoggableException(logMessage, SCMManipulator.class, "checkinFiles");
+                    }
+
+                    signal(logMessage, result);
+                }
+            }
+        }catch(LoggableException e){
+            LOGGER.throwing(e.getClazz().getName(), e.getMethodName(), e);
+            LOGGER.severe("Error while copying file : "+e.getMessage());
+            signal(e.getMessage(), false);
+        }
+
+        commitsQueue.removeAll(checkedInCommits);
     }
 
 	public void synchronizeAllConfigs(ScmSyncStrategy[] availableStrategies){
@@ -288,25 +290,7 @@ public class ScmSyncConfigurationBusiness {
 			getScmSyncConfigurationStatusManager().signalFailed(operation);
 		}
 	}
-
-    private static String createCommitMessage(ScmContext context, String messagePrefix, User user, String comment){
-   		StringBuilder commitMessage = new StringBuilder();
-   		commitMessage.append(messagePrefix);
-   		if(user != null){
-   			commitMessage.append(" by ").append(user.getId());
-   		}
-   		if(comment != null){
-   			commitMessage.append(" with following comment : ").append(comment);
-   		}
-   		String message = commitMessage.toString();
-
-           if(context.getCommitMessagePattern() == null || "".equals(context.getCommitMessagePattern())){
-               return message;
-           } else {
-               return context.getCommitMessagePattern().replaceAll("\\[message\\]", message.replaceAll("\\$", "\\\\\\$"));
-           }
-   	}
-
+	
 	private static String getCheckoutScmDirectoryAbsolutePath(){
 		return Hudson.getInstance().getRootDir().getAbsolutePath()+WORKING_DIRECTORY_PATH+CHECKOUT_SCM_DIRECTORY;
 	}
