@@ -50,4 +50,14 @@ public class Commit {
                return context.getCommitMessagePattern().replaceAll("\\[message\\]", message.replaceAll("\\$", "\\\\\\$"));
            }
    	}
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("Commit %s : %n", super.toString()));
+        sb.append(String.format("  Author : %s%n", String.valueOf(author)));
+        sb.append(String.format("  Comment : %s%n", message));
+        sb.append(String.format("  Changeset : %n%s%n", changeset.toString()));
+        return sb.toString();
+    }
 }

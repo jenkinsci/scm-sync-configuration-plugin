@@ -97,4 +97,16 @@ public class ChangeSet {
     public String getMessage(){
         return this.message.getMessage();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for(Path path : getPathContents().keySet()){
+            sb.append(String.format("    A %s%n", path.toString()));
+        }
+        for(Path path : getPathsToDelete()){
+            sb.append(String.format("    D %s%n", path.toString()));
+        }
+        return sb.toString();
+    }
 }

@@ -62,4 +62,9 @@ public class Path {
         result = 31 * result + (isDirectory ? 1 : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return getPath()+(isDirectory()?"/":"");
+    }
 }
