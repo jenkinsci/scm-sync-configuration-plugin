@@ -185,7 +185,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
             this.business.initializeRepository(createScmContext(), true);
         }
         if(configsResynchronizationRequired){
-            this.business.synchronizeAllConfigs(createScmContext(), AVAILABLE_STRATEGIES, getCurrentUser());
+            this.business.synchronizeAllConfigs(AVAILABLE_STRATEGIES);
         }
         if(repoCleaningRequired){
             // Cleaning checkouted repository

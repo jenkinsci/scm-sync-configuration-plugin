@@ -1,20 +1,19 @@
 package hudson.plugins.scm_sync_configuration.repository;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import hudson.model.Hudson;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBaseTest;
 import hudson.plugins.test.utils.scms.ScmUnderTest;
-
-import java.io.File;
-
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+
+import java.io.File;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 @PrepareForTest(SCM.class)
 public abstract class InitRepositoryTest extends ScmSyncConfigurationPluginBaseTest {
@@ -76,7 +75,7 @@ public abstract class InitRepositoryTest extends ScmSyncConfigurationPluginBaseT
 		createSCMMock();
 		
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/InitRepositoryTest.shouldSynchronizeHudsonFiles/");
 		

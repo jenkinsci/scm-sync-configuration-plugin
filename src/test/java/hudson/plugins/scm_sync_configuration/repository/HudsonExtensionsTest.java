@@ -1,17 +1,9 @@
 package hudson.plugins.scm_sync_configuration.repository;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 import hudson.XmlFile;
 import hudson.model.Item;
-import hudson.model.Saveable;
-import hudson.model.Hudson;
 import hudson.model.Job;
+import hudson.model.Saveable;
 import hudson.plugins.scm_sync_configuration.SCMManipulator;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.extensions.ScmSyncConfigurationItemListener;
@@ -21,11 +13,6 @@ import hudson.plugins.scm_sync_configuration.strategies.impl.JenkinsConfigScmSyn
 import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBaseTest;
 import hudson.plugins.test.utils.scms.ScmUnderTest;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +20,15 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.core.io.ClassPathResource;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @PrepareForTest(ScmSyncConfigurationPlugin.class)
 public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
@@ -61,7 +57,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		createSCMMock();
 		
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		// Renaming fakeJob to newFakeJob
 		Item mockedItem = Mockito.mock(Job.class);
@@ -81,7 +77,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		createSCMMock();
 		
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		File jobDirectory = new File(getCurrentHudsonRootDirectory() + "/jobs/newFakeJob/" );
 		File configFile = new File(jobDirectory.getAbsolutePath() + File.separator + "config.xml");
@@ -109,7 +105,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		createSCMMock();
 		
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		File jobDirectory = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/" );
 		File configFile = new File(jobDirectory.getAbsolutePath() + File.separator + "config.xml");
@@ -139,7 +135,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		createSCMMock();
 
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 
 		File configFile = new File(getCurrentHudsonRootDirectory() + "/hudson.tasks.Shell.xml" );
 
@@ -167,7 +163,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		createSCMMock();
 		
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		// Let's checkout current scm view ... and commit something in it ...
 		SCMManipulator scmManipulator = createMockedScmManipulator();
@@ -201,7 +197,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		createSCMMock();
 		
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		// Deleting fakeJob
 		Item mockedItem = Mockito.mock(Job.class);
@@ -224,7 +220,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		createSCMMock();
 		
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		// Deleting fakeJob
 		Item mockedItem = Mockito.mock(Job.class);
@@ -244,7 +240,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		createSCMMock();
 		
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		// Let's checkout current scm view ... and commit something in it ...
 		SCMManipulator scmManipulator = createMockedScmManipulator();
@@ -278,7 +274,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		createSCMMock();
 		
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		// Let's checkout current scm view ... and commit something in it ...
 		SCMManipulator scmManipulator = createMockedScmManipulator();
@@ -315,7 +311,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		createSCMMock();
 		
 		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(scmContext, ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES, Hudson.getInstance().getMe());
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		// Let's checkout current scm view ... and commit something in it ...
 		SCMManipulator scmManipulator = createMockedScmManipulator();

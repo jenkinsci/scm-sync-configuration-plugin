@@ -4,10 +4,7 @@ import com.google.common.io.Files;
 import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.exceptions.LoggableException;
-import hudson.plugins.scm_sync_configuration.model.ChangeSet;
-import hudson.plugins.scm_sync_configuration.model.Commit;
-import hudson.plugins.scm_sync_configuration.model.Path;
-import hudson.plugins.scm_sync_configuration.model.ScmContext;
+import hudson.plugins.scm_sync_configuration.model.*;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.utils.Checksums;
 import hudson.util.DaemonThreadFactory;
@@ -225,47 +222,7 @@ public class ScmSyncConfigurationBusiness {
         });
     }
 
-	public void synchronizeFile(ScmContext scmContext, File modifiedFile, String comment, User user){
-		if(scmManipulator == null || !scmManipulator.scmConfigurationSettledUp(scmContext, false)){
-			return;
-		}
-		
-		String message = "Synchronize file " + modifiedFile.getAbsolutePath();
-		
-		String modifiedFilePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(modifiedFile);
-		LOGGER.info("Synchronizing file ["+modifiedFilePathRelativeToHudsonRoot+"] to SCM ...");
-		String commitMessage = createCommitMessage(scmContext, "Modification on file", user, comment);
-		
-		File modifiedFileTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+modifiedFilePathRelativeToHudsonRoot);
-		boolean modifiedFileAlreadySynchronized = modifiedFileTranslatedInScm.exists();
-		try {
-			FileUtils.copyFile(modifiedFile, modifiedFileTranslatedInScm);
-		} catch (IOException e) {
-			LOGGER.throwing(FileUtils.class.getName(), "copyFile", e);
-			LOGGER.severe("Error while copying file : "+e.getMessage());
-			signal(message, false);
-		}
-
-		File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
-		
-		List<File> synchronizedFiles = new ArrayList<File>();
-		// if modified file is not yet synchronized with scm, let's add it !
-		if(!modifiedFileAlreadySynchronized){
-			synchronizedFiles.addAll(this.scmManipulator.addFile(scmRoot, modifiedFilePathRelativeToHudsonRoot));
-		} else {
-			synchronizedFiles.add(new File(modifiedFilePathRelativeToHudsonRoot));
-		}
-
-		boolean result = this.scmManipulator.checkinFiles(scmRoot, synchronizedFiles, commitMessage);
-		
-		if(result){
-			LOGGER.info("Synchronized file ["+modifiedFilePathRelativeToHudsonRoot+"] to SCM !");
-		}
-		
-		signal(message, result);
-	}
-	
-	public void synchronizeAllConfigs(ScmContext scmContext, ScmSyncStrategy[] availableStrategies, User user){
+	public void synchronizeAllConfigs(ScmSyncStrategy[] availableStrategies){
 		List<File> filesToSync = new ArrayList<File>();
 		// Building synced files from strategies
 		for(ScmSyncStrategy strategy : availableStrategies){
@@ -274,14 +231,10 @@ public class ScmSyncConfigurationBusiness {
 		
 		for(File fileToSync : filesToSync){
 			String hudsonConfigPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(fileToSync);
-			File hudsonConfigTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+hudsonConfigPathRelativeToHudsonRoot);
-			try {
-				if(!hudsonConfigTranslatedInScm.exists() 
-						|| !FileUtils.contentEquals(hudsonConfigTranslatedInScm, fileToSync)){
-					synchronizeFile(scmContext, fileToSync, "Synchronization init", user);
-				}
-			} catch (IOException e) {
-			}
+
+            ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();
+            plugin.getTransaction().defineCommitMessage(new WeightedMessage("Repository initialization", MessageWeight.IMPORTANT));
+            plugin.getTransaction().registerPath(hudsonConfigPathRelativeToHudsonRoot);
 		}
 	}
 
@@ -335,7 +288,7 @@ public class ScmSyncConfigurationBusiness {
 			getScmSyncConfigurationStatusManager().signalFailed(operation);
 		}
 	}
-	
+
     private static String createCommitMessage(ScmContext context, String messagePrefix, User user, String comment){
    		StringBuilder commitMessage = new StringBuilder();
    		commitMessage.append(messagePrefix);
