@@ -140,9 +140,10 @@ public class ScmSyncConfigurationBusiness {
         try {
             // Reading commit queue and commiting changeset
             for(Commit commit: currentCommitQueue){
-                String logMessage = "Processing commit "+commit.toString();
+                String logMessage = "Processing commit : " + commit.toString();
                 LOGGER.info(logMessage);
 
+                // Preparing files to add / delete
                 List<File> synchronizedFiles = new ArrayList<File>();
                 for(Map.Entry<Path,byte[]> pathContent : commit.getChangeset().getPathContents().entrySet()){
                     Path pathRelativeToJenkinsRoot = pathContent.getKey();
@@ -151,50 +152,14 @@ public class ScmSyncConfigurationBusiness {
                     File fileTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+pathRelativeToJenkinsRoot.getPath());
                     boolean fileAlreadySynchronized = fileTranslatedInScm.exists();
                     if(!fileAlreadySynchronized){
-                        Stack<File> directoriesToCreate = new Stack<File>();
-                        File directory = fileTranslatedInScm.getParentFile();
-                        while(!directory.exists()){
-                            directoriesToCreate.push(directory);
-                            directory = directory.getParentFile();
-                        }
-                        while(!directoriesToCreate.empty()){
-                            directory = directoriesToCreate.pop();
-                            if(!directory.mkdir()){
-                                throw new LoggableException("Error while creating directory "+directory.getAbsolutePath(), File.class, "mkdir");
-                            }
-                        }
-                        try {
-                            if(pathRelativeToJenkinsRoot.isDirectory()){
-                                if(!fileTranslatedInScm.mkdir()){
-                                    throw new LoggableException("Error while creating directory "+fileTranslatedInScm.getAbsolutePath(), File.class, "mkdir");
-                                }
-                            } else {
-                                Files.write(content, fileTranslatedInScm);
-                            }
-                        } catch (IOException e) {
-                            throw new LoggableException("Error while creating file in checkouted directory", Files.class, "write", e);
-                        }
+                        createScmContent(pathRelativeToJenkinsRoot, content, fileTranslatedInScm);
                         synchronizedFiles.addAll(scmManipulator.addFile(scmRoot, pathRelativeToJenkinsRoot.getPath()));
                     } else {
-                        boolean contentAlreadyPresent = false;
-                        try {
-                            contentAlreadyPresent = Checksums.fileAndByteArrayContentAreEqual(fileTranslatedInScm, content);
-                        } catch (IOException e) {
-                            throw new LoggableException(logMessage, Checksums.class, "fileAndByteArrayContentAreEqual", e);
-                        }
-                        if(contentAlreadyPresent){
-                            // Don't do anything
-                        } else {
-                            try {
-                                Files.write(content, fileTranslatedInScm);
-                            } catch (IOException e) {
-                                throw new LoggableException(logMessage, Files.class, "write", e);
-                            }
+                        if(writeScmContentOnlyIfItDiffers(content, fileTranslatedInScm)){
                             synchronizedFiles.add(fileTranslatedInScm);
                         }
                     }
                 }
-
                 for(Path path : commit.getChangeset().getPathsToDelete()){
                     List<File> deletedFiles = deleteHierarchy(commit.getScmContext(), path.getPath());
                     synchronizedFiles.addAll(deletedFiles);
@@ -203,28 +168,85 @@ public class ScmSyncConfigurationBusiness {
                 if(synchronizedFiles.isEmpty()){
                     LOGGER.info("Empty changeset to commit (no changes found on files) => commit skipped !");
                 } else {
+                    // Commiting files...
                     boolean result = scmManipulator.checkinFiles(scmRoot, synchronizedFiles, commit.getMessage());
 
                     if(result){
                         LOGGER.info("Commit "+commit.toString()+" pushed to SCM !");
                         checkedInCommits.add(commit);
                     } else {
-                        throw new LoggableException(logMessage, SCMManipulator.class, "checkinFiles");
+                        throw new LoggableException("Error while checking in file to scm repository", SCMManipulator.class, "checkinFiles");
                     }
 
-                    signal(logMessage, result);
+                    signal(logMessage, true);
                 }
             }
+        // As soon as a commit doesn't goes well, we should abort commit queue processing...
         }catch(LoggableException e){
             LOGGER.throwing(e.getClazz().getName(), e.getMethodName(), e);
-            LOGGER.severe("Error while copying file : "+e.getMessage());
+            LOGGER.severe("Error while processing commit queue : "+e.getMessage());
             signal(e.getMessage(), false);
+        } finally {
+            // We should remove every checkedInCommits
+            commitsQueue.removeAll(checkedInCommits);
         }
-
-        commitsQueue.removeAll(checkedInCommits);
     }
 
-	public void synchronizeAllConfigs(ScmSyncStrategy[] availableStrategies){
+    private boolean writeScmContentOnlyIfItDiffers(byte[] content, File fileTranslatedInScm)
+                throws LoggableException {
+        boolean scmContentUpdated = false;
+        boolean contentDiffer = false;
+        try {
+            contentDiffer = !Checksums.fileAndByteArrayContentAreEqual(fileTranslatedInScm, content);
+        } catch (IOException e) {
+            throw new LoggableException("Error while checking content checksum", Checksums.class, "fileAndByteArrayContentAreEqual", e);
+        }
+
+        if(contentDiffer){
+            try {
+                Files.write(content, fileTranslatedInScm);
+                scmContentUpdated = true;
+            } catch (IOException e) {
+                throw new LoggableException("Error while copying content to scm directory", Files.class, "write", e);
+            }
+        } else {
+            // Don't do anything
+        }
+        return scmContentUpdated;
+    }
+
+    private void createScmContent(Path pathRelativeToJenkinsRoot, byte[] content, File fileTranslatedInScm)
+                        throws LoggableException {
+        Stack<File> directoriesToCreate = new Stack<File>();
+        File directory = fileTranslatedInScm.getParentFile();
+
+        // Eventually, creating non existing enclosing directories
+        while(!directory.exists()){
+            directoriesToCreate.push(directory);
+            directory = directory.getParentFile();
+        }
+        while(!directoriesToCreate.empty()){
+            directory = directoriesToCreate.pop();
+            if(!directory.mkdir()){
+                throw new LoggableException("Error while creating directory "+directory.getAbsolutePath(), File.class, "mkdir");
+            }
+        }
+
+        try {
+            // Copying content if pathRelativeToJenkinsRoot is a file, or creating the directory if it is a directory
+            if(pathRelativeToJenkinsRoot.isDirectory()){
+                if(!fileTranslatedInScm.mkdir()){
+                    throw new LoggableException("Error while creating directory "+fileTranslatedInScm.getAbsolutePath(), File.class, "mkdir");
+                }
+            } else {
+                Files.write(content, fileTranslatedInScm);
+            }
+        } catch (IOException e) {
+            throw new LoggableException("Error while creating file in checkouted directory", Files.class, "write", e);
+        }
+    }
+
+    public void synchronizeAllConfigs(ScmSyncStrategy[] availableStrategies){
 		List<File> filesToSync = new ArrayList<File>();
 		// Building synced files from strategies
 		for(ScmSyncStrategy strategy : availableStrategies){
