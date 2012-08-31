@@ -63,6 +63,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		Item mockedItem = Mockito.mock(Job.class);
 		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/newFakeJob/" );
 		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
+        when(mockedItem.getName()).thenReturn("newFakeJob");
 
         // We should duplicate files in fakeJob to newFakeJob
         File oldJobDirectory = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/");
