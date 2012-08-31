@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -177,7 +178,10 @@ public class SCMManipulator {
 				if(addResult.isSuccess()){
 					synchronizedFiles.add(currentFile);
 				} else {
-                    LOGGER.severe("Error while adding SCM file : "+addResult.getCommandOutput());
+                    // If addResult.isSuccess() is false, it isn't an error if it is related to path chunks (except for latest one) :
+                    // if pathChunk is already synchronized, addResult.isSuccess() will be false.
+                    Level logLevel = (i==pathChunks.length-1)?Level.SEVERE:Level.FINE;
+                    LOGGER.log(logLevel, "Error while adding SCM file : " + addResult.getCommandOutput());
                 }
 			}
 		} catch (ScmException e) {
