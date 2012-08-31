@@ -63,7 +63,11 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		Item mockedItem = Mockito.mock(Job.class);
 		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/newFakeJob/" );
 		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
-		
+
+        // We should duplicate files in fakeJob to newFakeJob
+        File oldJobDirectory = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/");
+        FileUtils.copyDirectory(oldJobDirectory, mockedItemRootDir);
+
 		sscItemListener.onRenamed(mockedItem, "fakeJob", "newFakeJob");
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobRenameBeCorrectlyImpactedOnSCM/");
