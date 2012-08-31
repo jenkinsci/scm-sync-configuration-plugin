@@ -159,7 +159,11 @@ public class ScmSyncConfigurationBusiness {
                         createScmContent(pathRelativeToJenkinsRoot, content, fileTranslatedInScm);
                         synchronizedFiles.addAll(scmManipulator.addFile(scmRoot, pathRelativeToJenkinsRoot.getPath()));
                     } else {
-                        if(writeScmContentOnlyIfItDiffers(content, fileTranslatedInScm)){
+                        if(!fileTranslatedInScm.isDirectory()){
+                            if(writeScmContentOnlyIfItDiffers(content, fileTranslatedInScm)){
+                                synchronizedFiles.add(fileTranslatedInScm);
+                            }
+                        } else {
                             synchronizedFiles.add(fileTranslatedInScm);
                         }
                     }
