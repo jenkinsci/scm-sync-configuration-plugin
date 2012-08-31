@@ -5,6 +5,7 @@ import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import hudson.plugins.scm_sync_configuration.exceptions.LoggableException;
 import hudson.plugins.scm_sync_configuration.utils.Checksums;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -30,10 +31,15 @@ public class ChangeSet {
 
     public void registerPath(String path) {
         boolean contentAlreadyRegistered = false;
-        Path pathToRegister = new Path(JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(path));
+        File hudsonFile = JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(path);
+        Path pathToRegister = new Path(hudsonFile);
 
         if(pathToRegister.isDirectory()){
             pathContents.put(pathToRegister, new byte[0]);
+            // Registering recursively every files/directory inside this path
+            for(String fileOrDir : hudsonFile.list()){
+                registerPath(path+File.separator+fileOrDir);
+            }
         } else {
             // Verifying if path content is already in pathContent and, if this is the case,
             // look at checksums
