@@ -1,9 +1,5 @@
 package hudson.plugins.scm_sync_configuration.util;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 import hudson.Plugin;
 import hudson.PluginWrapper;
 import hudson.model.Hudson;
@@ -20,14 +16,6 @@ import hudson.plugins.scm_sync_configuration.xstream.migration.DefaultSSCPOJO;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
 import hudson.plugins.test.utils.DirectoryUtils;
 import hudson.plugins.test.utils.scms.ScmUnderTest;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.FileUtils;
@@ -43,6 +31,18 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.ClassPathResource;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({ "org.tmatesoft.svn.*" })
@@ -65,8 +65,10 @@ public abstract class ScmSyncConfigurationBaseTest {
 	
 	@Before
 	public void setup() throws Throwable {
-		// Instantiating ScmSyncConfigurationPlugin instance
-		ScmSyncConfigurationPlugin scmSyncConfigPluginInstance = new ScmSyncConfigurationPlugin();
+		// Instantiating ScmSyncConfigurationPlugin instance for unit tests by using
+        // synchronous transactions (instead of an asynchronous ones)
+        // => this way, every commit will be processed synchronously !
+		ScmSyncConfigurationPlugin scmSyncConfigPluginInstance = new ScmSyncConfigurationPlugin(true);
 		
 		// Mocking PluginWrapper attached to current ScmSyncConfigurationPlugin instance
 		PluginWrapper pluginWrapper = PowerMockito.mock(PluginWrapper.class);

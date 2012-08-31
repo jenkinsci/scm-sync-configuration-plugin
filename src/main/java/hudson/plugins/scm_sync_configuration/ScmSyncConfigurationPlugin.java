@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 public class ScmSyncConfigurationPlugin extends Plugin{
@@ -60,9 +61,20 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         }));
     }};
 
+    public static interface AtomicTransactionFactory {
+        AtomicTransaction createAtomicTransaction();
+    }
+
     private static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationPlugin.class.getName());
 
 	private transient ScmSyncConfigurationBusiness business;
+
+    /**
+     * Flag allowing to process commit synchronously instead of asynchronously (default)
+     * Could be useful, particularly during tests execution
+     */
+
+    private transient boolean synchronousTransactions = false;
 
     /**
      * SCM Transaction which is currently used. This transaction is thread scoped and will be, by default,
@@ -70,6 +82,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
      * Every time a transaction will be commited, it will be resetted to null
      */
     private transient ThreadLocal<ScmTransaction> transaction = new ThreadLocal<ScmTransaction>();
+
+    private transient Future<Void> latestCommitFuture;
 
 	private String scmRepositoryUrl;
 	private SCM scm;
@@ -81,7 +95,13 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     private List<File> filesModifiedByLastReload;
     private List<String> manualSynchronizationIncludes;
 
-	public ScmSyncConfigurationPlugin(){
+    public ScmSyncConfigurationPlugin(){
+        // By default, transactions should be asynchronous
+        this(false);
+    }
+
+	public ScmSyncConfigurationPlugin(boolean synchronousTransactions){
+        this.synchronousTransactions = synchronousTransactions;
 		setBusiness(new ScmSyncConfigurationBusiness());
 
         try {
@@ -342,13 +362,16 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	}
 
     public void startThreadedTransaction(){
-        this.setTransaction(new ThreadedTransaction());
+        this.setTransaction(new ThreadedTransaction(synchronousTransactions));
     }
 
-    public void commitChangeset(ChangeSet changeset){
+    public Future<Void> commitChangeset(ChangeSet changeset){
         try {
             if(!changeset.isEmpty()){
-                this.business.queueChangeSet(createScmContext(), changeset, getCurrentUser(), ScmSyncConfigurationDataProvider.retrieveComment(false));
+                latestCommitFuture = this.business.queueChangeSet(createScmContext(), changeset, getCurrentUser(), ScmSyncConfigurationDataProvider.retrieveComment(false));
+                return latestCommitFuture;
+            } else {
+                return null;
             }
         } finally {
             // Reinitializing transaction once commited
@@ -358,7 +381,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
     public ScmTransaction getTransaction() {
         if(transaction.get() == null){
-            setTransaction(new AtomicTransaction());
+            setTransaction(new AtomicTransaction(synchronousTransactions));
         }
         return transaction.get();
     }
@@ -369,4 +392,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         }
         transaction.set(transactionToRegister);
 	}
+
+    public Future<Void> getLatestCommitFuture() {
+        return latestCommitFuture;
+    }
 }

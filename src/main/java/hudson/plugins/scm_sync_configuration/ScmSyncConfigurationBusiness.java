@@ -18,8 +18,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 
@@ -40,6 +42,7 @@ public class ScmSyncConfigurationBusiness {
      */
     /*package*/ final ExecutorService writer = Executors.newFixedThreadPool(1, new DaemonThreadFactory());
 
+    //  TODO: Refactor this into the plugin object ???
     private List<Commit> commitsQueue = Collections.synchronizedList(new ArrayList<Commit>());
 
 	public ScmSyncConfigurationBusiness(){
@@ -113,19 +116,20 @@ public class ScmSyncConfigurationBusiness {
         return filesToCommit;
     }
 
-    public void queueChangeSet(final ScmContext scmContext, ChangeSet changeset, User user, String userMessage) {
+    public Future<Void> queueChangeSet(final ScmContext scmContext, ChangeSet changeset, User user, String userMessage) {
         if(scmManipulator == null || !scmManipulator.scmConfigurationSettledUp(scmContext, false)){
             LOGGER.info("Queue of changeset "+changeset.toString()+" aborted (scm manipulator not settled !)");
-            return;
+            return null;
       	}
 
         Commit commit = new Commit(changeset, user, userMessage, scmContext);
         LOGGER.info("Queuing commit "+commit.toString()+" to SCM ...");
         commitsQueue.add(commit);
 
-        writer.execute(new Runnable() {
-            public void run() {
+        return writer.submit(new Callable<Void>() {
+            public Void call() throws Exception {
                 processCommitsQueue();
+                return null;
             }
         });
     }

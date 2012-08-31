@@ -7,4 +7,11 @@ package hudson.plugins.scm_sync_configuration.transactions;
  */
 public class ThreadedTransaction extends ScmTransaction {
 
+    public ThreadedTransaction(boolean synchronousCommit){
+        super(synchronousCommit);
+    }
+
+    public ThreadedTransaction(){
+        super();
+    }
 }
