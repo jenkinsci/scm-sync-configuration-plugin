@@ -8,13 +8,11 @@ import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.command.checkin.CheckInScmResult;
 import org.apache.maven.scm.command.checkout.CheckOutScmResult;
 import org.apache.maven.scm.command.remove.RemoveScmResult;
-import org.apache.maven.scm.command.update.UpdateScmResult;
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.repository.ScmRepository;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -110,23 +108,11 @@ public class SCMManipulator {
             return null;
         }
 
-        String directoryName = hierarchyToDelete.getName();
         File enclosingDirectory = hierarchyToDelete.getParentFile();
 
         LOGGER.fine("Deleting SCM hierarchy ["+hierarchyToDelete.getAbsolutePath()+"] from SCM ...");
 
         try {
-            ScmFileSet updateFileSet = new ScmFileSet(enclosingDirectory, directoryName);
-            // FIXME : CRITICAL !! It could be lead to problems when 2-way synchronization will occur in the plugin !
-            // Here we MUST make an update to make scm delete work...
-            // But generally, we should NOT force an update here (update should ONLY come from
-            // the user will, not on the delete process !)
-            // If we don't make an update, delete is complaining because of a tree conflict :(
-            UpdateScmResult updateResult = this.scmManager.update(this.scmRepository, updateFileSet);
-            if(!updateResult.isSuccess()){
-                LOGGER.severe("[deleteHierarchy] Problem during first update : "+updateResult.getProviderMessage());
-                return null;
-            }
             ScmFileSet deleteFileSet = new ScmFileSet(enclosingDirectory, hierarchyToDelete);
             RemoveScmResult removeResult = this.scmManager.remove(this.scmRepository, deleteFileSet, "");
             if(!removeResult.isSuccess()){
@@ -141,10 +127,6 @@ public class SCMManipulator {
             List<File> filesToCommit = new ArrayList<File>();
             filesToCommit.add(commitFile);
             return filesToCommit;
-        } catch (IOException e) {
-            LOGGER.throwing(ScmManager.class.getName(), "<init>", e);
-            LOGGER.severe("[deleteHierarchy] Hierarchy deletion aborted : "+e.getMessage());
-            return null;
         } catch (ScmException e) {
             LOGGER.throwing(ScmManager.class.getName(), "remove", e);
             LOGGER.severe("[deleteHierarchy] Hierarchy deletion aborted : "+e.getMessage());
