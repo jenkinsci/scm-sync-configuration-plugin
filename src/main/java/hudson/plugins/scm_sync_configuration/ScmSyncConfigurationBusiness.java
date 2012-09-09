@@ -260,14 +260,19 @@ public class ScmSyncConfigurationBusiness {
 		for(ScmSyncStrategy strategy : availableStrategies){
 			filesToSync.addAll(strategy.createInitializationSynchronizedFileset());
 		}
-		
-		for(File fileToSync : filesToSync){
-			String hudsonConfigPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(fileToSync);
 
-            ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();
-            plugin.getTransaction().defineCommitMessage(new WeightedMessage("Repository initialization", MessageWeight.IMPORTANT));
-            plugin.getTransaction().registerPath(hudsonConfigPathRelativeToHudsonRoot);
-		}
+        ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();
+        plugin.startThreadedTransaction();
+        try {
+            for(File fileToSync : filesToSync){
+                String hudsonConfigPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(fileToSync);
+
+                plugin.getTransaction().defineCommitMessage(new WeightedMessage("Repository initialization", MessageWeight.IMPORTANT));
+                plugin.getTransaction().registerPath(hudsonConfigPathRelativeToHudsonRoot);
+            }
+        } finally {
+            plugin.getTransaction().commit();
+        }
 	}
 
 	public boolean scmCheckoutDirectorySettledUp(ScmContext scmContext){
@@ -320,7 +325,7 @@ public class ScmSyncConfigurationBusiness {
 			getScmSyncConfigurationStatusManager().signalFailed(operation);
 		}
 	}
-	
+
 	public static String getCheckoutScmDirectoryAbsolutePath(){
 		return Hudson.getInstance().getRootDir().getAbsolutePath()+WORKING_DIRECTORY_PATH+CHECKOUT_SCM_DIRECTORY;
 	}
