@@ -42,6 +42,18 @@ public class Path {
         return new File(ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath()+File.separator+getPath());
     }
 
+    public String getFirstNonExistingParentScmPath(){
+        File scmFile = getScmFile();
+        File latestNonExistingScmFile = null;
+        File currentFile = scmFile;
+        while(!currentFile.exists()){
+            latestNonExistingScmFile = currentFile;
+            currentFile = currentFile.getParentFile();
+        }
+
+        return latestNonExistingScmFile.getAbsolutePath().substring(ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath().length()+1);
+    }
+
     public boolean isDirectory() {
         return isDirectory;
     }

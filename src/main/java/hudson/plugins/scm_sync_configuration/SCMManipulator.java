@@ -3,6 +3,7 @@ package hudson.plugins.scm_sync_configuration;
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import org.apache.maven.scm.ScmException;
+import org.apache.maven.scm.ScmFile;
 import org.apache.maven.scm.ScmFileSet;
 import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.command.checkin.CheckInScmResult;
@@ -13,8 +14,10 @@ import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.repository.ScmRepository;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -154,11 +157,33 @@ public class SCMManipulator {
 					currentPath.append(File.separator);
 				}
 				File currentFile = new File(currentPath.toString());
+
 				// Trying to add current path to the scm ...
 				AddScmResult addResult = this.scmManager.add(this.scmRepository, new ScmFileSet(scmRoot, currentFile));
 				// If current has not yet been synchronized, addResult.isSuccess() should be true
 				if(addResult.isSuccess()){
 					synchronizedFiles.add(currentFile);
+
+                    if(i == pathChunks.length-1 && new File(scmRoot.getAbsolutePath()+File.separator+currentPath.toString()).isDirectory()){
+                        addResult = this.scmManager.add(this.scmRepository, new ScmFileSet(scmRoot, currentPath.toString()+"/**/*"));
+                        if(addResult.isSuccess()){
+                            // Cannot use directly a List<ScmFile> or List<File> here, since result type will depend upon
+                            // current scm api version
+                            Iterator scmFileIter = addResult.getAddedFiles().iterator();
+                            while(scmFileIter.hasNext()){
+                                Object scmFile = scmFileIter.next();
+                                if(scmFile instanceof File){
+                                    synchronizedFiles.add((File)scmFile);
+                                } else if(scmFile instanceof ScmFile){
+                                    synchronizedFiles.add(new File(scmRoot.getAbsolutePath()+File.separator+((ScmFile)scmFile).getPath()));
+                                } else {
+                                    LOGGER.severe("Unhandled AddScmResult.addedFiles type : " + scmFile.getClass().getName());
+                                }
+                            }
+                        } else {
+                            LOGGER.severe("Error while adding SCM files in directory : " + addResult.getCommandOutput());
+                        }
+                    }
 				} else {
                     // If addResult.isSuccess() is false, it isn't an error if it is related to path chunks (except for latest one) :
                     // if pathChunk is already synchronized, addResult.isSuccess() will be false.
@@ -166,6 +191,10 @@ public class SCMManipulator {
                     LOGGER.log(logLevel, "Error while adding SCM file : " + addResult.getCommandOutput());
                 }
 			}
+        } catch (IOException e) {
+            LOGGER.throwing(ScmFileSet.class.getName(), "init<>", e);
+            LOGGER.warning("[addFile] Error while creating ScmFileset : "+e.getMessage());
+            return synchronizedFiles;
 		} catch (ScmException e) {
 			LOGGER.throwing(ScmManager.class.getName(), "add", e);
 			LOGGER.warning("[addFile] Error while adding file : "+e.getMessage());
