@@ -177,7 +177,7 @@ public class ScmSyncConfigurationBusiness {
                     LOGGER.info("Empty changeset to commit (no changes found on files) => commit skipped !");
                 } else {
                     // Commiting files...
-                    boolean result = scmManipulator.checkinFiles(scmRoot, synchronizedFiles, commit.getMessage());
+                    boolean result = scmManipulator.checkinFiles(scmRoot, commit.getMessage());
 
                     if(result){
                         LOGGER.info("Commit "+commit.toString()+" pushed to SCM !");

@@ -22,7 +22,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -180,7 +179,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		FileUtils.fileAppend(hello2.getAbsolutePath(), "hello world 2 !");
 		scmManipulator.addFile(checkoutDirectoryForVerifications, "jobs/hello.txt");
 		scmManipulator.addFile(checkoutDirectoryForVerifications, "hello2.txt");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(hello1); add(hello2); }}, "external commit");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit");
 		
 		// Renaming fakeJob to newFakeJob
 		Item mockedItem = Mockito.mock(Item.class);
@@ -257,7 +256,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		FileUtils.fileAppend(hello2.getAbsolutePath(), "hello world 2 !");
 		scmManipulator.addFile(checkoutDirectoryForVerifications, "jobs/hello.txt");
 		scmManipulator.addFile(checkoutDirectoryForVerifications, "hello2.txt");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(hello1); add(hello2); }}, "external commit");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit");
 		
 		// Deleting fakeJob
 		Item mockedItem = Mockito.mock(Item.class);
@@ -290,11 +289,11 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		
 		final File configFile = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/config.xml");
 		FileUtils.fileAppend(configFile.getAbsolutePath(), "toto");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(configFile); }}, "external commit on config file");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit on config file");
 		
 		final File configJobFile = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/jobs/fakeJob/config.xml");
 		FileUtils.fileAppend(configJobFile.getAbsolutePath(), "titi");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(configJobFile); }}, "external commit on jonb file");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit on jonb file");
 		
 		verifyCurrentScmContentMatchesCurrentHudsonDir(false);
 		
@@ -328,7 +327,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		final File addedFile = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/myConfigFile.xml");
 		FileUtils.fileWrite(addedFile.getAbsolutePath(), "toto");
 		scmManipulator.addFile(checkoutDirectoryForVerifications, "/myConfigFile.xml");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(addedFile); }}, "external commit for add file");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit for add file");
 
 		final String jobDir = checkoutDirectoryForVerifications.getAbsolutePath() + "/jobs/myJob";
 		FileUtils.mkdir(jobDir);
@@ -336,7 +335,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		FileUtils.fileWrite(addedJobFile.getAbsolutePath(), "titi");
 		scmManipulator.addFile(checkoutDirectoryForVerifications, "/jobs/myJob");
 		scmManipulator.addFile(checkoutDirectoryForVerifications, "/jobs/myJob/config.xml");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, new ArrayList<File>(){{ add(addedJobFile); add(new File(jobDir)); }}, "external commit for add job file");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit for add job file");
 
 		verifyCurrentScmContentMatchesCurrentHudsonDir(false);
 		

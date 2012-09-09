@@ -198,22 +198,22 @@ public class SCMManipulator {
 		return synchronizedFiles;
 	}
 	
-	public boolean checkinFiles(File scmRoot, List<File> filesToCheckin, String commitMessage){
+	public boolean checkinFiles(File scmRoot, String commitMessage){
 		boolean checkinOk = false;
 
 		if(!expectScmRepositoryInitiated()){
 			return checkinOk;
 		}
-		
-		LOGGER.fine("Checking in SCM files : "+Arrays.toString(filesToCheckin.toArray(new File[0]))+" ...");
 
-		ScmFileSet fileSet = new ScmFileSet(scmRoot, filesToCheckin);
+		LOGGER.fine("Checking in SCM files ...");
+
+		ScmFileSet fileSet = new ScmFileSet(scmRoot);
 
 		// Let's commit everything !
 		try {
 			CheckInScmResult result = this.scmManager.checkIn(this.scmRepository, fileSet, commitMessage);
 			if(!result.isSuccess()){
-				LOGGER.severe("[checkinFiles] Problem during commit of ["+Arrays.toString(filesToCheckin.toArray(new File[0]))+"] : "+result.getCommandOutput());
+				LOGGER.severe("[checkinFiles] Problem during SCM commit : "+result.getCommandOutput());
 				return checkinOk;
 			}
 			checkinOk = true;
@@ -225,12 +225,12 @@ public class SCMManipulator {
 
 		
 		if(checkinOk){
-			LOGGER.fine("Checked in SCM files : "+Arrays.toString(filesToCheckin.toArray(new File[0]))+" !");
+			LOGGER.fine("Checked in SCM files !");
 		}
 		
 		return checkinOk;
 	}
-	
+
 	public String getScmSpecificFilename() {
 		return scmSpecificFilename;
 	}
