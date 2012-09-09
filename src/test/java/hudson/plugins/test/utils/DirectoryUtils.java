@@ -1,21 +1,14 @@
 package hudson.plugins.test.utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
-import org.apache.commons.io.FileUtils;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 public class DirectoryUtils {
 
@@ -28,7 +21,9 @@ public class DirectoryUtils {
 	}
 	private static final FileComparator FILE_COMPARATOR = new FileComparator();
 	
-	public static boolean directoryContentsAreEqual(File dir1, File dir2, final List<Pattern> excludePatterns, boolean recursive){
+    public static List<String> diffDirectories(File dir1, File dir2, final List<Pattern> excludePatterns, boolean recursive){
+        List<String> diffs = new ArrayList<String>();
+
 		if(!dir1.isDirectory() || !dir2.isDirectory()){
 			throw new IllegalArgumentException("dir1 & dir2 should be directories !");
 		}
@@ -58,7 +53,8 @@ public class DirectoryUtils {
 		}
 		
 		if(dir1FilesCollec.size() != dir2FilesCollec.size()){
-			return false;
+            diffs.add(String.format("Number of files in %s (%s) and %s (%s) differ !", dir1, dir1FilesCollec.size(), dir2, dir2FilesCollec.size()));
+            return diffs;
 		}
 		
 		
@@ -68,30 +64,29 @@ public class DirectoryUtils {
 			File f1 = dir1FileIter.next();
 			File f2 = dir2FileIter.next();
 			if(!f1.getName().equals(f2.getName())){
-				return false;
+                diffs.add(String.format("File listing in %s (%s) and %s (%s) differ !", dir1, dir1FilesCollec, dir2, dir2FilesCollec));
+                return diffs;
 			}
 			if(f1.isDirectory() != f2.isDirectory()){
-				return false;
+                diffs.add(String.format("Path type is not the same (dir / dir or file / file) on %s and %s !", f1, f2));
 			}
 			if(f1.isFile()){
 				try {
 					if(!FileUtils.contentEquals(f1, f2)){
-						return false;
+                        diffs.add(String.format("File content differ between %s and %s !", f1, f2));
 					}
 				}catch(IOException e){
 					LOGGER.throwing(FileUtils.class.getName(), "contentEquals", e);
 					LOGGER.severe("Error occured when comparing <"+f1.getAbsolutePath()+"> content with <"+f2.getAbsolutePath()+"> content");
-					return false;
+                    diffs.add("Error occured when comparing <"+f1.getAbsolutePath()+"> content with <"+f2.getAbsolutePath()+"> content");
 				}
 			}
 			if(recursive && f1.isDirectory()){
-				if(!directoryContentsAreEqual(f1, f2, excludePatterns, recursive)){
-					return false;
-				}
+                diffs.addAll(diffDirectories(f1, f2, excludePatterns, recursive));
 			}
 		}
 		
-		return true;
+		return diffs;
 	}
 	
 }

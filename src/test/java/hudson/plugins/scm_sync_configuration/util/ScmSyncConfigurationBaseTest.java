@@ -165,31 +165,29 @@ public abstract class ScmSyncConfigurationBaseTest {
 	}
 	
 	protected void verifyCurrentScmContentMatchesCurrentHudsonDir(boolean match) throws ComponentLookupException, PlexusContainerException, IOException{
+        verifyCurrentScmContentMatchesHierarchy(getCurrentHudsonRootDirectory(), match);
+    }
+
+    protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath, boolean match) throws ComponentLookupException, PlexusContainerException, IOException{
+           verifyCurrentScmContentMatchesHierarchy(new ClassPathResource(hierarchyPath).getFile(), match);
+   	}
+
+    protected void verifyCurrentScmContentMatchesHierarchy(File hierarchy, boolean match) throws ComponentLookupException, PlexusContainerException, IOException{
 		SCMManipulator scmManipulator = createMockedScmManipulator();
 		
 		// Checkouting scm in temp directory
 		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__verifyCurrentScmContentMatchesHierarchy");
 		scmManipulator.checkout(checkoutDirectoryForVerifications);
-		boolean directoryContentsAreEqual = DirectoryUtils.directoryContentsAreEqual(checkoutDirectoryForVerifications, getCurrentHudsonRootDirectory(), 
-				getSpecialSCMDirectoryExcludePatternAndScmSyncFiles(), true);
-		
+        List<String> diffs = DirectoryUtils.diffDirectories(checkoutDirectoryForVerifications, hierarchy,
+        				getSpecialSCMDirectoryExcludePatternAndScmSyncFiles(), true);
+
 		FileUtils.deleteDirectory(checkoutDirectoryForVerifications);
 		
-		assertThat(directoryContentsAreEqual, is(match));
-	}
-	
-	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath, boolean match) throws ComponentLookupException, PlexusContainerException, IOException{
-		SCMManipulator scmManipulator = createMockedScmManipulator();
-		
-		// Checkouting scm in temp directory
-		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__verifyCurrentScmContentMatchesHierarchy");
-		scmManipulator.checkout(checkoutDirectoryForVerifications);
-		boolean directoryContentsAreEqual = DirectoryUtils.directoryContentsAreEqual(checkoutDirectoryForVerifications, new ClassPathResource(hierarchyPath).getFile(), 
-				getSpecialSCMDirectoryExcludePattern(), true);
-		
-		FileUtils.deleteDirectory(checkoutDirectoryForVerifications);
-		
-		assertThat(directoryContentsAreEqual, is(match));
+        if(match){
+            assertTrue("Directories doesn't match : "+diffs, diffs.isEmpty());
+        } else {
+            assertFalse("Directories should _not_ match !", diffs.isEmpty());
+        }
 	}
 	
 	protected void verifyCurrentScmContentMatchesHierarchy(String hierarchyPath) throws ComponentLookupException, PlexusContainerException, IOException{
