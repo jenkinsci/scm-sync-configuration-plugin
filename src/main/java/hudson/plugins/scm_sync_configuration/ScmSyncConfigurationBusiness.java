@@ -321,7 +321,7 @@ public class ScmSyncConfigurationBusiness {
 		}
 	}
 	
-	private static String getCheckoutScmDirectoryAbsolutePath(){
+	public static String getCheckoutScmDirectoryAbsolutePath(){
 		return Hudson.getInstance().getRootDir().getAbsolutePath()+WORKING_DIRECTORY_PATH+CHECKOUT_SCM_DIRECTORY;
 	}
 }

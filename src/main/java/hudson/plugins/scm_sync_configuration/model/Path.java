@@ -1,6 +1,7 @@
 package hudson.plugins.scm_sync_configuration.model;
 
 import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
+import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationBusiness;
 
 import java.io.File;
 
@@ -33,6 +34,12 @@ public class Path {
 
     public File getHudsonFile(){
         return JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(this.path);
+    }
+
+    public File getScmFile(){
+        // TODO: Externalize ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath()
+        // in another class ?
+        return new File(ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath()+File.separator+getPath());
     }
 
     public boolean isDirectory() {
