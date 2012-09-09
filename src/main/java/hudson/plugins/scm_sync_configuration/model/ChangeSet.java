@@ -36,10 +36,6 @@ public class ChangeSet {
 
         if(pathToRegister.isDirectory()){
             pathContents.put(pathToRegister, new byte[0]);
-            // Registering recursively every files/directory inside this path
-            for(String fileOrDir : hudsonFile.list()){
-                registerPath(path+File.separator+fileOrDir);
-            }
         } else {
             // Verifying if path content is already in pathContent and, if this is the case,
             // look at checksums

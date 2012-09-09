@@ -148,32 +148,43 @@ public class ScmSyncConfigurationBusiness {
                 LOGGER.info(logMessage);
 
                 // Preparing files to add / delete
-                List<File> synchronizedFiles = new ArrayList<File>();
+                List<File> updatedFiles = new ArrayList<File>();
                 for(Map.Entry<Path,byte[]> pathContent : commit.getChangeset().getPathContents().entrySet()){
                     Path pathRelativeToJenkinsRoot = pathContent.getKey();
                     byte[] content = pathContent.getValue();
 
-                    File fileTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+pathRelativeToJenkinsRoot.getPath());
-                    boolean fileAlreadySynchronized = fileTranslatedInScm.exists();
-                    if(!fileAlreadySynchronized){
-                        createScmContent(pathRelativeToJenkinsRoot, content, fileTranslatedInScm);
-                        synchronizedFiles.addAll(scmManipulator.addFile(scmRoot, pathRelativeToJenkinsRoot.getPath()));
+                    File fileTranslatedInScm = pathRelativeToJenkinsRoot.getScmFile();
+                    if(pathRelativeToJenkinsRoot.isDirectory()) {
+                        if(!fileTranslatedInScm.exists()){
+                            try {
+                                FileUtils.copyDirectory(JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(pathRelativeToJenkinsRoot.getPath()),
+                                        fileTranslatedInScm);
+                            } catch (IOException e) {
+                                throw new LoggableException("Error while copying file hierarchy to SCM checkouted directory", FileUtils.class, "copyDirectory", e);
+                            }
+                            updatedFiles.addAll(scmManipulator.addFile(scmRoot, pathRelativeToJenkinsRoot.getPath()+"/**/*"));
+                        }
                     } else {
-                        if(!fileTranslatedInScm.isDirectory()){
-                            if(writeScmContentOnlyIfItDiffers(content, fileTranslatedInScm)){
-                                synchronizedFiles.add(fileTranslatedInScm);
+                        // We should remember if file in scm existed or not before any manipulation
+                        boolean fileTranslatedInScmInitiallyExists = fileTranslatedInScm.exists();
+
+                        boolean fileContentModified = writeScmContentOnlyIfItDiffers(pathRelativeToJenkinsRoot, content, fileTranslatedInScm);
+                        if(fileTranslatedInScmInitiallyExists){
+                            if(fileContentModified){
+                                // No need to call scmManipulator.addFile() if fileTranslatedInScm already existed
+                                updatedFiles.add(fileTranslatedInScm);
                             }
                         } else {
-                            synchronizedFiles.add(fileTranslatedInScm);
+                            updatedFiles.addAll(scmManipulator.addFile(scmRoot, pathRelativeToJenkinsRoot.getPath()));
                         }
                     }
                 }
                 for(Path path : commit.getChangeset().getPathsToDelete()){
                     List<File> deletedFiles = deleteHierarchy(commit.getScmContext(), path.getPath());
-                    synchronizedFiles.addAll(deletedFiles);
+                    updatedFiles.addAll(deletedFiles);
                 }
 
-                if(synchronizedFiles.isEmpty()){
+                if(updatedFiles.isEmpty()){
                     LOGGER.info("Empty changeset to commit (no changes found on files) => commit skipped !");
                 } else {
                     // Commiting files...
@@ -200,7 +211,7 @@ public class ScmSyncConfigurationBusiness {
         }
     }
 
-    private boolean writeScmContentOnlyIfItDiffers(byte[] content, File fileTranslatedInScm)
+    private boolean writeScmContentOnlyIfItDiffers(Path pathRelativeToJenkinsRoot, byte[] content, File fileTranslatedInScm)
                 throws LoggableException {
         boolean scmContentUpdated = false;
         boolean contentDiffer = false;
@@ -211,12 +222,8 @@ public class ScmSyncConfigurationBusiness {
         }
 
         if(contentDiffer){
-            try {
-                Files.write(content, fileTranslatedInScm);
-                scmContentUpdated = true;
-            } catch (IOException e) {
-                throw new LoggableException("Error while copying content to scm directory", Files.class, "write", e);
-            }
+            createScmContent(pathRelativeToJenkinsRoot, content, fileTranslatedInScm);
+            scmContentUpdated = true;
         } else {
             // Don't do anything
         }
