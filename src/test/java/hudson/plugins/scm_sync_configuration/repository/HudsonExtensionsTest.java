@@ -322,20 +322,20 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		SCMManipulator scmManipulator = createMockedScmManipulator();
 		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__tmpHierarchyForCommit");
 		scmManipulator.checkout(checkoutDirectoryForVerifications);
-		
+
+        // Verifying there isn't any difference between hudson and scm repo once every file are synchronized
 		verifyCurrentScmContentMatchesCurrentHudsonDir(true);
 		
 		final File addedFile = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/myConfigFile.xml");
 		FileUtils.fileWrite(addedFile.getAbsolutePath(), "toto");
-		scmManipulator.addFile(checkoutDirectoryForVerifications, "/myConfigFile.xml");
+		scmManipulator.addFile(checkoutDirectoryForVerifications, "myConfigFile.xml");
 		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit for add file");
 
 		final String jobDir = checkoutDirectoryForVerifications.getAbsolutePath() + "/jobs/myJob";
 		FileUtils.mkdir(jobDir);
 		final File addedJobFile = new File(jobDir + "/config.xml");
 		FileUtils.fileWrite(addedJobFile.getAbsolutePath(), "titi");
-		scmManipulator.addFile(checkoutDirectoryForVerifications, "/jobs/myJob");
-		scmManipulator.addFile(checkoutDirectoryForVerifications, "/jobs/myJob/config.xml");
+		scmManipulator.addFile(checkoutDirectoryForVerifications, "jobs/myJob");
 		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit for add job file");
 
 		verifyCurrentScmContentMatchesCurrentHudsonDir(false);
