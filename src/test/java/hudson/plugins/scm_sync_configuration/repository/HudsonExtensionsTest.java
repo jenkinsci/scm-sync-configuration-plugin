@@ -367,14 +367,14 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		assertStrategy(null, Mockito.mock(Job.class), "jobs" + File.separator + "myJob" + File.separator + "config2.xml");
 	}
 
-	private void assertStrategy(Class<? extends ScmSyncStrategy> clazz, Saveable object, String relativePath) {
-		ScmSyncStrategy strategy = ScmSyncConfigurationPlugin.getInstance().getStrategyForSaveable(object, new File(getCurrentHudsonRootDirectory() + File.separator + relativePath));
-		if (clazz == null) {
+	private void assertStrategy(Class<? extends ScmSyncStrategy> expectedStrategyClass, Saveable saveableInstance, String targetPath) {
+		ScmSyncStrategy strategy = ScmSyncConfigurationPlugin.getInstance().getStrategyForSaveable(saveableInstance, new File(getCurrentHudsonRootDirectory() + File.separator + targetPath));
+		if (expectedStrategyClass == null) {
 			assertThat(strategy, nullValue());
 		}
 		else {
 			assertThat(strategy, notNullValue());
-			assertThat(strategy, instanceOf(clazz));
+			assertThat(strategy, instanceOf(expectedStrategyClass));
 		}
 	}
 	
