@@ -9,6 +9,7 @@ import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.extensions.ScmSyncConfigurationItemListener;
 import hudson.plugins.scm_sync_configuration.extensions.ScmSyncConfigurationSaveableListener;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
+import hudson.plugins.scm_sync_configuration.strategies.impl.BasicPluginsConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JenkinsConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBaseTest;
@@ -354,7 +355,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 	@Test
 	public void shouldFileWhichHaveToBeInSCM() throws Throwable {
 		assertStrategy(JenkinsConfigScmSyncStrategy.class, Mockito.mock(Saveable.class), "config.xml");
-		assertStrategy(JenkinsConfigScmSyncStrategy.class, Mockito.mock(Saveable.class), "hudson.scm.SubversionSCM.xml");
+		assertStrategy(BasicPluginsConfigScmSyncStrategy.class, Mockito.mock(Saveable.class), "hudson.scm.SubversionSCM.xml");
 		assertStrategy(null, Mockito.mock(Saveable.class), "hudson.config.xml2");
 		assertStrategy(null, Mockito.mock(Saveable.class), "nodeMonitors.xml");
 		assertStrategy(null, Mockito.mock(Saveable.class), "toto" + File.separator + "hudson.config.xml");
