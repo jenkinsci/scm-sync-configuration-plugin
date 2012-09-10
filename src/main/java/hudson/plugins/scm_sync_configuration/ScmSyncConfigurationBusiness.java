@@ -157,7 +157,7 @@ public class ScmSyncConfigurationBusiness {
                     if(pathRelativeToJenkinsRoot.isDirectory()) {
                         if(!fileTranslatedInScm.exists()){
                             // Retrieving non existing parent scm path *before* copying it from jenkins directory
-                            String firstExistingParentScmPath = pathRelativeToJenkinsRoot.getFirstNonExistingParentScmPath();
+                            String firstNonExistingParentScmPath = pathRelativeToJenkinsRoot.getFirstNonExistingParentScmPath();
 
                             try {
                                 FileUtils.copyDirectory(JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(pathRelativeToJenkinsRoot.getPath()),
@@ -165,7 +165,7 @@ public class ScmSyncConfigurationBusiness {
                             } catch (IOException e) {
                                 throw new LoggableException("Error while copying file hierarchy to SCM checkouted directory", FileUtils.class, "copyDirectory", e);
                             }
-                            updatedFiles.addAll(scmManipulator.addFile(scmRoot, firstExistingParentScmPath));
+                            updatedFiles.addAll(scmManipulator.addFile(scmRoot, firstNonExistingParentScmPath));
                         }
                     } else {
                         // We should remember if file in scm existed or not before any manipulation,
