@@ -41,7 +41,7 @@ public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
                         MessageWeight.IMPORTANT);
             }
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
-                return new WeightedMessage("Job ["+item.getName()+"] hierarchy renamed",
+                return new WeightedMessage("Job ["+item.getName()+"] hierarchy renamed from ["+oldPath+"] to ["+newPath+"]",
                         // Job config rename message should be considered as "important", especially
                         // more important than the plugin descriptors Saveable renames
                         MessageWeight.IMPORTANT);
