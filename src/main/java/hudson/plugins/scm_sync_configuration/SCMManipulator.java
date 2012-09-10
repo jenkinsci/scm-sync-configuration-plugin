@@ -115,6 +115,11 @@ public class SCMManipulator {
 
         LOGGER.fine("Deleting SCM hierarchy ["+hierarchyToDelete.getAbsolutePath()+"] from SCM ...");
 
+        File commitFile = hierarchyToDelete;
+        while(! commitFile.isDirectory()) {
+            commitFile = commitFile.getParentFile();
+        }
+
         try {
             ScmFileSet deleteFileSet = new ScmFileSet(enclosingDirectory, hierarchyToDelete);
             RemoveScmResult removeResult = this.scmManager.remove(this.scmRepository, deleteFileSet, "");
@@ -122,13 +127,11 @@ public class SCMManipulator {
                 LOGGER.severe("[deleteHierarchy] Problem during remove : "+removeResult.getProviderMessage());
                 return null;
             }
-            File commitFile = hierarchyToDelete;
-            while(! commitFile.isDirectory()) {
-                commitFile = commitFile.getParentFile();
-            }
 
             List<File> filesToCommit = new ArrayList<File>();
             filesToCommit.add(commitFile);
+
+            filesToCommit = refineUpdatedFilesInScmResult(filesToCommit);
             return filesToCommit;
         } catch (ScmException e) {
             LOGGER.throwing(ScmManager.class.getName(), "remove", e);
@@ -162,24 +165,12 @@ public class SCMManipulator {
 				AddScmResult addResult = this.scmManager.add(this.scmRepository, new ScmFileSet(scmRoot, currentFile));
 				// If current has not yet been synchronized, addResult.isSuccess() should be true
 				if(addResult.isSuccess()){
-					synchronizedFiles.add(currentFile);
+					synchronizedFiles.addAll(refineUpdatedFilesInScmResult(addResult.getAddedFiles()));
 
                     if(i == pathChunks.length-1 && new File(scmRoot.getAbsolutePath()+File.separator+currentPath.toString()).isDirectory()){
                         addResult = this.scmManager.add(this.scmRepository, new ScmFileSet(scmRoot, currentPath.toString()+"/**/*"));
                         if(addResult.isSuccess()){
-                            // Cannot use directly a List<ScmFile> or List<File> here, since result type will depend upon
-                            // current scm api version
-                            Iterator scmFileIter = addResult.getAddedFiles().iterator();
-                            while(scmFileIter.hasNext()){
-                                Object scmFile = scmFileIter.next();
-                                if(scmFile instanceof File){
-                                    synchronizedFiles.add((File)scmFile);
-                                } else if(scmFile instanceof ScmFile){
-                                    synchronizedFiles.add(new File(scmRoot.getAbsolutePath()+File.separator+((ScmFile)scmFile).getPath()));
-                                } else {
-                                    LOGGER.severe("Unhandled AddScmResult.addedFiles type : " + scmFile.getClass().getName());
-                                }
-                            }
+                            synchronizedFiles.addAll(refineUpdatedFilesInScmResult(addResult.getAddedFiles()));
                         } else {
                             LOGGER.severe("Error while adding SCM files in directory : " + addResult.getCommandOutput());
                         }
@@ -208,6 +199,31 @@ public class SCMManipulator {
 		
 		return synchronizedFiles;
 	}
+
+    private List<File> refineUpdatedFilesInScmResult(List updatedFiles){
+        List<File> refinedUpdatedFiles = new ArrayList<File>();
+
+        // Cannot use directly a List<ScmFile> or List<File> here, since result type will depend upon
+        // current scm api version
+        Iterator scmFileIter = updatedFiles.iterator();
+        while(scmFileIter.hasNext()){
+            Object scmFile = scmFileIter.next();
+            if(scmFile instanceof File){
+                String checkoutScmDir = ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath();
+                String scmPath = ((File) scmFile).getAbsolutePath();
+                if(scmPath.startsWith(checkoutScmDir)){
+                    scmPath = scmPath.substring(checkoutScmDir.length() + 1);
+                }
+                refinedUpdatedFiles.add(new File(scmPath));
+            } else if(scmFile instanceof ScmFile){
+                refinedUpdatedFiles.add(new File(((ScmFile)scmFile).getPath()));
+            } else {
+                LOGGER.severe("Unhandled AddScmResult.addedFiles type : " + scmFile.getClass().getName());
+            }
+        }
+
+        return refinedUpdatedFiles;
+    }
 	
 	public boolean checkinFiles(File scmRoot, String commitMessage){
 		boolean checkinOk = false;
@@ -234,7 +250,7 @@ public class SCMManipulator {
 			return checkinOk;
 		}
 
-		
+
 		if(checkinOk){
 			LOGGER.fine("Checked in SCM files !");
 		}
