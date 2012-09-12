@@ -179,7 +179,7 @@ public abstract class ScmSyncConfigurationBaseTest {
 		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__verifyCurrentScmContentMatchesHierarchy");
 		scmManipulator.checkout(checkoutDirectoryForVerifications);
         List<String> diffs = DirectoryUtils.diffDirectories(checkoutDirectoryForVerifications, hierarchy,
-        				getSpecialSCMDirectoryExcludePatternAndScmSyncFiles(), true);
+                getSpecialSCMDirectoryExcludePattern(), true);
 
 		FileUtils.deleteDirectory(checkoutDirectoryForVerifications);
 		
@@ -199,19 +199,15 @@ public abstract class ScmSyncConfigurationBaseTest {
 		return scmUnderTest.createUrl(this.getCurentLocalRepository().getAbsolutePath());
 	}
 	
-	protected List<Pattern> getSpecialSCMDirectoryExcludePattern(){
+	protected static List<Pattern> getSpecialSCMDirectoryExcludePattern(){
 		return new ArrayList<Pattern>(){{
 			add(Pattern.compile("\\.svn"));
 			add(Pattern.compile("\\.git.*"));
+            add(Pattern.compile("scm-sync-configuration\\..*\\.log"));
+            add(Pattern.compile("scm-sync-configuration"));
 		}};
 	}
 	
-	protected List<Pattern> getSpecialSCMDirectoryExcludePatternAndScmSyncFiles(){
-		List<Pattern> list = getSpecialSCMDirectoryExcludePattern();
-		list.add(Pattern.compile("scm-sync.*"));
-		return list;
-	}
-
 	protected String getSuffixForTestFiles() {
 		return scmUnderTest.getSuffixForTestFiles();
 	}
