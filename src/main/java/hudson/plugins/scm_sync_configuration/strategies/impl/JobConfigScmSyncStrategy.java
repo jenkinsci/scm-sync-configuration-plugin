@@ -44,13 +44,13 @@ public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
                 return new WeightedMessage("Job ["+item.getName()+"] hierarchy renamed from ["+oldPath+"] to ["+newPath+"]",
                         // Job config rename message should be considered as "important", especially
                         // more important than the plugin descriptors Saveable renames
-                        MessageWeight.IMPORTANT);
+                        MessageWeight.MORE_IMPORTANT);
             }
             public WeightedMessage getMessageWhenItemDeleted(Item item) {
                 return new WeightedMessage("Job ["+item.getName()+"] hierarchy deleted",
                         // Job config deletion message should be considered as "important", especially
                         // more important than the plugin descriptors Saveable deletions
-                        MessageWeight.IMPORTANT);
+                        MessageWeight.MORE_IMPORTANT);
             }
         };
     }
