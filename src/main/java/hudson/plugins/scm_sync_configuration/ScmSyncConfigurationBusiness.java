@@ -103,14 +103,25 @@ public class ScmSyncConfigurationBusiness {
 		}
 	}
 	
-    public List<File> deleteHierarchy(ScmContext scmContext, String hierarchyPath){
+    public List<File> deleteHierarchy(ScmContext scmContext, Path hierarchyPath){
         if(scmManipulator == null || !scmManipulator.scmConfigurationSettledUp(scmContext, false)){
             return null;
         }
 
-        File rootHierarchyTranslatedInScm = new File(getCheckoutScmDirectoryAbsolutePath()+File.separator+hierarchyPath);
 
+        File rootHierarchyTranslatedInScm = hierarchyPath.getScmFile();
         List<File> filesToCommit = scmManipulator.deleteHierarchy(rootHierarchyTranslatedInScm);
+
+        // Once done, we should delete path in scm if it is a directory
+        if(hierarchyPath.isDirectory()){
+            try {
+                FileUtils.deleteDirectory(rootHierarchyTranslatedInScm);
+            } catch (IOException e) {
+                throw new LoggableException("Failed to recursively delete scm directory "+rootHierarchyTranslatedInScm.getAbsolutePath(), FileUtils.class, "deleteDirectory", e);
+            }
+        }
+
+
         signal("Delete " + hierarchyPath, filesToCommit != null);
 
         return filesToCommit;
@@ -184,7 +195,7 @@ public class ScmSyncConfigurationBusiness {
                     }
                 }
                 for(Path path : commit.getChangeset().getPathsToDelete()){
-                    List<File> deletedFiles = deleteHierarchy(commit.getScmContext(), path.getPath());
+                    List<File> deletedFiles = deleteHierarchy(commit.getScmContext(), path);
                     updatedFiles.addAll(deletedFiles);
                 }
 

@@ -63,7 +63,10 @@ public class ChangeSet {
     }
 
     public void registerPathForDeletion(String path){
-        pathsToDelete.add(new Path(path));
+        // We should determine if path is a directory by watching scm path (and not hudson path) because in most of time,
+        // when we are here, directory is already deleted in hudson hierarchy...
+        boolean isDirectory = new Path(path).getScmFile().isDirectory();
+        pathsToDelete.add(new Path(path, isDirectory));
     }
 
     public boolean isEmpty(){
