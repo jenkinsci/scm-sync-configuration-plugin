@@ -39,7 +39,7 @@ public class Commit {
    		if(user != null){
    			commitMessage.append(" by ").append(user.getId());
    		}
-   		if(userComment != null){
+   		if(userComment != null && !"".equals(userComment)){
    			commitMessage.append(" with following comment : ").append(userComment);
    		}
    		String message = commitMessage.toString();
