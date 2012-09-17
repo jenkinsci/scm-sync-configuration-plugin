@@ -33,15 +33,15 @@ public class BasicPluginsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
     public CommitMessageFactory getCommitMessageFactory(){
         return new CommitMessageFactory(){
             public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
-                return new WeightedMessage("Plugin configuration files updated", MessageWeight.NORMAL);
+                return new WeightedMessage("Plugin configuration files updated", MessageWeight.MINIMAL);
             }
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
                 // It should never happen... but who cares how will behave *every* plugin in the jenkins land ?
-                return new WeightedMessage("Plugin configuration files renamed", MessageWeight.NORMAL);
+                return new WeightedMessage("Plugin configuration files renamed", MessageWeight.MINIMAL);
             }
             public WeightedMessage getMessageWhenItemDeleted(Item item) {
                 // It should never happen... but who cares how will behave *every* plugin in the jenkins land ?
-                return new WeightedMessage("Plugin configuration files deleted", MessageWeight.NORMAL);
+                return new WeightedMessage("Plugin configuration files deleted", MessageWeight.MINIMAL);
             }
         };
     }

@@ -39,7 +39,7 @@ public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
                 return new WeightedMessage("Jenkins configuration files updated",
                         // Jenkins config update message should be considered as "important", especially
                         // more important than the plugin descriptors Saveable updates
-                        MessageWeight.IMPORTANT);
+                        MessageWeight.NORMAL);
             }
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
                 throw new IllegalStateException("Jenkins configuration files should never be renamed !");
