@@ -76,13 +76,20 @@ public class ChangeSet {
     public Map<Path, byte[]> getPathContents(){
         Map<Path, byte[]> filteredPathContents = new HashMap<Path, byte[]>(pathContents);
 
+        // Avoiding ConcurrentModificationException...
+        List<Path> filteredPaths = new ArrayList<Path>();
+
         for(Path pathToAdd : filteredPathContents.keySet()){
             for(Path pathToDelete : pathsToDelete){
                 // Removing paths being both in pathsToDelete and pathContents
                 if(pathToDelete.contains(pathToAdd)){
-                    filteredPathContents.remove(pathToAdd);
+                    filteredPaths.add(pathToAdd);
                 }
             }
+        }
+
+        for(Path path : filteredPaths){
+            filteredPathContents.remove(path);
         }
 
         return filteredPathContents;
