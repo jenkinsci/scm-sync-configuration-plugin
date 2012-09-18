@@ -20,7 +20,7 @@ public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
         add(new PageMatcher("^configure$", "form[name='config']"));
         // View configuration pages
         add(new PageMatcher("^(.+/)?view/[^/]+/configure$", "form[name='viewConfig']"));
-        add(new PageMatcher("^newView$", "form[name='createView']"));
+        add(new PageMatcher("^newView$", "form[name='createView'],form[name='createItem']"));
     } };
     
     private static final String[] PATTERNS = new String[]{
