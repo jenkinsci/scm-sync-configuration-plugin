@@ -22,26 +22,29 @@ public class ScmSyncConfigurationFilter implements Filter {
 
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
         // In the beginning of every http request, we should create a new threaded transaction
-        ScmSyncConfigurationPlugin.getInstance().startThreadedTransaction();
+        final ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();
+        if(plugin != null){
+            plugin.startThreadedTransaction();
 
-        try {
-            // Providing current ServletRequest in ScmSyncConfigurationDataProvider's thread local
-            // in order to be able to access it from everywhere inside this call
-            ScmSyncConfigurationDataProvider.provideRequestDuring((HttpServletRequest)request, new Callable() {
-                public Object call() throws Exception {
-                    try {
-                        // Handling "normally" http request
-                        chain.doFilter(request, response);
-                    }finally{
-                        // In the end of http request, we should commit current transaction
-                        ScmSyncConfigurationPlugin.getInstance().getTransaction().commit();
+            try {
+                // Providing current ServletRequest in ScmSyncConfigurationDataProvider's thread local
+                // in order to be able to access it from everywhere inside this call
+                ScmSyncConfigurationDataProvider.provideRequestDuring((HttpServletRequest)request, new Callable() {
+                    public Object call() throws Exception {
+                        try {
+                            // Handling "normally" http request
+                            chain.doFilter(request, response);
+                        }finally{
+                            // In the end of http request, we should commit current transaction
+                            plugin.getTransaction().commit();
+                        }
+
+                        return null;
                     }
-
-                    return null;
-                }
-            });
-        } catch(Exception e){
-            throw new ServletException(e);
+                });
+            } catch(Exception e){
+                throw new ServletException(e);
+            }
         }
     }
 
