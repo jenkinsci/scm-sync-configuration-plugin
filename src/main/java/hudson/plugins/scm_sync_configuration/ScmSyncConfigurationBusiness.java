@@ -134,7 +134,7 @@ public class ScmSyncConfigurationBusiness {
           }
 
         Commit commit = new Commit(changeset, user, userMessage, scmContext);
-        LOGGER.info("Queuing commit "+commit.toString()+" to SCM ...");
+        LOGGER.finest("Queuing commit "+commit.toString()+" to SCM ...");
         commitsQueue.add(commit);
 
         return writer.submit(new Callable<Void>() {
@@ -156,7 +156,7 @@ public class ScmSyncConfigurationBusiness {
             // Reading commit queue and commiting changeset
             for(Commit commit: currentCommitQueue){
                 String logMessage = "Processing commit : " + commit.toString();
-                LOGGER.info(logMessage);
+                LOGGER.finest(logMessage);
 
                 // Preparing files to add / delete
                 List<File> updatedFiles = new ArrayList<File>();
@@ -200,13 +200,13 @@ public class ScmSyncConfigurationBusiness {
                 }
 
                 if(updatedFiles.isEmpty()){
-                    LOGGER.info("Empty changeset to commit (no changes found on files) => commit skipped !");
+                    LOGGER.finest("Empty changeset to commit (no changes found on files) => commit skipped !");
                 } else {
                     // Commiting files...
                     boolean result = scmManipulator.checkinFiles(scmRoot, commit.getMessage());
 
                     if(result){
-                        LOGGER.info("Commit "+commit.toString()+" pushed to SCM !");
+                        LOGGER.finest("Commit "+commit.toString()+" pushed to SCM !");
                         checkedInCommits.add(commit);
                     } else {
                         throw new LoggableException("Error while checking in file to scm repository", SCMManipulator.class, "checkinFiles");
