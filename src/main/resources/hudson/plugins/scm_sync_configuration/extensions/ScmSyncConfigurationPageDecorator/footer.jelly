@@ -1,8 +1,8 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
 
 <j:set var="url" value="${request.requestURL}" />
-<j:if test="${it.getPlugin().shouldDecorationOccursOnURL(url.toString())}">
-    <j:set var="scmStrategy" value="${it.getPlugin().getStrategyForURL(url.toString())}" />
+<j:if test="${it.getScmSyncConfigPlugin().shouldDecorationOccursOnURL(url.toString())}">
+    <j:set var="scmStrategy" value="${it.getScmSyncConfigPlugin().getStrategyForURL(url.toString())}" />
     <j:set var="pageMatcher" value="${scmStrategy.getPageMatcherMatching(url.toString())}" />
     <!-- Adding scm-sync-configuration header file to the page -->
     <script src="${rootURL}/plugin/scm-sync-configuration/scripts/scm-sync-configuration/scm-sync-configuration-page-handler.js"></script>
@@ -43,18 +43,18 @@
     
 </j:if>
 
-<j:set var="success" value="${it.getPlugin().getScmSyncConfigurationStatusManager().getLastSuccess()}"/>
+<j:set var="success" value="${it.getScmSyncConfigPlugin().getScmSyncConfigurationStatusManager().getLastSuccess()}"/>
 <j:if test="${success != null}">
     <j:set var="icon" value="health-80plus" />
     <j:set var="msg" value="Last operation @ ${success}" />
 </j:if>
-<j:set var="fail" value="${it.getPlugin().getScmSyncConfigurationStatusManager().getLastFail()}"/>
+<j:set var="fail" value="${it.getScmSyncConfigPlugin().getScmSyncConfigurationStatusManager().getLastFail()}"/>
 <j:if test="${fail != null}">
     <j:set var="icon" value="error" />
     <j:set var="msg" value="&lt;br/&gt;${fail}&lt;br/&gt;To remove this message, please remove JENKINS_HOME/scm-sync-configuration.*.log files" />
 </j:if>
 
-<j:if test="${it.getPlugin().displayStatus}">
+<j:if test="${it.getScmSyncConfigPlugin().displayStatus}">
     <table width="100%">
         <tr><td id="footer">
             <span style="color:gray">SCM Sync status : <img src="${imagesURL}/16x16/${icon}.png" alt="" height="16" width="16"/>
