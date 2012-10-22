@@ -15,16 +15,10 @@ import java.util.regex.Pattern;
 
 public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
 
-    private static final Function<String,String> FILE_SEPARATOR_TRANSFORMER = new Function<String, String>() {
-        public String apply(@Nullable String s) {
-            return s.replaceAll("/", File.separator);
-        }
-    };
-
 	private String[] patterns;
 
 	public PatternsEntityMatcher(String[] patterns) {
-		this.patterns = Collections2.transform(Arrays.asList(patterns), FILE_SEPARATOR_TRANSFORMER).toArray(new String[0]);
+		this.patterns = patterns;
 	}
 
 	public boolean matches(Saveable saveable, File file) {
