@@ -25,6 +25,7 @@ public abstract class SCM {
 		add(new ScmSyncNoSCM());
 		add(new ScmSyncSubversionSCM());
 		add(new ScmSyncGitSCM());
+		add(new ScmSyncHgSCM());
 	} };
 	
 	transient protected String title;

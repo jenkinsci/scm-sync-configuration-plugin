@@ -145,7 +145,8 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>subversion</artifactId>
 	  <version>1.39</version>
-    </dependency>    
+    </dependency>
+    
     <!-- providers declaration -->
     <dependency>
       <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
@@ -159,6 +160,11 @@
       <version>1.6</version>
     </dependency>
     
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-provider-hg</artifactId>
+      <version>1.8</version>
+    </dependency>
     
     <!-- TEST DEPENDENCIES -->
     <!-- powermock to mock static methods.. especially Hudson.getInstance() -->
