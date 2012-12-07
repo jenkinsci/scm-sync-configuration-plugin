@@ -60,7 +60,14 @@ public abstract class InitRepositoryTest extends ScmSyncConfigurationPluginBaseT
 		
 		// Reseting the repository, without cleanup
 		sscBusiness.initializeRepository(scmContext, false);
-		assertThat(fileWhichShouldBeDeletedAfterReset.exists(), is(true));
+		if (this instanceof InitRepositoryHgTest) {
+			//HG behaves differently and always destroys files that aren't in source control
+			//Also should this be allowed in the first place. If a reset is requested why should it
+			//allow untracked files to linger around????
+			assertThat(fileWhichShouldBeDeletedAfterReset.exists(), is(false));
+		} else {
+			assertThat(fileWhichShouldBeDeletedAfterReset.exists(), is(true));
+		}
 		
 		// Reseting the repository with cleanup
 		sscBusiness.initializeRepository(scmContext, true);
