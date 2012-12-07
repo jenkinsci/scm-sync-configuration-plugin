@@ -9,9 +9,10 @@ public class ScmUnderTestHg implements ScmUnderTest {
 
 	public void initRepo(File path) throws Exception {
 		ProcessBuilder[] commands = new ProcessBuilder[] {
-		    new ProcessBuilder("hg", "init"),
-		    new ProcessBuilder("touch", "blank.txt"),
-		    new ProcessBuilder("hg", "add", "blank.txt"),
+		    //unlike Git, Hg doesn't support bare repos. So we create one for real
+			new ProcessBuilder("hg", "init"),
+		    new ProcessBuilder("touch", "hg_dummy.txt"),
+		    new ProcessBuilder("hg", "add", "hg_dummy.txt"),
 		    new ProcessBuilder("hg", "commit", "-m", "\"initial commit\"")
 		};
 		for (ProcessBuilder pb : commands) {

@@ -294,7 +294,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		
 		final File configJobFile = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/jobs/fakeJob/config.xml");
 		FileUtils.fileAppend(configJobFile.getAbsolutePath(), "titi");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit on jonb file");
+		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit on job file");
 		
 		verifyCurrentScmContentMatchesCurrentHudsonDir(false);
 		
@@ -303,11 +303,20 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		
 		verifyCurrentScmContentMatchesCurrentHudsonDir(true);
 		
+		assertAndRemoveHgSpecificFile(syncedFiles);
 		assertThat(syncedFiles.size(), is(2));
 		assertThat(syncedFiles.contains(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/config.xml")), is(true));
 		assertThat(syncedFiles.contains(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/jobs/fakeJob/config.xml")), is(true));
 		
 		assertStatusManagerIsOk();
+	}
+
+	public void assertAndRemoveHgSpecificFile(List<File> syncedFiles) {
+		if(this instanceof HudsonExtensionsHgTest) {
+			File file = new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/hg_dummy.txt");
+			assertThat(syncedFiles.contains(file), is(true));
+			syncedFiles.remove(syncedFiles.indexOf(file));
+		}
 	}
 
 	@Test
@@ -345,6 +354,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		
 		verifyCurrentScmContentMatchesCurrentHudsonDir(true);
 		
+		assertAndRemoveHgSpecificFile(syncedFiles);
 		assertThat(syncedFiles.size(), is(2));
 		assertThat(syncedFiles.contains(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/myConfigFile.xml")), is(true));
 		assertThat(syncedFiles.contains(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/jobs/myJob")), is(true));
