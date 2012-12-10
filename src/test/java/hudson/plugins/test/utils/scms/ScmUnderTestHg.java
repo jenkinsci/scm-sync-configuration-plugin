@@ -9,7 +9,8 @@ public class ScmUnderTestHg implements ScmUnderTest {
 
 	public void initRepo(File path) throws Exception {
 		ProcessBuilder[] commands = new ProcessBuilder[] {
-		    //unlike Git, Hg doesn't support bare repos. So we create one for real
+		    // HG support: Unlike Git, Hg does not appear to support "bare" repos.
+			// So we have to initialise the repo by commiting a dummy file.
 			new ProcessBuilder("hg", "init"),
 		    new ProcessBuilder("touch", "hg_dummy.txt"),
 		    new ProcessBuilder("hg", "add", "hg_dummy.txt"),

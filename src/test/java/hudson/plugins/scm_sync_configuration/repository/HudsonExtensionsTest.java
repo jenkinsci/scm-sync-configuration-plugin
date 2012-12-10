@@ -311,14 +311,6 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		assertStatusManagerIsOk();
 	}
 
-	public void assertAndRemoveHgSpecificFile(List<File> syncedFiles) {
-		if(this instanceof HudsonExtensionsHgTest) {
-			File file = new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/hg_dummy.txt");
-			assertThat(syncedFiles.contains(file), is(true));
-			syncedFiles.remove(syncedFiles.indexOf(file));
-		}
-	}
-
 	@Test
 	public void shouldReloadAllFilesUpdateScmAndReloadAllFilesWithFileAdd() throws Throwable {
 		// Initializing the repository...
@@ -388,4 +380,13 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		}
 	}
 	
+	private void assertAndRemoveHgSpecificFile(List<File> syncedFiles) {
+		// HG Support: If we encounter the dummy file used to initialise HG repo then we know
+		// we are dealing with a HG repo, so remove it so other tests can pass.
+		if(this instanceof HudsonExtensionsHgTest) {
+			File file = new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/hg_dummy.txt");
+			assertThat(syncedFiles.contains(file), is(true));
+			syncedFiles.remove(syncedFiles.indexOf(file));
+		}
+	}
 }

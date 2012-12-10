@@ -146,7 +146,7 @@
       <artifactId>subversion</artifactId>
 	  <version>1.39</version>
     </dependency>
-    
+
     <!-- providers declaration -->
     <dependency>
       <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
