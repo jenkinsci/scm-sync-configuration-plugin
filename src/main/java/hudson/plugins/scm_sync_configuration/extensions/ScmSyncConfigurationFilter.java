@@ -42,6 +42,12 @@ public class ScmSyncConfigurationFilter implements Filter {
                         return null;
                     }
                 });
+            } catch(RuntimeException e){
+                throw e;
+            } catch(ServletException e){
+                throw e;
+            } catch(IOException e){
+                throw e;
             } catch(Exception e){
                 throw new ServletException(e);
             }
