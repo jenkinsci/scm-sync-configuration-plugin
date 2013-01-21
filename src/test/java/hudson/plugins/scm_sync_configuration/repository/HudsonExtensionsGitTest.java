@@ -8,9 +8,4 @@ public class HudsonExtensionsGitTest extends HudsonExtensionsTest {
 	public HudsonExtensionsGitTest() {
 		super(new ScmUnderTestGit());
 	}
-
-    @Ignore("Should be re-activated once maven-scm-api 1.9 is released (see JENKINS-15128)")
-    public void shouldJobRenameBeCorrectlyImpactedOnSCM() throws Throwable {
-        super.shouldJobRenameBeCorrectlyImpactedOnSCM();
-    }
 }

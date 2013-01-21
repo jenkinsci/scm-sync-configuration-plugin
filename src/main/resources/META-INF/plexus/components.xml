@@ -32,6 +32,11 @@ under the License.
     </component>
 
     <component>
+        <role>org.apache.maven.scm.provider.ScmProvider</role>
+        <role-hint>git</role-hint>
+        <implementation>org.apache.maven.scm.provider.git.gitexe.GitExeScmProvider</implementation>
+    </component>
+    <component>
       <role>org.apache.maven.scm.provider.ScmProvider</role>
       <role-hint>svn</role-hint>
       <implementation>org.apache.maven.scm.provider.svn.svnjava.SvnJavaScmProvider</implementation>
