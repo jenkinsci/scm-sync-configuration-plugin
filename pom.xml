@@ -26,9 +26,11 @@
       <email>bertrand.paquet@gmail.com</email>
     </developer>
   </developers>
-  
+
   <properties>
-  	<powermock.version>1.4.8</powermock.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <powermock.version>1.4.8</powermock.version>
   </properties>
     
   <!-- get every artifact through maven.glassfish.org, which proxies all the artifacts that we need -->
