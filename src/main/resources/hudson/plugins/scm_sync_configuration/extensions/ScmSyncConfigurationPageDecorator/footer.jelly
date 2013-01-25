@@ -43,18 +43,18 @@
     
 </j:if>
 
-<j:set var="success" value="${it.getScmSyncConfigPlugin().getScmSyncConfigurationStatusManager().getLastSuccess()}"/>
-<j:if test="${success != null}">
-    <j:set var="icon" value="health-80plus" />
-    <j:set var="msg" value="Last operation @ ${success}" />
-</j:if>
-<j:set var="fail" value="${it.getScmSyncConfigPlugin().getScmSyncConfigurationStatusManager().getLastFail()}"/>
-<j:if test="${fail != null}">
-    <j:set var="icon" value="error" />
-    <j:set var="msg" value="&lt;br/&gt;${fail}&lt;br/&gt;To remove this message, please remove JENKINS_HOME/scm-sync-configuration.*.log files" />
-</j:if>
-
 <j:if test="${it.getScmSyncConfigPlugin().displayStatus}">
+	<j:set var="success" value="${it.getScmSyncConfigPlugin().getScmSyncConfigurationStatusManager().getLastSuccess()}"/>
+	<j:if test="${success != null}">
+	    <j:set var="icon" value="health-80plus" />
+	    <j:set var="msg" value="Last operation @ ${success}" />
+	</j:if>
+	<j:set var="fail" value="${it.getScmSyncConfigPlugin().getScmSyncConfigurationStatusManager().getLastFail()}"/>
+	<j:if test="${fail != null}">
+	    <j:set var="icon" value="error" />
+	    <j:set var="msg" value="&lt;br/&gt;${fail}&lt;br/&gt;To remove this message, please remove JENKINS_HOME/scm-sync-configuration.*.log files" />
+	</j:if>
+
     <table width="100%">
         <tr><td id="footer">
             <span style="color:gray">SCM Sync status : <img src="${imagesURL}/16x16/${icon}.png" alt="" height="16" width="16"/>
