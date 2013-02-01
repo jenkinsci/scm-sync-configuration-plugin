@@ -203,6 +203,8 @@ public abstract class ScmSyncConfigurationBaseTest {
 		return new ArrayList<Pattern>(){{
 			add(Pattern.compile("\\.svn"));
 			add(Pattern.compile("\\.git.*"));
+			add(Pattern.compile("\\.hg.*"));
+			add(Pattern.compile("hg_dummy.txt"));
             add(Pattern.compile("scm-sync-configuration\\..*\\.log"));
             add(Pattern.compile("scm-sync-configuration"));
 		}};

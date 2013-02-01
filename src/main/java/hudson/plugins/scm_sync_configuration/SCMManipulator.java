@@ -106,14 +106,16 @@ public class SCMManipulator {
 		return checkoutOk;
 	}
 
-    public List<File> deleteHierarchy(File hierarchyToDelete){
+    public List<File> deleteHierarchy(File hierarchyToDelete, String hierarchyPath){
         if(!expectScmRepositoryInitiated()){
             return null;
         }
 
-        File enclosingDirectory = hierarchyToDelete.getParentFile();
-
-        LOGGER.fine("Deleting SCM hierarchy ["+hierarchyToDelete.getAbsolutePath()+"] from SCM ...");
+        String absolutePath = hierarchyToDelete.getAbsolutePath();
+        String basePath = absolutePath.substring(0, absolutePath.lastIndexOf(hierarchyPath));
+        File enclosingDirectory = new File(basePath);
+        
+        LOGGER.fine("Deleting SCM hierarchy ["+absolutePath+"] from SCM ...");
 
         File commitFile = hierarchyToDelete;
         while(! commitFile.isDirectory()) {

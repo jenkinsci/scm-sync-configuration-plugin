@@ -110,7 +110,7 @@ public class ScmSyncConfigurationBusiness {
 
 
         File rootHierarchyTranslatedInScm = hierarchyPath.getScmFile();
-        List<File> filesToCommit = scmManipulator.deleteHierarchy(rootHierarchyTranslatedInScm);
+        List<File> filesToCommit = scmManipulator.deleteHierarchy(rootHierarchyTranslatedInScm, hierarchyPath.getPath());
 
         // Once done, we should delete path in scm if it is a directory
         if(hierarchyPath.isDirectory()){
