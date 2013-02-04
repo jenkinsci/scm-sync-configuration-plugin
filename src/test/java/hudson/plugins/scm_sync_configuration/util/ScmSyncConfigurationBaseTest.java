@@ -16,6 +16,7 @@ import hudson.plugins.scm_sync_configuration.xstream.migration.DefaultSSCPOJO;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
 import hudson.plugins.test.utils.DirectoryUtils;
 import hudson.plugins.test.utils.scms.ScmUnderTest;
+import jenkins.model.Jenkins;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.FileUtils;
@@ -102,16 +103,22 @@ public abstract class ScmSyncConfigurationBaseTest {
 	    User mockedUser = Mockito.mock(User.class);
 	    when(mockedUser.getId()).thenReturn("fcamblor");
 	    
-		// Mocking Hudson singleton instance ...
+		// Mocking Hudson/Jenkins singleton instances ...
 	    // Warning : this line will only work on Objenesis supported VMs :
 	    // http://code.google.com/p/objenesis/wiki/ListOfCurrentlySupportedVMs
 	    Hudson hudsonMockedInstance = spy((Hudson) new ObjenesisStd().getInstantiatorOf(Hudson.class).newInstance());
+	    Jenkins jenkinsMockedInstance = spy((Jenkins) new ObjenesisStd().getInstantiatorOf(Jenkins.class).newInstance());
 		PowerMockito.doReturn(currentHudsonRootDirectory).when(hudsonMockedInstance).getRootDir();
+		PowerMockito.doReturn(currentHudsonRootDirectory).when(jenkinsMockedInstance).getRootDir();
 		PowerMockito.doReturn(mockedUser).when(hudsonMockedInstance).getMe();
+		PowerMockito.doReturn(mockedUser).when(jenkinsMockedInstance).getMe();
 		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(hudsonMockedInstance).getPlugin(ScmSyncConfigurationPlugin.class);
-		
+		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(jenkinsMockedInstance).getPlugin(ScmSyncConfigurationPlugin.class);
+
 	    PowerMockito.mockStatic(Hudson.class);
+	    PowerMockito.mockStatic(Jenkins.class);
 	    PowerMockito.doReturn(hudsonMockedInstance).when(Hudson.class); Hudson.getInstance();
+	    PowerMockito.doReturn(jenkinsMockedInstance).when(Jenkins.class); Jenkins.getInstance();
 	    //when(Hudson.getInstance()).thenReturn(hudsonMockedInstance);
 	}
 	
