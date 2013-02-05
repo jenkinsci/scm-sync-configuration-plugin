@@ -202,6 +202,7 @@ public class ScmSyncConfigurationBusiness {
 
                 if(updatedFiles.isEmpty()){
                     LOGGER.finest("Empty changeset to commit (no changes found on files) => commit skipped !");
+                    checkedInCommits.add(commit);
                 } else {
                     // Commiting files...
                     boolean result = scmManipulator.checkinFiles(scmRoot, commit.getMessage());

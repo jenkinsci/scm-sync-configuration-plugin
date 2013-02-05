@@ -9,6 +9,7 @@ import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.command.checkin.CheckInScmResult;
 import org.apache.maven.scm.command.checkout.CheckOutScmResult;
 import org.apache.maven.scm.command.remove.RemoveScmResult;
+import org.apache.maven.scm.command.update.UpdateScmResult;
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.repository.ScmRepository;
@@ -74,8 +75,8 @@ public class SCMManipulator {
 		return scmRepositoryInitiated;
 	}
 	
-	public void update(File root) throws ScmException {
-		this.scmManager.update(scmRepository, new ScmFileSet(root));
+	public UpdateScmResult update(File root) throws ScmException {
+		return this.scmManager.update(scmRepository, new ScmFileSet(root));
 	}
 	public boolean checkout(File checkoutDirectory){
 		boolean checkoutOk = false;
