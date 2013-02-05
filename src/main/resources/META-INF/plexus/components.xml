@@ -34,7 +34,7 @@ under the License.
     <component>
         <role>org.apache.maven.scm.provider.ScmProvider</role>
         <role-hint>git</role-hint>
-        <implementation>org.apache.maven.scm.provider.git.gitexe.GitExeScmProvider</implementation>
+        <implementation>hudson.plugins.scm_sync_configuration.scms.customproviders.git.gitexe.ScmSyncGitExeScmProvider</implementation>
     </component>
     <component>
       <role>org.apache.maven.scm.provider.ScmProvider</role>
