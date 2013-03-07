@@ -171,6 +171,7 @@ public class ScmSyncConfigurationBusiness {
                             String firstNonExistingParentScmPath = pathRelativeToJenkinsRoot.getFirstNonExistingParentScmPath();
 
                             try {
+                                // TODO: filter files depending on patterns ?
                                 FileUtils.copyDirectory(JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(pathRelativeToJenkinsRoot.getPath()),
                                         fileTranslatedInScm);
                             } catch (IOException e) {
