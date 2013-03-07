@@ -5,3 +5,4 @@
 /work
 /work-backup
 *.iml
+.DS_Store
