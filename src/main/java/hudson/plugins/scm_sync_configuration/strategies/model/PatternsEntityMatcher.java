@@ -1,33 +1,29 @@
 package hudson.plugins.scm_sync_configuration.strategies.model;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 import hudson.model.Hudson;
 import hudson.model.Saveable;
 import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import org.apache.tools.ant.DirectoryScanner;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
 
-	private String[] patterns;
+	private String[] includesPatterns;
 
-	public PatternsEntityMatcher(String[] patterns) {
-		this.patterns = patterns;
-	}
+    public PatternsEntityMatcher(String[] includesPatterns){
+        this.includesPatterns = includesPatterns;
+    }
 
 	public boolean matches(Saveable saveable, File file) {
 		if (file == null) {
 			return false;
 		}
 		String filePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
-		for(String pattern : patterns) {
-            if(DirectoryScanner.match(pattern, filePathRelativeToHudsonRoot)){
+		for(String matchingFile : matchingFilesFrom(Hudson.getInstance().getRootDir())) {
+            if(matchingFile.equals(filePathRelativeToHudsonRoot)){
                 return true;
             }
 		}
@@ -35,12 +31,12 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
 	}
 
     public List<String> getIncludes(){
-        return Arrays.asList(patterns);
+        return Arrays.asList(includesPatterns);
     }
 
     public String[] matchingFilesFrom(File rootDirectory) {
         DirectoryScanner scanner = new DirectoryScanner();
-        scanner.setIncludes(patterns);
+        scanner.setIncludes(includesPatterns);
         scanner.setBasedir(rootDirectory);
         scanner.scan();
         return scanner.getIncludedFiles();
