@@ -354,6 +354,10 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 
 	@Test
 	public void shouldFileWhichHaveToBeInSCM() throws Throwable {
+        // IMPORTANT NOTE :
+        // For every tested files in this test, file path should exist in
+        // HudsonExtensionsTest.shouldFileWhichHaveToBeInSCM/ directory
+
 		assertStrategy(JenkinsConfigScmSyncStrategy.class, Mockito.mock(Saveable.class), "config.xml");
 		assertStrategy(BasicPluginsConfigScmSyncStrategy.class, Mockito.mock(Saveable.class), "hudson.scm.SubversionSCM.xml");
 		assertStrategy(null, Mockito.mock(Saveable.class), "hudson.config.xml2");
@@ -377,5 +381,13 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 			assertThat(strategy, instanceOf(expectedStrategyClass));
 		}
 	}
-	
+
+    @Override
+	protected String getHudsonRootBaseTemplate(){
+        if("shouldFileWhichHaveToBeInSCM".equals(testName.getMethodName())){
+            return "HudsonExtensionsTest.shouldFileWhichHaveToBeInSCM/";
+        }
+
+		return "hudsonRootBaseTemplate/";
+	}
 }
