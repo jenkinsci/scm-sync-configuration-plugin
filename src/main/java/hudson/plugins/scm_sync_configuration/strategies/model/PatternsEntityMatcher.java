@@ -4,6 +4,7 @@ import hudson.model.Hudson;
 import hudson.model.Saveable;
 import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import org.apache.tools.ant.DirectoryScanner;
+import org.springframework.util.AntPathMatcher;
 
 import java.io.File;
 import java.util.Arrays;
@@ -22,8 +23,9 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
 			return false;
 		}
 		String filePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
-		for(String matchingFile : matchingFilesFrom(Hudson.getInstance().getRootDir())) {
-            if(matchingFile.equals(filePathRelativeToHudsonRoot)){
+		AntPathMatcher matcher = new AntPathMatcher();
+		for (String pattern : includesPatterns) {
+            if (matcher.match(pattern, filePathRelativeToHudsonRoot)) {
                 return true;
             }
 		}
