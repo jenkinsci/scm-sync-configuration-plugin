@@ -52,12 +52,21 @@
 	<j:set var="fail" value="${it.getScmSyncConfigPlugin().getScmSyncConfigurationStatusManager().getLastFail()}"/>
 	<j:if test="${fail != null}">
 	    <j:set var="icon" value="error" />
-	    <j:set var="msg" value="&lt;br/&gt;${fail}&lt;br/&gt;To remove this message, please remove JENKINS_HOME/scm-sync-configuration.*.log files" />
+	    <j:set var="msg" value="&lt;br/&gt;${fail}&lt;br/&gt;To remove this message, please remove JENKINS_HOME/scm-sync-configuration.*.log files or by click the status icon" />
 	</j:if>
+
+    <script>
+        var remover = <st:bind value="${it}"/>;
+        function removeLog() {
+            remover.RemoveLog();
+            var id = document.getElementById("fail_log");
+            id.innerHTML = "SCM Sync status :";
+        }
+    </script>
 
     <table width="100%">
         <tr><td id="footer">
-            <span style="color:gray">SCM Sync status : <img src="${imagesURL}/16x16/${icon}.png" alt="" height="16" width="16"/>
+            <span id="fail_log" style="color:gray">SCM Sync status : <img src="${imagesURL}/16x16/${icon}.png" alt="" height="16" width="16" onclick="removeLog();"/>
             ${msg}
             </span>
         </td></tr>
