@@ -25,6 +25,14 @@ public class ScmSyncConfigurationStatusManager {
 		success = new File(Hudson.getInstance().getRootDir().getAbsolutePath()+File.separator+LOG_SUCCESS_FILENAME);
 	}
 
+	public File getFailFile() {
+		return fail;
+	}
+
+	public File getSuccessFile() {
+		return success;
+	}
+
 	public String getLastFail() {
 		return readFile(fail);
 	}
