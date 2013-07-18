@@ -8,6 +8,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
 
 /**
  * @author fcamblor
@@ -17,12 +18,21 @@ import java.util.concurrent.Callable;
 @Extension
 public class ScmSyncConfigurationFilter implements Filter {
 
+    private static final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(ScmSyncConfigurationFilter.class.getName());
+
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
         // In the beginning of every http request, we should create a new threaded transaction
-        final ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();
+        final ScmSyncConfigurationPlugin plugin;
+        try {
+            plugin = ScmSyncConfigurationPlugin.getInstance();
+        } catch(Throwable t){
+            LOG.log(Level.SEVERE, "Error when retrieving ScmSyncConfig plugin instance => No filtering enabled on current request", t);
+            return;
+        }
+
         if(plugin != null){
             plugin.startThreadedTransaction();
 
