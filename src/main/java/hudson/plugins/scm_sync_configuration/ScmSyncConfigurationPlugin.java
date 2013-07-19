@@ -14,10 +14,7 @@ import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
 import hudson.plugins.scm_sync_configuration.scms.ScmSyncNoSCM;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
-import hudson.plugins.scm_sync_configuration.strategies.impl.BasicPluginsConfigScmSyncStrategy;
-import hudson.plugins.scm_sync_configuration.strategies.impl.JenkinsConfigScmSyncStrategy;
-import hudson.plugins.scm_sync_configuration.strategies.impl.JobConfigScmSyncStrategy;
-import hudson.plugins.scm_sync_configuration.strategies.impl.ManualIncludesScmSyncStrategy;
+import hudson.plugins.scm_sync_configuration.strategies.impl.*;
 import hudson.plugins.scm_sync_configuration.transactions.AtomicTransaction;
 import hudson.plugins.scm_sync_configuration.transactions.ScmTransaction;
 import hudson.plugins.scm_sync_configuration.transactions.ThreadedTransaction;
@@ -47,6 +44,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
             new JenkinsConfigScmSyncStrategy(),
             new BasicPluginsConfigScmSyncStrategy(),
             new JobConfigScmSyncStrategy(),
+            new UserConfigScmSyncStrategy(),
             new ManualIncludesScmSyncStrategy()
 	};
 
