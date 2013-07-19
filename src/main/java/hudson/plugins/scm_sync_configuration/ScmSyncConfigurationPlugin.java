@@ -61,6 +61,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         }));
     }};
 
+    public void purgeFailLogs() {
+        business.purgeFailLogs();
+    }
+
     public static interface AtomicTransactionFactory {
         AtomicTransaction createAtomicTransaction();
     }
@@ -392,6 +396,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         }
         transaction.set(transactionToRegister);
 	}
+
+    public boolean currentUserCannotPurgeFailLogs() {
+        return !business.canCurrentUserPurgeFailLogs();
+    }
 
     public Future<Void> getLatestCommitFuture() {
         return latestCommitFuture;

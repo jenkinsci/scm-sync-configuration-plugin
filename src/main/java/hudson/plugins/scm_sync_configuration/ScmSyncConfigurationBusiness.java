@@ -7,6 +7,7 @@ import hudson.plugins.scm_sync_configuration.exceptions.LoggableException;
 import hudson.plugins.scm_sync_configuration.model.*;
 import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.utils.Checksums;
+import hudson.security.Permission;
 import hudson.util.DaemonThreadFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.scm.ScmException;
@@ -350,5 +351,19 @@ public class ScmSyncConfigurationBusiness {
 
     public static String getCheckoutScmDirectoryAbsolutePath(){
         return Hudson.getInstance().getRootDir().getAbsolutePath()+WORKING_DIRECTORY_PATH+CHECKOUT_SCM_DIRECTORY;
+    }
+
+    public void purgeFailLogs() {
+        Hudson.getInstance().checkPermission(purgeFailLogPermission());
+        scmSyncConfigurationStatusManager.purgeFailLogs();
+    }
+
+    public boolean canCurrentUserPurgeFailLogs() {
+        return Hudson.getInstance().hasPermission(purgeFailLogPermission());
+    }
+
+    private static Permission purgeFailLogPermission(){
+        // Only administrators should be able to purge logs
+        return Hudson.ADMINISTER;
     }
 }

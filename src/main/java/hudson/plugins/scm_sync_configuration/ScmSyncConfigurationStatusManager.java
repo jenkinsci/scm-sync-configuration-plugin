@@ -70,5 +70,8 @@ public class ScmSyncConfigurationStatusManager {
 			LOGGER.severe("Unable to write file " + f.getAbsolutePath() + " : " + e.getMessage());
 		}
 	}
-	
+
+    public void purgeFailLogs() {
+        fail.delete();
+    }
 }

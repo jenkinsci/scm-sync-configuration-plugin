@@ -52,8 +52,20 @@
 	<j:set var="fail" value="${it.getScmSyncConfigPlugin().getScmSyncConfigurationStatusManager().getLastFail()}"/>
 	<j:if test="${fail != null}">
 	    <j:set var="icon" value="error" />
-	    <j:set var="msg" value="&lt;br/&gt;${fail}&lt;br/&gt;To remove this message, please remove JENKINS_HOME/scm-sync-configuration.*.log files" />
+	    <j:set var="msg" value="&lt;br/&gt;${fail}&lt;br/&gt;To remove this message, please &lt;a href='#' onclick='javascript:removeLog();'&gt;click here&lt;/a&gt;" />
 	</j:if>
+
+    <script type="text/javascript">
+        function removeLog() {
+            <j:if test="${it.getScmSyncConfigPlugin().currentUserCannotPurgeFailLogs()}">
+                alert("Only administrators can purge logs !");
+                return;
+            </j:if>
+            var plugin = <st:bind value="${it}"/>;
+            plugin.purgeScmSyncConfigLogs();
+            alert("SCM Sync Config errors purged ! You can refresh the page.");
+        }
+	</script>
 
     <table width="100%">
         <tr><td id="footer">
