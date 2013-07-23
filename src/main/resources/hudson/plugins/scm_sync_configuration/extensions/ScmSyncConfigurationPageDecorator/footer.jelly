@@ -55,15 +55,16 @@
 	    <j:set var="msg" value="&lt;br/&gt;${fail}&lt;br/&gt;To remove this message, please &lt;a href='#' onclick='javascript:removeLog();'&gt;click here&lt;/a&gt;" />
 	</j:if>
 
+    <st:bind var="scmSyncConfigPageDecorator" value="${it}"/>
     <script type="text/javascript">
         function removeLog() {
             <j:if test="${it.getScmSyncConfigPlugin().currentUserCannotPurgeFailLogs()}">
                 alert("Only administrators can purge logs !");
                 return;
             </j:if>
-            var plugin = <st:bind value="${it}"/>;
-            plugin.purgeScmSyncConfigLogs();
-            alert("SCM Sync Config errors purged ! You can refresh the page.");
+            scmSyncConfigPageDecorator.purgeScmSyncConfigLogs();
+            alert("SCM Sync Config errors purged !");
+            document.location.reload(true);
         }
 	</script>
 
