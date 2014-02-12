@@ -4,6 +4,7 @@ import hudson.XmlFile;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.Saveable;
+import hudson.model.TopLevelItem;
 import hudson.plugins.scm_sync_configuration.SCMManipulator;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.extensions.ScmSyncConfigurationItemListener;
@@ -60,7 +61,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		// Renaming fakeJob to newFakeJob
-		Item mockedItem = Mockito.mock(Job.class);
+		Item mockedItem = Mockito.mock(TopLevelItem.class);
 		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/newFakeJob/" );
 		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
         when(mockedItem.getName()).thenReturn("newFakeJob");
@@ -90,7 +91,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		FileUtils.copyFile(new ClassPathResource("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobAddBeCorrectlyImpactedOnSCM/jobs/newFakeJob/config.xml").getFile(), configFile);
 		
 		// Creating fake new job
-		Item mockedItem = Mockito.mock(Job.class);
+		Item mockedItem = Mockito.mock(TopLevelItem.class);
 		when(mockedItem.getRootDir()).thenReturn(jobDirectory);
 		
 		sscItemListener.onCreated(mockedItem);
@@ -116,7 +117,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		File configFile = new File(jobDirectory.getAbsolutePath() + File.separator + "config.xml");
 		
 		// Creating fake new job
-		Item mockedItem = Mockito.mock(Job.class);
+		Item mockedItem = Mockito.mock(TopLevelItem.class);
 		when(mockedItem.getRootDir()).thenReturn(jobDirectory);
 		
 		sscItemListener.onCreated(mockedItem);
@@ -205,7 +206,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		// Deleting fakeJob
-		Item mockedItem = Mockito.mock(Job.class);
+		Item mockedItem = Mockito.mock(TopLevelItem.class);
 		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/" );
 		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
 		
@@ -228,7 +229,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 		
 		// Deleting fakeJob
-		Item mockedItem = Mockito.mock(Job.class);
+		Item mockedItem = Mockito.mock(TopLevelItem.class);
 		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/" );
 		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
 		
@@ -367,7 +368,7 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		assertStrategy(null, Mockito.mock(Job.class), "toto" + File.separator + "config.xml");
 		assertStrategy(null, Mockito.mock(Job.class), "jobs" + File.separator + "config.xml");
 		assertStrategy(null, Mockito.mock(Saveable.class), "jobs" + File.separator + "myJob" + File.separator + "config.xml");
-		assertStrategy(JobConfigScmSyncStrategy.class, Mockito.mock(Job.class), "jobs" + File.separator + "myJob" + File.separator + "config.xml");
+		assertStrategy(JobConfigScmSyncStrategy.class, Mockito.mock(TopLevelItem.class), "jobs" + File.separator + "myJob" + File.separator + "config.xml");
 		assertStrategy(null, Mockito.mock(Job.class), "jobs" + File.separator + "myJob" + File.separator + "config2.xml");
 	}
 
