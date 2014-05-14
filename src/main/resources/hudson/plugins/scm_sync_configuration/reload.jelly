@@ -13,7 +13,7 @@
         </j:forEach>
         </ul>
       </p>
-      <h3>Please reload Jenkins config from disk by clicking <a href="${rootUrl}/reload">here</a></h3>
+      <h3>Please reload Jenkins config from disk by clicking <a href="${rootURL}/reload">here</a></h3>
       
     </l:main-panel>
  </l:layout>

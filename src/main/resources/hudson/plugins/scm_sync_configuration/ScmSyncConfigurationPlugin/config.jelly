@@ -49,7 +49,7 @@
         </f:repeatable>
     </f:entry>
     <f:entry title="${%Reload config from SCM}" help="${rootUrl}/plugin/scm-sync-configuration/help/reloadScmConfig-help.html">
-    	<a href="${rootUrl}/plugin/scm-sync-configuration/reloadAllFilesFromScm" onClick="return confirm('${%WARNING : the Jenkins config will be reloaded from SCM}.\n${%Only file modifications are handled}. ${%File added or removed will not be handled} !\n\n${%Continue} ?')">${%Reload}</a>
+    	<a href="${rootURL}/plugin/scm-sync-configuration/reloadAllFilesFromScm" onClick="return confirm('${%WARNING : the Jenkins config will be reloaded from SCM}.\n${%Only file modifications are handled}. ${%File added or removed will not be handled} !\n\n${%Continue} ?')">${%Reload}</a>
     </f:entry>
   </f:section>
   
