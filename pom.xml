@@ -58,7 +58,7 @@
                 <configuration>
                     <!-- Git scm specific behaviour -->
                     <localCheckout>true</localCheckout>
-                    <pushChanges>false</pushChanges>
+                    <pushChanges>true</pushChanges>
                 </configuration>
             </plugin>
             <plugin>
