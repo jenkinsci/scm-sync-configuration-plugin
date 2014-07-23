@@ -1,8 +1,14 @@
-/.project
-/target
-/.settings
-/.classpath
-/work
-/work-backup
+target/
+work*/
+
+# IntelliJ project files 
 *.iml
-.idea
+*.ipr
+*.iws
+.idea/
+
+# eclipse project file
+.settings
+.classpath
+.project
+build/
