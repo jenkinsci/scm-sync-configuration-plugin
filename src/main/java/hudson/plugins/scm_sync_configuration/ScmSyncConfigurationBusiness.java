@@ -61,7 +61,7 @@ public class ScmSyncConfigurationBusiness {
         this.scmManipulator = new SCMManipulator(scmManager);
         this.checkoutScmDirectory = new File(getCheckoutScmDirectoryAbsolutePath());
         this.checkoutSucceeded = false;
-        initializeRepository(scmContext, false);
+        initializeRepository(scmContext, true);
     }
 
     public void initializeRepository(ScmContext scmContext, boolean deleteCheckoutScmDir){
@@ -304,8 +304,32 @@ public class ScmSyncConfigurationBusiness {
     }
 
     public List<File> reloadAllFilesFromScm() throws IOException, ScmException {
+        //removeSourceJobsDuringReload();
         this.scmManipulator.update(new File(getCheckoutScmDirectoryAbsolutePath()));
         return syncDirectories(new File(getCheckoutScmDirectoryAbsolutePath() + File.separator), "");
+    }
+
+    /**
+     *
+     * @param from configuration checked out from SCM
+     * @param relative
+     * @return
+     * @throws IOException
+     */
+    public List<File> removeSourceJobsDuringReload() throws IOException {
+        List<File> l = new ArrayList<File>();
+        File jobsFolder = new File(Hudson.getInstance().getRootDir().toString()+ "/jobs");
+        LOGGER.info("Configuration reload - jobs removal. Cleaning up folder:"+jobsFolder);
+
+        for(File f : jobsFolder.listFiles()){
+            l.add(f);
+            if (f.isDirectory()) {
+                FileUtils.deleteDirectory(f);
+            } else {
+                FileUtils.forceDelete(f);
+            }
+        }
+        return l;
     }
 
     private List<File> syncDirectories(File from, String relative) throws IOException {

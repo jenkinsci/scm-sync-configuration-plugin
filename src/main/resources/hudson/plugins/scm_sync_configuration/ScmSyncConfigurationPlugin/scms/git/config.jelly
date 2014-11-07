@@ -3,5 +3,7 @@
 	<f:entry title="${%Repository URL}" help="${rootURL}/plugin/scm-sync-configuration/helpForRepositoryUrl?scm=${scm.id}">
 		<f:textbox id="gitRepositoryUrl" name="gitRepositoryUrl" value="${it.isScmSelected(scm) ? it.scmUrl : null}"/>
 	</f:entry>
-
+	<f:entry title="${%Repository branch}" help="${rootURL}/plugin/scm-sync-configuration/helpForRepositoryUrl?scm=${scm.id}">
+    	<f:textbox id="scmGitBranch" name="scmGitBranch" value="${it.isScmSelected(scm) ? it.scmGitBranch : null}"/>
+    </f:entry>
 </j:jelly>
