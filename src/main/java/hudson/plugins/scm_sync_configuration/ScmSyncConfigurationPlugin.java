@@ -97,7 +97,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     private String commitMessagePattern = "[message]";
     private List<File> filesModifiedByLastReload;
     private List<String> manualSynchronizationIncludes;
-    private String scmBranchToReload;
 
     private static final String SCM_SYNC_GIT_PREFX="scm:git:";
 
