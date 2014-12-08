@@ -9,7 +9,7 @@
 
   <artifactId>scm-sync-configuration</artifactId>
   <name>SCM Sync Configuration Plugin</name>
-  <version>0.0.8.1-SNAPSHOT</version>
+  <version>0.0.8.1hybris</version>
   <packaging>hpi</packaging>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/SCM+Sync+configuration+plugin</url>
   <description>SCM Sync Configuration Jenkins plugin is aimed at 2 main features : First, keep sync'ed your config.xml (and other ressources) jenkins files with a SCM repository (backup), Secondly, track changes (and author) made on every file with commit messages.</description>
