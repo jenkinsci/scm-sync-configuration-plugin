@@ -5,7 +5,6 @@ import com.google.common.collect.Collections2;
 import hudson.Plugin;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
-import hudson.model.Hudson;
 import hudson.model.Saveable;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.extensions.ScmSyncConfigurationFilter;
@@ -21,6 +20,7 @@ import hudson.plugins.scm_sync_configuration.transactions.ThreadedTransaction;
 import hudson.plugins.scm_sync_configuration.xstream.ScmSyncConfigurationXStreamConverter;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
 import hudson.util.PluginServletFilter;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.acegisecurity.AccessDeniedException;
 import org.apache.maven.scm.ScmException;
@@ -124,7 +124,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void start() throws Exception {
 		super.start();
 
-		Hudson.XSTREAM.registerConverter(new ScmSyncConfigurationXStreamConverter());
+		Jenkins.XSTREAM.registerConverter(new ScmSyncConfigurationXStreamConverter());
 
 		this.load();
 
@@ -286,13 +286,13 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	private User getCurrentUser(){
 		User user = null;
 		try {
-			user = Hudson.getInstance().getMe();
+			user = Jenkins.getInstance().getMe();
 		}catch(AccessDeniedException e){}
 		return user;
 	}
 
 	public static ScmSyncConfigurationPlugin getInstance(){
-		return Hudson.getInstance().getPlugin(ScmSyncConfigurationPlugin.class);
+		return Jenkins.getInstance().getPlugin(ScmSyncConfigurationPlugin.class);
 	}
 
 	public ScmSyncStrategy getStrategyForSaveable(Saveable s, File f){

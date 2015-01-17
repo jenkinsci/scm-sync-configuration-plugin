@@ -1,7 +1,6 @@
 package hudson.plugins.scm_sync_configuration;
 
 import com.google.common.io.Files;
-import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.exceptions.LoggableException;
 import hudson.plugins.scm_sync_configuration.model.*;
@@ -9,6 +8,7 @@ import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.utils.Checksums;
 import hudson.security.Permission;
 import hudson.util.DaemonThreadFactory;
+import jenkins.model.Jenkins;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.manager.ScmManager;
@@ -311,14 +311,12 @@ public class ScmSyncConfigurationBusiness {
 
     /**
      *
-     * @param from configuration checked out from SCM
-     * @param relative
      * @return
      * @throws IOException
      */
     public List<File> removeSourceJobsDuringReload() throws IOException {
         List<File> l = new ArrayList<File>();
-        File jobsFolder = new File(Hudson.getInstance().getRootDir().toString()+ "/jobs");
+        File jobsFolder = new File(Jenkins.getInstance().getRootDir().toString()+ "/jobs");
         LOGGER.info("Configuration reload - jobs removal. Cleaning up folder:"+jobsFolder);
 
         for(File f : jobsFolder.listFiles()){
@@ -336,7 +334,7 @@ public class ScmSyncConfigurationBusiness {
         List<File> l = new ArrayList<File>();
         for(File f : from.listFiles()) {
             String newRelative = relative + File.separator + f.getName();
-            File jenkinsFile = new File(Hudson.getInstance().getRootDir() + newRelative);
+            File jenkinsFile = new File(Jenkins.getInstance().getRootDir() + newRelative);
             if (f.getName().equals(scmManipulator.getScmSpecificFilename())) {
                 // nothing to do
             }
@@ -375,20 +373,20 @@ public class ScmSyncConfigurationBusiness {
     }
 
     public static String getCheckoutScmDirectoryAbsolutePath(){
-        return Hudson.getInstance().getRootDir().getAbsolutePath()+WORKING_DIRECTORY_PATH+CHECKOUT_SCM_DIRECTORY;
+        return Jenkins.getInstance().getRootDir().getAbsolutePath()+WORKING_DIRECTORY_PATH+CHECKOUT_SCM_DIRECTORY;
     }
 
     public void purgeFailLogs() {
-        Hudson.getInstance().checkPermission(purgeFailLogPermission());
+        Jenkins.getInstance().checkPermission(purgeFailLogPermission());
         scmSyncConfigurationStatusManager.purgeFailLogs();
     }
 
     public boolean canCurrentUserPurgeFailLogs() {
-        return Hudson.getInstance().hasPermission(purgeFailLogPermission());
+        return Jenkins.getInstance().hasPermission(purgeFailLogPermission());
     }
 
     private static Permission purgeFailLogPermission(){
         // Only administrators should be able to purge logs
-        return Hudson.ADMINISTER;
+        return Jenkins.ADMINISTER;
     }
 }

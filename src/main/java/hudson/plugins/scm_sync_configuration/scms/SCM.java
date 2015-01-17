@@ -1,12 +1,12 @@
 package hudson.plugins.scm_sync_configuration.scms;
 
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
@@ -52,7 +52,7 @@ public abstract class SCM {
 	}
 	
 	public Descriptor<? extends hudson.scm.SCM> getSCMDescriptor(){
-		return Hudson.getInstance().getDescriptorByName(getSCMClassName());
+		return Jenkins.getInstance().getDescriptorByName(getSCMClassName());
 	}
 	
 	public String getRepositoryUrlHelpPath() {

@@ -17,6 +17,7 @@ import hudson.plugins.scm_sync_configuration.util.ScmSyncConfigurationPluginBase
 import hudson.plugins.test.utils.PluginUtil;
 import hudson.plugins.test.utils.scms.ScmUnderTestSubversion;
 
+import jenkins.model.Jenkins;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
