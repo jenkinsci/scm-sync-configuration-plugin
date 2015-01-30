@@ -17,6 +17,7 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 	public static final String SCM_NO_USER_COMMIT_MESSAGE = "noUserCommitMessage";
     public static final String SCM_DISPLAY_STATUS = "displayStatus";
     public static final String SCM_COMMIT_MESSAGE_PATTERN = "commitMessagePattern";
+    public static final String SCM_INCLUDE_USERCONFIG = "includeUserConfig";
     public static final String SCM_MANUAL_INCLUDES = "manualSynchronizationIncludes";
 
     private static final Logger LOGGER = Logger.getLogger(AbstractMigrator.class.getName());
@@ -41,6 +42,7 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		boolean noUserCommitMessage = false;
 		boolean displayStatus = true;
         String commitMessagePattern = "[message]";
+        boolean includeUserConfig = true;
         List<String> manualIncludes = null;
 		
 		while(reader.hasMoreChildren()){
@@ -56,6 +58,8 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 				scmContent = reader.getValue();
             } else if(SCM_COMMIT_MESSAGE_PATTERN.equals(reader.getNodeName())){
                 commitMessagePattern = reader.getValue();
+            } else if(SCM_INCLUDE_USERCONFIG.equals(reader.getNodeName())){
+                includeUserConfig = Boolean.parseBoolean(reader.getValue());
             } else if(SCM_MANUAL_INCLUDES.equals(reader.getNodeName())){
                 manualIncludes = new ArrayList<String>();
                 while(reader.hasMoreChildren()){
@@ -71,14 +75,15 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 			}
 			reader.moveUp();
 		}
-		
+
 		pojo.setScm(createSCMFrom(scmClassAttribute, scmContent));
 		pojo.setScmRepositoryUrl(scmRepositoryUrl);
 		pojo.setNoUserCommitMessage(noUserCommitMessage);
 		pojo.setDisplayStatus(displayStatus);
         pojo.setCommitMessagePattern(commitMessagePattern);
         pojo.setManualSynchronizationIncludes(manualIncludes);
-		
+        pojo.setIncludeUserConfig(includeUserConfig);
+
 		return pojo;
 	}
 	

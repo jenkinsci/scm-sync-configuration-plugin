@@ -34,6 +34,16 @@
         <f:textbox name="commitMessagePattern" value="${it.commitMessagePattern}" />
     </f:entry>
 
+    <f:entry title="${%Include user config}">
+        <j:choose>
+            <j:when test="${it.includeUserConfig}">
+                <f:checkbox name="includeUserConfig" checked="${it.includeUserConfig}" value="true" />
+            </j:when>
+            <j:otherwise>
+                <f:checkbox name="includeUserConfig" value="true" />
+            </j:otherwise>
+        </j:choose>
+    </f:entry>
     <!--
     Help url for manualSynchronizationIncludes field is a jelly script and not a html file
     because we need default includes list to be displayed in it !
