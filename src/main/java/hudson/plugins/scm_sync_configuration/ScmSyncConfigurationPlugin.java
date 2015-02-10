@@ -21,6 +21,7 @@ import hudson.plugins.scm_sync_configuration.xstream.ScmSyncConfigurationXStream
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
 import hudson.util.PluginServletFilter;
 import jenkins.model.Jenkins;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.acegisecurity.AccessDeniedException;
 import org.apache.maven.scm.ScmException;
@@ -186,7 +187,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 			String newScmRepositoryUrl = this.scm.createScmUrlFromRequest(req);
 
 			this.scmRepositoryUrl = newScmRepositoryUrl;
-            String newScmGitBranch = formData.getJSONObject("scm").getString("scmGitBranch");
+
+            String newScmGitBranch = null;
+            if ("hudson.plugins.scm_sync_configuration.scms.ScmSyncGitSCM".equals(scmType)){
+                newScmGitBranch = formData.getJSONObject("scm").getString("scmGitBranch");
+            }
 
             if (oldGitBranch == null) {
                 oldGitBranch = "master";
