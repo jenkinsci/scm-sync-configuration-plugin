@@ -22,12 +22,12 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
 	    if (file == null) {
 	    	return false;
             }
-	    
-	    // in case **/jobs/ directory is a link to a mounted volume so nextBuildNumber stays in sync with buildHistory and symlinks
-	    // such cases are usual when running Jenkins in Docker as a Phoenix Docker Container
-	    if (file.getAbsolutePath() == null ||
-	        !file.getAbsolutePath().startsWith(Hudson.getInstance().getRootDir().getAbsolutePath())) {
-	    	return false;
+            
+            // in case **/jobs/ directory is a link to a mounted volume so nextBuildNumber stays in sync with buildHistory and symlinks
+            // such cases are usual when running Jenkins in Docker as a Phoenix Docker Container
+            if (file.getAbsolutePath() == null ||
+                !file.getAbsolutePath().startsWith(Hudson.getInstance().getRootDir().getAbsolutePath())) {
+              	return false;
             }
             
             String filePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
