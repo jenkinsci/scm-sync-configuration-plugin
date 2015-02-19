@@ -25,6 +25,7 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
             
             // in case **/jobs/ directory is a link to a mounted volume so nextBuildNumber stays in sync with buildHistory and symlinks
             // such cases are usual when running Jenkins in Docker as a Phoenix Docker Container
+            // adding this check avoids unnecessary Exceptions on Jenkins logs
             if (file.getAbsolutePath() == null ||
                 !file.getAbsolutePath().startsWith(Hudson.getInstance().getRootDir().getAbsolutePath())) {
               	return false;
@@ -36,7 +37,6 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
               if(matcher.match(pattern, filePathRelativeToHudsonRoot)){
                 return true;
               }
-            	
             }
             return false;
 	}
