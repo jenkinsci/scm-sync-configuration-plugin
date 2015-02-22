@@ -19,26 +19,26 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
     }
 
 	public boolean matches(Saveable saveable, File file) {
-	    if (file == null) {
-	    	return false;
+		if (file == null) {
+			return false;
+		}
+
+        // in case jobs directory is a link to a mounted volume so nextBuildNumber stays in sync with buildHistory and symlinks
+        // such cases are usual when running Jenkins in Docker as a Phoenix Docker Container
+        // adding this check avoids unnecessary Exceptions on Jenkins logs
+        if (file.getAbsolutePath() == null ||
+            !file.getAbsolutePath().startsWith(Hudson.getInstance().getRootDir().getAbsolutePath())) {
+          	return false;
+        }
+    
+        String filePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
+        AntPathMatcher matcher = new AntPathMatcher();
+        for(String pattern : includesPatterns) {
+            if(matcher.match(pattern, filePathRelativeToHudsonRoot)) {
+            	return true;
             }
-            
-            // in case **/jobs/ directory is a link to a mounted volume so nextBuildNumber stays in sync with buildHistory and symlinks
-            // such cases are usual when running Jenkins in Docker as a Phoenix Docker Container
-            // adding this check avoids unnecessary Exceptions on Jenkins logs
-            if (file.getAbsolutePath() == null ||
-                !file.getAbsolutePath().startsWith(Hudson.getInstance().getRootDir().getAbsolutePath())) {
-              	return false;
-            }
-            
-            String filePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
-            AntPathMatcher matcher = new AntPathMatcher();
-            for(String pattern : includesPatterns) {
-              if(matcher.match(pattern, filePathRelativeToHudsonRoot)){
-                return true;
-              }
-            }
-            return false;
+        }
+        return false;
 	}
 
     public List<String> getIncludes(){
