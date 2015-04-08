@@ -2,7 +2,6 @@ package hudson.plugins.scm_sync_configuration.util;
 
 import hudson.Plugin;
 import hudson.PluginWrapper;
-import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.SCMManagerFactory;
 import hudson.plugins.scm_sync_configuration.SCMManipulator;
@@ -16,6 +15,7 @@ import hudson.plugins.scm_sync_configuration.xstream.migration.DefaultSSCPOJO;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
 import hudson.plugins.test.utils.DirectoryUtils;
 import hudson.plugins.test.utils.scms.ScmUnderTest;
+import jenkins.model.Jenkins;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.FileUtils;
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({ "org.tmatesoft.svn.*" })
-@PrepareForTest({Hudson.class, SCM.class, ScmSyncSubversionSCM.class, PluginWrapper.class})
+@PrepareForTest({SCM.class, ScmSyncSubversionSCM.class, PluginWrapper.class, Jenkins.class})
 public abstract class ScmSyncConfigurationBaseTest {
 	
 	@Rule protected TestName testName = new TestName();
@@ -105,14 +105,14 @@ public abstract class ScmSyncConfigurationBaseTest {
 		// Mocking Hudson singleton instance ...
 	    // Warning : this line will only work on Objenesis supported VMs :
 	    // http://code.google.com/p/objenesis/wiki/ListOfCurrentlySupportedVMs
-	    Hudson hudsonMockedInstance = spy((Hudson) new ObjenesisStd().getInstantiatorOf(Hudson.class).newInstance());
-		PowerMockito.doReturn(currentHudsonRootDirectory).when(hudsonMockedInstance).getRootDir();
-		PowerMockito.doReturn(mockedUser).when(hudsonMockedInstance).getMe();
-		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(hudsonMockedInstance).getPlugin(ScmSyncConfigurationPlugin.class);
-		
-	    PowerMockito.mockStatic(Hudson.class);
-	    PowerMockito.doReturn(hudsonMockedInstance).when(Hudson.class); Hudson.getInstance();
-	    //when(Hudson.getInstance()).thenReturn(hudsonMockedInstance);
+
+		Jenkins jenkinsMockInstance = spy((Jenkins) new ObjenesisStd().getInstantiatorOf(Jenkins.class).newInstance());
+		PowerMockito.doReturn(currentHudsonRootDirectory).when(jenkinsMockInstance).getRootDir();
+		PowerMockito.doReturn(mockedUser).when(jenkinsMockInstance).getMe();
+		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(jenkinsMockInstance).getPlugin(ScmSyncConfigurationPlugin.class);
+
+	    PowerMockito.mockStatic(Jenkins.class);
+	    PowerMockito.doReturn(jenkinsMockInstance).when(Jenkins.class); Jenkins.getInstance();
 	}
 	
 	@After

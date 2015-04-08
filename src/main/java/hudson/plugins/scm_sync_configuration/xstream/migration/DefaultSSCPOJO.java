@@ -7,6 +7,7 @@ import java.util.List;
 public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 
 	private String scmRepositoryUrl;
+    private String scmGitBranch;
 	private SCM scm;
 	private boolean noUserCommitMessage;
 	private boolean displayStatus;
@@ -19,7 +20,13 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 	public void setScmRepositoryUrl(String scmRepositoryUrl) {
 		this.scmRepositoryUrl = scmRepositoryUrl;
 	}
-	public SCM getScm() {
+    public String getScmGitBranch() {
+        return scmGitBranch;
+    }
+    public void setScmGitBranch(String scmGitBranch) {
+        this.scmGitBranch = scmGitBranch;
+    }
+    public SCM getScm() {
 		return scm;
 	}
 	public void setScm(SCM scm) {
