@@ -16,6 +16,7 @@ import hudson.plugins.scm_sync_configuration.xstream.migration.DefaultSSCPOJO;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
 import hudson.plugins.test.utils.DirectoryUtils;
 import hudson.plugins.test.utils.scms.ScmUnderTest;
+
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.util.FileUtils;
@@ -51,6 +52,9 @@ import static org.mockito.Mockito.when;
 public abstract class ScmSyncConfigurationBaseTest {
 	
 	@Rule protected TestName testName = new TestName();
+	
+	private static final String TEST_URL = "https://jenkins.example.org/";
+	
 	private File currentTestDirectory = null;
 	private File curentLocalRepository = null;
 	private File currentHudsonRootDirectory = null;
@@ -110,6 +114,8 @@ public abstract class ScmSyncConfigurationBaseTest {
 		PowerMockito.doReturn(currentHudsonRootDirectory).when(hudsonMockedInstance).getRootDir();
 		PowerMockito.doReturn(mockedUser).when(hudsonMockedInstance).getMe();
 		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(hudsonMockedInstance).getPlugin(ScmSyncConfigurationPlugin.class);
+		PowerMockito.doReturn(TEST_URL).when(hudsonMockedInstance).getRootUrl();
+		PowerMockito.doReturn(TEST_URL).when(hudsonMockedInstance).getRootUrlFromRequest();
 		
 	    PowerMockito.mockStatic(Jenkins.class);
 	    PowerMockito.doReturn(hudsonMockedInstance).when(Jenkins.class); Jenkins.getInstance();

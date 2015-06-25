@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 public class ScmSyncConfigurationBusiness {
 
-    private static final String WORKING_DIRECTORY_PATH = "/scm-sync-configuration/";
+    private static final String WORKING_DIRECTORY = "scm-sync-configuration";
     private static final String CHECKOUT_SCM_DIRECTORY = "checkoutConfiguration";
     private static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationBusiness.class.getName());
 
@@ -351,9 +351,13 @@ public class ScmSyncConfigurationBusiness {
     }
 
     public static String getCheckoutScmDirectoryAbsolutePath(){
-        return Hudson.getInstance().getRootDir().getAbsolutePath()+WORKING_DIRECTORY_PATH+CHECKOUT_SCM_DIRECTORY;
+        return new File(new File(Hudson.getInstance().getRootDir(), WORKING_DIRECTORY), CHECKOUT_SCM_DIRECTORY).getAbsolutePath();
     }
 
+    public static String getScmDirectoryName() {
+    	return WORKING_DIRECTORY;
+    }
+    
     public void purgeFailLogs() {
         Hudson.getInstance().checkPermission(purgeFailLogPermission());
         scmSyncConfigurationStatusManager.purgeFailLogs();
