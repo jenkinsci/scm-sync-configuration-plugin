@@ -39,7 +39,8 @@ public class JobOrFolderConfigurationEntityMatcher implements ConfigurationEntit
 				// Deleted.
 				file = ((AbstractItem) saveable).getConfigFile().getFile();
 			}
-			return CONFIGS_TO_MATCH.matcher(JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file)).matches();
+			String jenkinsRelativePath = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
+			return jenkinsRelativePath != null && CONFIGS_TO_MATCH.matcher(jenkinsRelativePath).matches();				
 		}
 		return false;
 	}
