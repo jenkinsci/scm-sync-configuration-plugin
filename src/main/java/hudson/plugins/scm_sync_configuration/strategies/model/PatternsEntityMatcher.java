@@ -27,17 +27,19 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
 			return false;
 		}
 		String pathRelativeToRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
-		// Guard our own SCM workspace and the war directory. User-defined includes might inadvertently include those if they start with * or **!
-		if (pathRelativeToRoot.equals(SCM_WORKING_DIRECTORY) || pathRelativeToRoot.startsWith(SCM_WORKING_DIRECTORY + '/')) {
-			return false;
-		} else if (pathRelativeToRoot.equals(WAR_DIRECTORY) || pathRelativeToRoot.startsWith(WAR_DIRECTORY + '/')) {
-			return false;
-		}
-        AntPathMatcher matcher = new AntPathMatcher();
-        for (String pattern : includesPatterns) {
-            if (matcher.match(pattern, pathRelativeToRoot)) {
-                return true;
-            }
+		if (pathRelativeToRoot != null) {
+			// Guard our own SCM workspace and the war directory. User-defined includes might inadvertently include those if they start with * or **!
+			if (pathRelativeToRoot.equals(SCM_WORKING_DIRECTORY) || pathRelativeToRoot.startsWith(SCM_WORKING_DIRECTORY + '/')) {
+				return false;
+			} else if (pathRelativeToRoot.equals(WAR_DIRECTORY) || pathRelativeToRoot.startsWith(WAR_DIRECTORY + '/')) {
+				return false;
+			}
+	        AntPathMatcher matcher = new AntPathMatcher();
+	        for (String pattern : includesPatterns) {
+	            if (matcher.match(pattern, pathRelativeToRoot)) {
+	                return true;
+	            }
+			}
 		}
 		return false;
 	}
