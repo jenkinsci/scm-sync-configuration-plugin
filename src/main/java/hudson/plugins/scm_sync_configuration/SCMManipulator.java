@@ -86,7 +86,7 @@ public class SCMManipulator {
 		}
 		
 		// Checkouting sources
-		LOGGER.fine("Checkouting SCM files into ["+checkoutDirectory.getAbsolutePath()+"] ...");
+		LOGGER.fine("Checking out SCM files into ["+checkoutDirectory.getAbsolutePath()+"] ...");
 		try {
 			CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory));
 			if(!result.isSuccess()){
@@ -101,7 +101,7 @@ public class SCMManipulator {
 		}
 		
 		if(checkoutOk){
-			LOGGER.fine("Checkouted SCM files into ["+checkoutDirectory.getAbsolutePath()+"] !");
+			LOGGER.fine("Checked out SCM files into ["+checkoutDirectory.getAbsolutePath()+"] !");
 		}
 
 		return checkoutOk;

@@ -94,7 +94,7 @@ public class ChangeSet {
 
     public void defineMessage(WeightedMessage weightedMessage) {
         // Defining message only once !
-        if(this.message == null || weightedMessage.getWeight().weighterThan(message.getWeight())){
+        if(this.message == null || weightedMessage.getWeight().compareTo(message.getWeight()) > 0){
             this.message = weightedMessage;
         }
     }

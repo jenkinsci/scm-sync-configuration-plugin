@@ -228,7 +228,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
             this.business.synchronizeAllConfigs(AVAILABLE_STRATEGIES);
         }
         if(repoCleaningRequired){
-            // Cleaning checkouted repository
             this.business.cleanChekoutScmDirectory();
         }
 
