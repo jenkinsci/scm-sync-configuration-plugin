@@ -1,7 +1,11 @@
 package hudson.plugins.scm_sync_configuration;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
 import hudson.Plugin;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
@@ -25,6 +29,7 @@ import net.sf.json.JSONObject;
 
 import org.acegisecurity.AccessDeniedException;
 import org.apache.maven.scm.ScmException;
+import org.apache.tools.ant.types.selectors.FileSelector;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -39,6 +44,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
+
+import jenkins.model.Jenkins;
 
 public class ScmSyncConfigurationPlugin extends Plugin{
 
@@ -231,6 +238,20 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		this.save();
 	}
 
+	public Iterable<File> collectAllFilesForScm() {
+		return Iterables.concat(Iterables.transform(Lists.newArrayList(AVAILABLE_STRATEGIES), new Function<ScmSyncStrategy, Iterable<File>>() {
+			public Iterable<File> apply(ScmSyncStrategy strategy) {
+				return strategy.collect();
+			}}));
+	}
+	
+	public Iterable<File> collectAllFilesForScm(final File fromSubDirectory) {
+		return Iterables.concat(Iterables.transform(Lists.newArrayList(AVAILABLE_STRATEGIES), new Function<ScmSyncStrategy, Iterable<File>>() {
+			public Iterable<File> apply(ScmSyncStrategy strategy) {
+				return strategy.collect(fromSubDirectory);
+			}}));
+	}
+	
 	public void doReloadAllFilesFromScm(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
 		try {
 			filesModifiedByLastReload = business.reloadAllFilesFromScm();
@@ -295,6 +316,23 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		return null;
 	}
 
+	/**
+	 * Tries to find at least one strategy that would have applied to a deleted item.
+	 * 
+	 * @param s the saveable that was deleted. It still exists in Jenkins' model, but has already been eradicated from disk.
+	 * @param pathRelativeToRoot where the item had lived on disk
+	 * @param wasDirectory whether it was a directory
+	 * @return a strategy that thinks it might have applied
+	 */
+	public ScmSyncStrategy getStrategyForDeletedSaveable(Saveable s, String pathRelativeToRoot, boolean wasDirectory) {
+		for (ScmSyncStrategy strategy : AVAILABLE_STRATEGIES) {
+			if (strategy.mightHaveBeenApplicableToDeletedSaveable(s, pathRelativeToRoot, wasDirectory)) {
+				return strategy;
+			}
+		}
+		return null;
+	}
+	
 	public ScmContext createScmContext(){
 		return new ScmContext(this.scm, this.scmRepositoryUrl, this.commitMessagePattern);
 	}

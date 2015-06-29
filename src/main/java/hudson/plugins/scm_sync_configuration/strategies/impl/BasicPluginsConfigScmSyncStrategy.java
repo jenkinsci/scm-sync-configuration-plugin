@@ -41,4 +41,8 @@ public class BasicPluginsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
             }
         };
     }
+
+	public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
+		return !wasDirectory && pathRelativeToRoot != null && CONFIG_ENTITY_MATCHER.matches(saveable,  pathRelativeToRoot, false);
+	}
 }

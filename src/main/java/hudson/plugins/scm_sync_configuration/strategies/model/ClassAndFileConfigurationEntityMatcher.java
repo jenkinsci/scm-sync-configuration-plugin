@@ -15,8 +15,8 @@ public class ClassAndFileConfigurationEntityMatcher extends PatternsEntityMatche
 	}
 	
 	public boolean matches(Saveable saveable, File file) {
-		if(saveableClazz.isAssignableFrom(saveable.getClass())){
-			if(file == null){
+		if (saveableClazz.isAssignableFrom(saveable.getClass())){
+			if (file == null) {
 				return true;
 			} else {
 				return super.matches(saveable, file);

@@ -282,7 +282,7 @@ public class ScmSyncConfigurationBusiness {
         List<File> filesToSync = new ArrayList<File>();
         // Building synced files from strategies
         for(ScmSyncStrategy strategy : availableStrategies){
-            filesToSync.addAll(strategy.createInitializationSynchronizedFileset());
+            filesToSync.addAll(strategy.collect());
         }
 
         ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();

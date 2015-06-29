@@ -5,32 +5,35 @@ import hudson.model.AbstractItem;
 import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.types.selectors.FileSelector;
 
 /**
  * A {@link ConfigurationEntityMatcher} for job and Cloudbees Folders plugin folder configuration files.
  * Matches config.xml located in jobs/project/config.xml (normal Jenkins), but also in nested directories
  * below that as long as the path has the pattern (jobs/someName/)+config.xml (Cloudbees directory structure).
  */
-public class JobOrFolderConfigurationEntityMatcher implements ConfigurationEntityMatcher {
+public class JobOrFolderConfigurationEntityMatcher extends PatternsEntityMatcher {
 
 	private static final String JOBS_DIR_NAME = "jobs";
 	private static final String CONFIG_FILE_NAME = "config.xml";
+	private static final String DIRECTORY_REGEXP = "(?:" + JOBS_DIR_NAME + "/[^/]+/)+";
 	
-	private static final Pattern CONFIGS_TO_MATCH = Pattern.compile("(?:" + JOBS_DIR_NAME + "/[^/]+/)+" + CONFIG_FILE_NAME);
+	private static final Pattern CONFIGS_TO_MATCH = Pattern.compile(DIRECTORY_REGEXP + CONFIG_FILE_NAME);
+	private static final Pattern DIRECTORIES_TO_MATCH = Pattern.compile(DIRECTORY_REGEXP);
+	
+	private static final String[] ANT_PATTERN = new String[] { JOBS_DIR_NAME + "/**/" + CONFIG_FILE_NAME };
 
-	private static final FileFilter DIRECTORIES = new FileFilter() {
-		public boolean accept(File file) {
-			return file.isDirectory();
-		}
-	};
-	
+	public JobOrFolderConfigurationEntityMatcher() {
+		super(ANT_PATTERN);
+		// This pattern is only used for matchingFileFrom() below, and is augmented by a FileSelector enforcing the (jobs/someName/)+ pattern
+	}
+
 	public boolean matches(Saveable saveable, File file) {
 		// The file may be null, indicating a deletion!
 		if (saveable instanceof AbstractItem) {
@@ -38,50 +41,61 @@ public class JobOrFolderConfigurationEntityMatcher implements ConfigurationEntit
 			if (file == null) {
 				// Deleted.
 				file = ((AbstractItem) saveable).getConfigFile().getFile();
+			} else if (file.isDirectory()) {
+				file = new File(file, CONFIG_FILE_NAME);
 			}
-			String jenkinsRelativePath = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
-			return jenkinsRelativePath != null && CONFIGS_TO_MATCH.matcher(jenkinsRelativePath).matches();				
+			return matches(saveable, JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file), false);
 		}
 		return false;
 	}
 
-	public String[] matchingFilesFrom(File rootDirectory) {
-		// PatternsEntityMatcher uses a org.apache.tools.ant.DirectoryScanner, which returns a (sorted) list of matching file paths
-		// relative to the given root directory. Let's adhere to that specification, but only for our very special job config pattern.
-		if (rootDirectory == null || !rootDirectory.isDirectory()) {
-			return new String[0];
-		}
-		List<String> collected = new ArrayList<String>();
-		// Compare https://github.com/jenkinsci/cloudbees-folder-plugin/blob/70a4d47314a36b54d522cae0a78b3c76d153e627/src/main/java/com/cloudbees/hudson/plugins/folder/Folder.java#L200
-		scanForJobConfigs (new File (rootDirectory, JOBS_DIR_NAME), JOBS_DIR_NAME, collected);
-		String[] result = collected.toArray(new String[collected.size()]);
-		Arrays.sort(result);
-		return result;
-	}
-
-	private static void scanForJobConfigs(File jobsDir, String prefix, Collection<String> result) {
-		if (!jobsDir.isDirectory()) {
-			return;
-		}
-		File[] projects = jobsDir.listFiles(DIRECTORIES);
-		if (projects == null) {
-			return;
-		}
-		for (File project : projects) {
-			if (new File(project, CONFIG_FILE_NAME).isFile()) {
-				result.add(prefix + '/' + project.getName() + '/' + CONFIG_FILE_NAME);
-				scanForJobConfigs(new File(project, JOBS_DIR_NAME), prefix + '/' + project.getName() + '/' + JOBS_DIR_NAME, result);
+	public boolean matches(Saveable saveable, String pathRelativeToRoot, boolean isDirectory) {
+		if ((saveable instanceof AbstractItem) && pathRelativeToRoot != null) {
+			if (isDirectory) {
+				if (!pathRelativeToRoot.endsWith("/")) {
+					pathRelativeToRoot += '/';
+				}
+				pathRelativeToRoot += CONFIG_FILE_NAME;
 			}
-			// Again, compare https://github.com/jenkinsci/cloudbees-folder-plugin/blob/70a4d47314a36b54d522cae0a78b3c76d153e627/src/main/java/com/cloudbees/hudson/plugins/folder/Folder.java#L200
-			// The Cloudbees Folders plugin prunes the hierarchy on directories not containing a config.xml.
+			return CONFIGS_TO_MATCH.matcher(pathRelativeToRoot).matches();
 		}
+		return false;
 	}
 	
 	public List<String> getIncludes() {
-		// XXX The call hierarchy indicates that although this is called, ScmSyncConfigurationPlugin.getDefaultIncludes() isn't,
-		// and thus this whole method and assembling strings is futile. Let's just return an empty list as other matchers
-		// return ant patters, but there is no ant pattern that corresponds to our regular expression.
-		return Collections.emptyList();
+		// This is used only for display in the UI.
+		return Collections.singletonList(ANT_PATTERN[0] + " (** restricted to real project and folder directories)");
+	}
+
+	public String[] matchingFilesFrom(File rootDirectory, FileSelector selector) {
+		// Create a selector that enforces the (jobs/someName)+ pattern
+		final FileSelector originalSelector = selector;
+		FileSelector combinedSelector = new FileSelector() {
+			public boolean isSelected(File basedir, String pathRelativeToBaseDir, File file) throws BuildException {
+				if (originalSelector != null && !originalSelector.isSelected(basedir, pathRelativeToBaseDir, file)) {
+					return false;
+				}
+				if (CONFIGS_TO_MATCH.matcher(pathRelativeToBaseDir).matches()) {
+					return true;
+				}
+				
+				if (JOBS_DIR_NAME.equals(pathRelativeToBaseDir)) {
+					return true;
+				}
+				if (!pathRelativeToBaseDir.endsWith("/")) {
+					pathRelativeToBaseDir += '/';
+				}
+				if (pathRelativeToBaseDir.endsWith('/' + JOBS_DIR_NAME + '/')) {
+					pathRelativeToBaseDir = StringUtils.removeEnd(pathRelativeToBaseDir, JOBS_DIR_NAME + '/');
+					return DIRECTORIES_TO_MATCH.matcher(pathRelativeToBaseDir).matches();
+				} else {
+					// Compare https://github.com/jenkinsci/cloudbees-folder-plugin/blob/70a4d47314a36b54d522cae0a78b3c76d153e627/src/main/java/com/cloudbees/hudson/plugins/folder/Folder.java#L200
+					// The Cloudbees Folders plugin prunes the hierarchy on directories not containing a config.xml.
+					return DIRECTORIES_TO_MATCH.matcher(pathRelativeToBaseDir).matches() && file.isDirectory() && new File(file, CONFIG_FILE_NAME).exists();
+				}
+			}
+		};
+		return super.matchingFilesFrom(rootDirectory, combinedSelector);
 	}
 
 }

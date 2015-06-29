@@ -2,26 +2,33 @@ package hudson.plugins.scm_sync_configuration.strategies;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+
 import hudson.XmlFile;
-import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.model.Saveable;
+import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import hudson.plugins.scm_sync_configuration.model.MessageWeight;
 import hudson.plugins.scm_sync_configuration.model.WeightedMessage;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 
 import javax.annotation.Nullable;
+
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.types.selectors.FileSelector;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import jenkins.model.Jenkins;
+
 public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 
     private static final Function<String,File> PATH_TO_FILE_IN_HUDSON = new Function<String, File>() {
         public File apply(@Nullable String path) {
-            return new File(Hudson.getInstance().getRootDir()+File.separator+path);
+            return new File(Jenkins.getInstance().getRootDir(), path);
         }
     };
 
@@ -39,6 +46,7 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 
 	private ConfigurationEntityMatcher configEntityMatcher;
 	private List<PageMatcher> pageMatchers;
+	private CommitMessageFactory commitMessageFactory;
 	
 	protected AbstractScmSyncStrategy(ConfigurationEntityMatcher _configEntityMatcher, List<PageMatcher> _pageMatchers){
 		this.configEntityMatcher = _configEntityMatcher;
@@ -54,7 +62,7 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 	}
 
 	public PageMatcher getPageMatcherMatching(String url){
-		String rootUrl = Hudson.getInstance().getRootUrlFromRequest();
+		String rootUrl = Jenkins.getInstance().getRootUrlFromRequest();
 		String cleanedUrl = null;
 		if(url.startsWith(rootUrl)){
 			cleanedUrl = url.substring(rootUrl.length());
@@ -69,12 +77,36 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
 		return null;
 	}
 
-    public List<File> createInitializationSynchronizedFileset() {
-        File hudsonRoot = Hudson.getInstance().getRootDir();
-        String[] matchingFilePaths = createConfigEntityMatcher().matchingFilesFrom(hudsonRoot);
-        return new ArrayList(Collections2.transform(Arrays.asList(matchingFilePaths), PATH_TO_FILE_IN_HUDSON));
+    public List<File> collect() {
+        return collect(null);
     }
 
+    public List<File> collect(File directory) {
+        File jenkinsRoot = Jenkins.getInstance().getRootDir();
+        if (jenkinsRoot.equals(directory)) {
+        	directory = null;
+        }
+        FileSelector selector = null;
+        if (directory != null) {
+        	String pathRelativeToRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(directory);
+        	if (pathRelativeToRoot == null) {
+        		throw new IllegalArgumentException(directory.getAbsolutePath() + " is not under " + jenkinsRoot.getAbsolutePath());
+        	}
+        	final String restrictedPath = pathRelativeToRoot.endsWith("/") ? pathRelativeToRoot : pathRelativeToRoot + '/';
+        	selector = new FileSelector() {
+				public boolean isSelected(File basedir, String pathRelativeToBasedir, File file) throws BuildException {
+					// Only include directories leading to our directory (parent directories and the directory itself) and then whatever is below.
+					if (file.isDirectory()) {
+						pathRelativeToBasedir = pathRelativeToBasedir.endsWith("/") ? pathRelativeToBasedir : pathRelativeToBasedir + '/';
+					}
+					return pathRelativeToBasedir.startsWith(restrictedPath) || restrictedPath.startsWith(pathRelativeToBasedir);
+				}
+			};
+        }
+        String[] matchingFilePaths = createConfigEntityMatcher().matchingFilesFrom(jenkinsRoot, selector);
+        return new ArrayList<File>(Collections2.transform(Arrays.asList(matchingFilePaths), PATH_TO_FILE_IN_HUDSON));
+    }
+    
 	public boolean isCurrentUrlApplicable(String url) {
 		return getPageMatcherMatching(url)!=null;
 	}
@@ -84,6 +116,9 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
     }
 
     public CommitMessageFactory getCommitMessageFactory(){
-        return new DefaultCommitMessageFactory();
+    	if (commitMessageFactory == null) {
+    		commitMessageFactory = new DefaultCommitMessageFactory();
+    	}
+        return commitMessageFactory;
     }
 }

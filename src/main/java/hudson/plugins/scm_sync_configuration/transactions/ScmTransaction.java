@@ -1,5 +1,8 @@
 package hudson.plugins.scm_sync_configuration.transactions;
 
+import java.io.File;
+
+import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.model.ChangeSet;
 import hudson.plugins.scm_sync_configuration.model.WeightedMessage;
@@ -48,6 +51,19 @@ public abstract class ScmTransaction {
     }
 
     public void registerRenamedPath(String oldPath, String newPath){
-        this.changeset.registerRenamedPath(oldPath, newPath);
+    	File newFile = JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(newPath);
+    	if (newFile.isDirectory()) {
+            for (File f : ScmSyncConfigurationPlugin.getInstance().collectAllFilesForScm(newFile)) {
+            	String pathRelativeToRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(f);
+            	if (pathRelativeToRoot != null) {
+            		this.changeset.registerPath(pathRelativeToRoot);
+            	}
+            }
+    	} else {
+    		this.changeset.registerPath(newPath);
+    	}
+        if (oldPath != null) {
+        	this.changeset.registerPathForDeletion(oldPath);
+        }
     }
 }

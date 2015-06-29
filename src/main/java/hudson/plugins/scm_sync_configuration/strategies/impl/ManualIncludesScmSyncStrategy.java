@@ -1,5 +1,6 @@
 package hudson.plugins.scm_sync_configuration.strategies.impl;
 
+import hudson.model.Saveable;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
@@ -24,4 +25,9 @@ public class ManualIncludesScmSyncStrategy extends AbstractScmSyncStrategy {
         }
         return new PatternsEntityMatcher(includes);
     }
+
+	public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
+		// Best we can do here. We'll double check later on in the transaction.
+		return true;
+	}
 }
