@@ -1,5 +1,10 @@
 package hudson.plugins.scm_sync_configuration.model;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
+
+import com.google.common.base.Strings;
+
 import hudson.model.User;
 
 /**
@@ -34,22 +39,44 @@ public class Commit {
     }
 
     private static String createCommitMessage(ScmContext context, String messagePrefix, User user, String userComment){
-   		StringBuilder commitMessage = new StringBuilder();
-   		commitMessage.append(messagePrefix);
-   		if(user != null){
-   			commitMessage.append(" by ").append(user.getId());
-   		}
-   		if(userComment != null && !"".equals(userComment)){
-   			commitMessage.append(" with following comment : ").append(userComment);
-   		}
-   		String message = commitMessage.toString();
+   	    StringBuilder commitMessage = new StringBuilder();
+   	    if (user != null) {
+   		    commitMessage.append(user.getId()).append(": ");
+   	    }
+   	    commitMessage.append(messagePrefix);
+   	    commitMessage.append("\n\n");
+   	    commitMessage.append("Change performed by ").append(user.getDisplayName());
+   	    commitMessage.append('\n');
+   	    if (userComment != null && !"".equals(userComment.trim())){
+   	   	    commitMessage.append('\n').append(userComment.trim());
+   	   	}
+   	    String message = commitMessage.toString();
 
-           if(context.getCommitMessagePattern() == null || "".equals(context.getCommitMessagePattern())){
-               return message;
-           } else {
-               return context.getCommitMessagePattern().replaceAll("\\[message\\]", message.replaceAll("\\$", "\\\\\\$"));
-           }
+   	    if (!Strings.isNullOrEmpty(context.getCommitMessagePattern())) {
+            message = context.getCommitMessagePattern().replaceAll("\\[message\\]", message.replaceAll("\\$", "\\\\\\$"));
+	   	}
+        return wrapText(message, 72);
    	}
+
+    private static String wrapText(String str, int lineLength) {
+    	if (str == null) {
+    		return null;
+    	}
+    	int i = 0;
+    	int max = str.length();
+    	StringBuilder text = new StringBuilder();
+    	while (i < max) {
+    		int next = str.indexOf('\n', i);
+    		if (next < 0) next = max;
+    		String line = StringUtils.stripEnd(str.substring(i, next), null);
+			if (line.length() > lineLength) {
+				line = WordUtils.wrap(line, lineLength, "\n", false);
+			}
+			text.append(line).append('\n');
+			i = next+1;
+		}
+    	return text.toString();
+    }
 
     @Override
     public String toString() {

@@ -175,7 +175,7 @@ public class ScmSyncConfigurationBusiness {
                                 FileUtils.copyDirectory(JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(pathRelativeToJenkinsRoot.getPath()),
                                         fileTranslatedInScm);
                             } catch (IOException e) {
-                                throw new LoggableException("Error while copying file hierarchy to SCM checkouted directory", FileUtils.class, "copyDirectory", e);
+                                throw new LoggableException("Error while copying file hierarchy to SCM directory", FileUtils.class, "copyDirectory", e);
                             }
                             updatedFiles.addAll(scmManipulator.addFile(scmRoot, firstNonExistingParentScmPath));
                         }
@@ -274,7 +274,7 @@ public class ScmSyncConfigurationBusiness {
                 Files.write(content, fileTranslatedInScm);
             }
         } catch (IOException e) {
-            throw new LoggableException("Error while creating file in checkouted directory", Files.class, "write", e);
+            throw new LoggableException("Error while creating file in SCM directory", Files.class, "write", e);
         }
     }
 
@@ -291,7 +291,7 @@ public class ScmSyncConfigurationBusiness {
             for(File fileToSync : filesToSync){
                 String hudsonConfigPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(fileToSync);
 
-                plugin.getTransaction().defineCommitMessage(new WeightedMessage("Repository initialization", MessageWeight.IMPORTANT));
+                plugin.getTransaction().defineCommitMessage(new WeightedMessage("New included files", MessageWeight.IMPORTANT));
                 plugin.getTransaction().registerPath(hudsonConfigPathRelativeToHudsonRoot);
             }
         } finally {

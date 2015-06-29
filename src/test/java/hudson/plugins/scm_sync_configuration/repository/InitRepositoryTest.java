@@ -50,7 +50,7 @@ public abstract class InitRepositoryTest extends ScmSyncConfigurationPluginBaseT
 		// Initializing the repository...
 		createSCMMock();
 		
-		// After init, local checkouted repository should exists
+		// After init, local checked out repository should exist
 		assertThat(getCurrentScmSyncConfigurationCheckoutDirectory().exists(), is(true));
 		
 		// Populating checkoutConfiguration directory ..

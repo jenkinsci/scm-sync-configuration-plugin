@@ -7,8 +7,8 @@ package hudson.plugins.scm_sync_configuration.model;
  * have only the more important commit message kept during the transaction
  */
 public class WeightedMessage {
-    String message;
-    MessageWeight weight;
+    private final String message;
+    private final MessageWeight weight;
     public WeightedMessage(String message, MessageWeight weight) {
         this.message = message;
         this.weight = weight;
