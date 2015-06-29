@@ -73,7 +73,12 @@ public abstract class ScmSyncConfigurationBaseTest {
 		// Instantiating ScmSyncConfigurationPlugin instance for unit tests by using
         // synchronous transactions (instead of an asynchronous ones)
         // => this way, every commit will be processed synchronously !
-		ScmSyncConfigurationPlugin scmSyncConfigPluginInstance = new ScmSyncConfigurationPlugin(true);
+		ScmSyncConfigurationPlugin scmSyncConfigPluginInstance = new ScmSyncConfigurationPlugin(true) {
+			@Override
+			public void initialInit() throws Exception {
+				// No-op. We *must not* initialize here in tests because the tests provide their own setup.
+			}
+		};
 		
 		// Mocking PluginWrapper attached to current ScmSyncConfigurationPlugin instance
 		PluginWrapper pluginWrapper = PowerMockito.mock(PluginWrapper.class);
