@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import jenkins.model.Jenkins;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.spy;
@@ -46,7 +47,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({ "org.tmatesoft.svn.*" })
-@PrepareForTest({Hudson.class, SCM.class, ScmSyncSubversionSCM.class, PluginWrapper.class})
+@PrepareForTest({Hudson.class, Jenkins.class, SCM.class, ScmSyncSubversionSCM.class, PluginWrapper.class})
 public abstract class ScmSyncConfigurationBaseTest {
 	
 	@Rule protected TestName testName = new TestName();
@@ -110,6 +111,8 @@ public abstract class ScmSyncConfigurationBaseTest {
 		PowerMockito.doReturn(mockedUser).when(hudsonMockedInstance).getMe();
 		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(hudsonMockedInstance).getPlugin(ScmSyncConfigurationPlugin.class);
 		
+	    PowerMockito.mockStatic(Jenkins.class);
+	    PowerMockito.doReturn(hudsonMockedInstance).when(Jenkins.class); Jenkins.getInstance();
 	    PowerMockito.mockStatic(Hudson.class);
 	    PowerMockito.doReturn(hudsonMockedInstance).when(Hudson.class); Hudson.getInstance();
 	    //when(Hudson.getInstance()).thenReturn(hudsonMockedInstance);
