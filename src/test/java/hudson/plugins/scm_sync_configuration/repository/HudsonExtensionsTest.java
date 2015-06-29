@@ -20,8 +20,6 @@ import org.codehaus.plexus.util.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
@@ -30,14 +28,12 @@ import java.util.List;
 import jenkins.model.Jenkins;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-@PrepareForTest(ScmSyncConfigurationPlugin.class)
 public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBaseTest {
 
-	private ScmSyncConfigurationItemListener sscItemListener;
-	private ScmSyncConfigurationSaveableListener sscConfigurationSaveableListener;
+	protected ScmSyncConfigurationItemListener sscItemListener;
+	protected ScmSyncConfigurationSaveableListener sscConfigurationSaveableListener;
 	
 	protected HudsonExtensionsTest(ScmUnderTest scmUnderTest) {
 		super(scmUnderTest);
@@ -47,11 +43,6 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 	public void initObjectsUnderTests() throws Throwable{
 		this.sscItemListener = new ScmSyncConfigurationItemListener();
 		this.sscConfigurationSaveableListener = new ScmSyncConfigurationSaveableListener();
-
-		// Mocking ScmSyncConfigurationPlugin.getStrategyForSaveable()
-		ScmSyncConfigurationPlugin sscPlugin = spy(ScmSyncConfigurationPlugin.getInstance());
-		sscPlugin.setBusiness(this.sscBusiness);
-		PowerMockito.doReturn(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES[0]).when(sscPlugin).getStrategyForSaveable(Mockito.any(Saveable.class), Mockito.any(File.class));
 	}
 	
 	@Test
@@ -67,12 +58,12 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/newFakeJob/" );
 		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
         when(mockedItem.getName()).thenReturn("newFakeJob");
-
+        when(mockedItem.getParent()).thenReturn(null);
         // We should duplicate files in fakeJob to newFakeJob
         File oldJobDirectory = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/");
         FileUtils.copyDirectory(oldJobDirectory, mockedItemRootDir);
 
-		sscItemListener.onRenamed(mockedItem, "fakeJob", "newFakeJob");
+		sscItemListener.onLocationChanged(mockedItem, "fakeJob", "newFakeJob");
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobRenameBeCorrectlyImpactedOnSCM/");
 		
@@ -147,11 +138,9 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 
 		File configFile = new File(getCurrentHudsonRootDirectory() + "/hudson.tasks.Shell.xml" );
 
-		// Creating fake new job
+		// Creating fake new plugin config
 		Item mockedItem = Mockito.mock(Item.class);
-		when(mockedItem.getRootDir()).thenReturn(configFile);
 
-		sscItemListener.onCreated(mockedItem);
 		sscConfigurationSaveableListener.onChange(mockedItem, new XmlFile(configFile));
 
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/InitRepositoryTest.shouldSynchronizeHudsonFiles/");
@@ -162,40 +151,6 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldConfigModificationBeCorrectlyImpactedOnSCM/");
 
-		assertStatusManagerIsOk();
-	}
-
-	@Test
-	public void shouldJobRenameDoesntPerformAnyScmUpdate() throws Throwable {
-		// Initializing the repository...
-		createSCMMock();
-		
-		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
-		
-		// Let's checkout current scm view ... and commit something in it ...
-		SCMManipulator scmManipulator = createMockedScmManipulator();
-		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__tmpHierarchyForCommit");
-		scmManipulator.checkout(checkoutDirectoryForVerifications);
-		final File hello1 = new File(checkoutDirectoryForVerifications.getAbsolutePath()+"/jobs/hello.txt");
-		final File hello2 = new File(checkoutDirectoryForVerifications.getAbsolutePath()+"/hello2.txt");
-		FileUtils.fileAppend(hello1.getAbsolutePath(), "hello world !");
-		FileUtils.fileAppend(hello2.getAbsolutePath(), "hello world 2 !");
-		scmManipulator.addFile(checkoutDirectoryForVerifications, "jobs/hello.txt");
-		scmManipulator.addFile(checkoutDirectoryForVerifications, "hello2.txt");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit");
-		
-		// Renaming fakeJob to newFakeJob
-		Item mockedItem = Mockito.mock(Item.class);
-		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/newFakeJob/" );
-		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
-		
-		sscItemListener.onRenamed(mockedItem, "fakeJob", "newFakeJob");
-		
-		// Assert no hello file is present in current hudson root
-		assertThat(new File(this.getCurrentScmSyncConfigurationCheckoutDirectory()+"/jobs/hello.txt").exists(), is(false));
-		assertThat(new File(this.getCurrentScmSyncConfigurationCheckoutDirectory()+"/hello2.txt").exists(), is(false));
-		
 		assertStatusManagerIsOk();
 	}
 
@@ -238,40 +193,6 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		sscItemListener.onDeleted(mockedItem);
 		
 		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.shouldJobDeleteWithTwoJobsBeCorrectlyImpactedOnSCM/");
-		
-		assertStatusManagerIsOk();
-	}
-
-	@Test
-	public void shouldJobDeleteDoesntPerformAnyScmUpdate() throws Throwable {
-		// Initializing the repository...
-		createSCMMock();
-		
-		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
-		
-		// Let's checkout current scm view ... and commit something in it ...
-		SCMManipulator scmManipulator = createMockedScmManipulator();
-		File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__tmpHierarchyForCommit");
-		scmManipulator.checkout(checkoutDirectoryForVerifications);
-		final File hello1 = new File(checkoutDirectoryForVerifications.getAbsolutePath()+"/jobs/hello.txt");
-		final File hello2 = new File(checkoutDirectoryForVerifications.getAbsolutePath()+"/hello2.txt");
-		FileUtils.fileAppend(hello1.getAbsolutePath(), "hello world !");
-		FileUtils.fileAppend(hello2.getAbsolutePath(), "hello world 2 !");
-		scmManipulator.addFile(checkoutDirectoryForVerifications, "jobs/hello.txt");
-		scmManipulator.addFile(checkoutDirectoryForVerifications, "hello2.txt");
-		scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit");
-		
-		// Deleting fakeJob
-		Item mockedItem = Mockito.mock(Item.class);
-		File mockedItemRootDir = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/" );
-		when(mockedItem.getRootDir()).thenReturn(mockedItemRootDir);
-		
-		sscItemListener.onDeleted(mockedItem);
-		
-		// Assert no hello file is present in current hudson root
-		assertThat(new File(this.getCurrentScmSyncConfigurationCheckoutDirectory()+"/jobs/hello.txt").exists(), is(false));
-		assertThat(new File(this.getCurrentScmSyncConfigurationCheckoutDirectory()+"/hello2.txt").exists(), is(false));
 		
 		assertStatusManagerIsOk();
 	}

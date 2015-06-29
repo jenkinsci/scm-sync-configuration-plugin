@@ -22,14 +22,16 @@ public class UserConfigScmSyncStrategy extends AbstractScmSyncStrategy {
         new PageMatcher("^securityRealm/addUser$", "#main-panel form"),
         new PageMatcher("^securityRealm/user/[^/]+/configure$", "form[name='config']")
     );
+
     // Only saving config.xml file located in user directory
 	private static final String [] PATTERNS = new String[] {
         "users/*/config.xml"
 	};
-	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MANAGER = new ClassAndFileConfigurationEntityMatcher(User.class, PATTERNS);
+	
+	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new ClassAndFileConfigurationEntityMatcher(User.class, PATTERNS);
 
 	public UserConfigScmSyncStrategy(){
-		super(CONFIG_ENTITY_MANAGER, PAGE_MATCHERS);
+		super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
 	}
 
     public CommitMessageFactory getCommitMessageFactory(){
@@ -54,4 +56,8 @@ public class UserConfigScmSyncStrategy extends AbstractScmSyncStrategy {
             }
         };
     }
+
+	public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
+		return CONFIG_ENTITY_MATCHER.matches(saveable, pathRelativeToRoot, wasDirectory);
+	}
 }

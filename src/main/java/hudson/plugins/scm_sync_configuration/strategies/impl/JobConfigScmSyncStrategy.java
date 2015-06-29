@@ -6,6 +6,7 @@ import hudson.model.Saveable;
 import hudson.plugins.scm_sync_configuration.model.MessageWeight;
 import hudson.plugins.scm_sync_configuration.model.WeightedMessage;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
+import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.JobOrFolderConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 
@@ -13,8 +14,10 @@ import java.util.Collections;
 
 public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
+	private static final ConfigurationEntityMatcher CONFIG_MATCHER = new JobOrFolderConfigurationEntityMatcher();
+	
     public JobConfigScmSyncStrategy(){
-		super(new JobOrFolderConfigurationEntityMatcher(), Collections.singletonList(new PageMatcher("^(.*view/[^/]+/)?(job/[^/]+/)+configure$", "form[name='config']")));
+		super(CONFIG_MATCHER, Collections.singletonList(new PageMatcher("^(.*view/[^/]+/)?(job/[^/]+/)+configure$", "form[name='config']")));
 	}
 
     public CommitMessageFactory getCommitMessageFactory(){
@@ -39,4 +42,8 @@ public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
             }
         };
     }
+
+	public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeFromRoot, boolean wasDirectory) {
+		return CONFIG_MATCHER.matches(saveable, pathRelativeFromRoot, wasDirectory);
+	}
 }

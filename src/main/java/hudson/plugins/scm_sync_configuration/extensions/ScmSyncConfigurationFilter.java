@@ -39,8 +39,8 @@ public class ScmSyncConfigurationFilter implements Filter {
             try {
                 // Providing current ServletRequest in ScmSyncConfigurationDataProvider's thread local
                 // in order to be able to access it from everywhere inside this call
-                ScmSyncConfigurationDataProvider.provideRequestDuring((HttpServletRequest)request, new Callable() {
-                    public Object call() throws Exception {
+                ScmSyncConfigurationDataProvider.provideRequestDuring((HttpServletRequest)request, new Callable<Void>() {
+                    public Void call() throws Exception {
                         try {
                             // Handling "normally" http request
                             chain.doFilter(request, response);

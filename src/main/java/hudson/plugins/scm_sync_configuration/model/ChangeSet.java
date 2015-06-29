@@ -8,14 +8,12 @@ import hudson.plugins.scm_sync_configuration.utils.Checksums;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * @author fcamblor
  * POJO representing a Changeset built during a scm transaction
  */
 public class ChangeSet {
-    private static final Logger LOGGER = Logger.getLogger(ChangeSet.class.getName());
 
     // Changeset commit message
     WeightedMessage message = null;
@@ -55,11 +53,6 @@ public class ChangeSet {
                 }
             }
         }
-    }
-
-    public void registerRenamedPath(String oldPath, String newPath) {
-        registerPathForDeletion(oldPath);
-        registerPath(newPath);
     }
 
     public void registerPathForDeletion(String path){

@@ -50,4 +50,9 @@ public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
             }
         };
     }
+
+	public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
+		// Uh-oh... Jenkins config should never be deleted.
+		return false;
+	}
 }
