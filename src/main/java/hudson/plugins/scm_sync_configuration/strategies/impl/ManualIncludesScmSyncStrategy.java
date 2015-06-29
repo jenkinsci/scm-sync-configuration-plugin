@@ -6,17 +6,13 @@ import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntit
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PatternsEntityMatcher;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ManualIncludesScmSyncStrategy extends AbstractScmSyncStrategy {
 
-	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ {
-        // No page matcher for this particular implementation
-    } };
-
 	public ManualIncludesScmSyncStrategy(){
-		super(null, PAGE_MATCHERS);
+		super(null, Collections.<PageMatcher>emptyList());
 	}
 
     @Override

@@ -10,14 +10,9 @@ import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntit
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PatternsEntityMatcher;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
 public class BasicPluginsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
-
-	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ {
-        // No page matchers for this strategy ... for the moment
-    } };
 
     private static final String[] PATTERNS = new String[]{
         "hudson*.xml",
@@ -27,7 +22,7 @@ public class BasicPluginsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new PatternsEntityMatcher(PATTERNS);
 
 	public BasicPluginsConfigScmSyncStrategy(){
-		super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
+		super(CONFIG_ENTITY_MATCHER, Collections.<PageMatcher>emptyList());
 	}
 
     public CommitMessageFactory getCommitMessageFactory(){
