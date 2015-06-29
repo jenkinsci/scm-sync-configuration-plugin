@@ -16,6 +16,7 @@ public class BasicPluginsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
     private static final String[] PATTERNS = new String[]{
         "hudson*.xml",
+        "jenkins*.xml",
         "scm-sync-configuration.xml"
     };
 
