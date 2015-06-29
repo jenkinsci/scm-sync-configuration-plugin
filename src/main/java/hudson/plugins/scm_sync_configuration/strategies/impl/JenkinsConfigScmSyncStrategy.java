@@ -10,18 +10,19 @@ import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntit
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PatternsEntityMatcher;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 
 public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
-	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ {
+	private static final List<PageMatcher> PAGE_MATCHERS = ImmutableList.of(
         // Global configuration page
-        add(new PageMatcher("^configure$", "form[name='config']"));
+        new PageMatcher("^configure$", "form[name='config']"),
         // View configuration pages
-        add(new PageMatcher("^(.+/)?view/[^/]+/configure$", "form[name='viewConfig']"));
-        add(new PageMatcher("^newView$", "form[name='createView'],form[name='createItem']"));
-    } };
+        new PageMatcher("^(.+/)?view/[^/]+/configure$", "form[name='viewConfig']"),
+        new PageMatcher("^newView$", "form[name='createView'],form[name='createItem']")
+    );
     
     private static final String[] PATTERNS = new String[]{
         "config.xml"

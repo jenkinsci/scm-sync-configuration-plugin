@@ -2,7 +2,6 @@ package hudson.plugins.scm_sync_configuration.strategies.impl;
 
 import hudson.XmlFile;
 import hudson.model.Item;
-import hudson.model.Job;
 import hudson.model.Saveable;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.model.MessageWeight;
@@ -12,16 +11,17 @@ import hudson.plugins.scm_sync_configuration.strategies.model.ClassAndFileConfig
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 
 public class UserConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
     // Don't miss to take into account view urls since we can configure a job through a view !
-	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ {
-        add(new PageMatcher("^securityRealm/addUser$", "#main-panel form"));
-        add(new PageMatcher("^securityRealm/user/[^/]+/configure$", "form[name='config']"));
-    } };
+	private static final List<PageMatcher> PAGE_MATCHERS = ImmutableList.of(
+        new PageMatcher("^securityRealm/addUser$", "#main-panel form"),
+        new PageMatcher("^securityRealm/user/[^/]+/configure$", "form[name='config']")
+    );
     // Only saving config.xml file located in user directory
 	private static final String [] PATTERNS = new String[] {
         "users/*/config.xml"
