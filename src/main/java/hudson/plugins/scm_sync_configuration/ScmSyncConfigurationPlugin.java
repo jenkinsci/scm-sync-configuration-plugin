@@ -3,13 +3,13 @@ package hudson.plugins.scm_sync_configuration;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import hudson.Plugin;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
-import hudson.model.Hudson;
 import hudson.model.Saveable;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.extensions.ScmSyncConfigurationFilter;
@@ -29,7 +29,6 @@ import net.sf.json.JSONObject;
 
 import org.acegisecurity.AccessDeniedException;
 import org.apache.maven.scm.ScmException;
-import org.apache.tools.ant.types.selectors.FileSelector;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -60,13 +59,13 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     /**
      * Strategies that cannot be updated by user
      */
-    public static final transient List<ScmSyncStrategy> DEFAULT_STRATEGIES = new ArrayList<ScmSyncStrategy>(){{
-        addAll(Collections2.filter(Arrays.asList(AVAILABLE_STRATEGIES), new Predicate<ScmSyncStrategy>() {
+    public static final transient List<ScmSyncStrategy> DEFAULT_STRATEGIES = ImmutableList.copyOf(
+        Collections2.filter(Arrays.asList(AVAILABLE_STRATEGIES), new Predicate<ScmSyncStrategy>() {
             public boolean apply(@Nullable ScmSyncStrategy scmSyncStrategy) {
                 return !( scmSyncStrategy instanceof ManualIncludesScmSyncStrategy );
             }
-        }));
-    }};
+        })
+    );
 
     public void purgeFailLogs() {
         business.purgeFailLogs();
@@ -130,7 +129,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void start() throws Exception {
 		super.start();
 
-		Hudson.XSTREAM.registerConverter(new ScmSyncConfigurationXStreamConverter());
+		Jenkins.XSTREAM.registerConverter(new ScmSyncConfigurationXStreamConverter());
 
 		this.load();
 
@@ -296,13 +295,13 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	private User getCurrentUser(){
 		User user = null;
 		try {
-			user = Hudson.getInstance().getMe();
+			user = Jenkins.getInstance().getMe();
 		}catch(AccessDeniedException e){}
 		return user;
 	}
 
 	public static ScmSyncConfigurationPlugin getInstance(){
-		return Hudson.getInstance().getPlugin(ScmSyncConfigurationPlugin.class);
+		return Jenkins.getInstance().getPlugin(ScmSyncConfigurationPlugin.class);
 	}
 
 	public ScmSyncStrategy getStrategyForSaveable(Saveable s, File f){

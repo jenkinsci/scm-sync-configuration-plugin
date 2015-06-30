@@ -3,7 +3,6 @@ package hudson.plugins.scm_sync_configuration.strategies.model;
 import hudson.model.Saveable;
 
 import java.io.File;
-import java.util.regex.Pattern;
 
 public class ClassAndFileConfigurationEntityMatcher extends PatternsEntityMatcher {
 		

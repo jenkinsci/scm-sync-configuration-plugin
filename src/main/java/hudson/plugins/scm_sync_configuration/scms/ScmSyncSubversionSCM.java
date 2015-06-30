@@ -47,6 +47,7 @@ public class ScmSyncSubversionSCM extends SCM {
 			try {
 				Field credentialField = SubversionSCM.DescriptorImpl.class.getDeclaredField("credentials");
 				credentialField.setAccessible(true);
+				@SuppressWarnings("unchecked")
 				Map<String,Credential> credentials = (Map<String,Credential>)credentialField.get(subversionDescriptor);
 				Credential cred = credentials.get(realm);
 				if(cred == null){

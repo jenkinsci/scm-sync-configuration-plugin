@@ -1,7 +1,7 @@
 package hudson.plugins.scm_sync_configuration;
 
 import com.google.common.io.Files;
-import hudson.model.Hudson;
+
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.exceptions.LoggableException;
 import hudson.plugins.scm_sync_configuration.model.*;
@@ -9,6 +9,7 @@ import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.utils.Checksums;
 import hudson.security.Permission;
 import hudson.util.DaemonThreadFactory;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.manager.ScmManager;
@@ -24,6 +25,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
+
+import jenkins.model.Jenkins;
 
 
 public class ScmSyncConfigurationBusiness {
@@ -305,18 +308,17 @@ public class ScmSyncConfigurationBusiness {
 
     public List<File> reloadAllFilesFromScm() throws IOException, ScmException {
         this.scmManipulator.update(new File(getCheckoutScmDirectoryAbsolutePath()));
-        return syncDirectories(new File(getCheckoutScmDirectoryAbsolutePath() + File.separator), "");
+        return syncDirectories(new File(getCheckoutScmDirectoryAbsolutePath()), "");
     }
 
     private List<File> syncDirectories(File from, String relative) throws IOException {
         List<File> l = new ArrayList<File>();
         for(File f : from.listFiles()) {
             String newRelative = relative + File.separator + f.getName();
-            File jenkinsFile = new File(Hudson.getInstance().getRootDir() + newRelative);
+            File jenkinsFile = new File(Jenkins.getInstance().getRootDir() + newRelative);
             if (f.getName().equals(scmManipulator.getScmSpecificFilename())) {
                 // nothing to do
-            }
-            else if (f.isDirectory()) {
+            } else if (f.isDirectory()) {
                 if (!jenkinsFile.exists()) {
                     FileUtils.copyDirectory(f, jenkinsFile, new FileFilter() {
 
@@ -330,8 +332,7 @@ public class ScmSyncConfigurationBusiness {
                 else {
                     l.addAll(syncDirectories(f, newRelative));
                 }
-            }
-            else {
+            } else {
                 if (!jenkinsFile.exists() || !FileUtils.contentEquals(f, jenkinsFile)) {
                     FileUtils.copyFile(f, jenkinsFile);
                     l.add(jenkinsFile);
@@ -351,7 +352,7 @@ public class ScmSyncConfigurationBusiness {
     }
 
     public static String getCheckoutScmDirectoryAbsolutePath(){
-        return new File(new File(Hudson.getInstance().getRootDir(), WORKING_DIRECTORY), CHECKOUT_SCM_DIRECTORY).getAbsolutePath();
+        return new File(new File(Jenkins.getInstance().getRootDir(), WORKING_DIRECTORY), CHECKOUT_SCM_DIRECTORY).getAbsolutePath();
     }
 
     public static String getScmDirectoryName() {
@@ -359,16 +360,16 @@ public class ScmSyncConfigurationBusiness {
     }
     
     public void purgeFailLogs() {
-        Hudson.getInstance().checkPermission(purgeFailLogPermission());
+        Jenkins.getInstance().checkPermission(purgeFailLogPermission());
         scmSyncConfigurationStatusManager.purgeFailLogs();
     }
 
     public boolean canCurrentUserPurgeFailLogs() {
-        return Hudson.getInstance().hasPermission(purgeFailLogPermission());
+        return Jenkins.getInstance().hasPermission(purgeFailLogPermission());
     }
 
     private static Permission purgeFailLogPermission(){
         // Only administrators should be able to purge logs
-        return Hudson.ADMINISTER;
+        return Jenkins.ADMINISTER;
     }
 }
