@@ -12,11 +12,10 @@ public class ScmSyncGitSCM extends SCM {
 	
 	public String createScmUrlFromRequest(StaplerRequest req) {
 		String repoURL = req.getParameter("gitRepositoryUrl");
-		if(repoURL == null){
+		if (repoURL == null) {
 			return null;
-		}
-		else {
-			return SCM_URL_PREFIX+repoURL;
+		} else {
+			return SCM_URL_PREFIX + repoURL.trim();
 		}
 	}
 	
