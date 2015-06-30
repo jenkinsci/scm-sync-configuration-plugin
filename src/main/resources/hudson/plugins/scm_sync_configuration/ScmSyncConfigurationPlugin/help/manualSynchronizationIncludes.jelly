@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
     <div>
-        ${%List of ant-like includes allowing to specify additionnal sync-ed files with repository}.<br/>
+        ${%List of ant-like includes allowing to specify additional files to synchronize with the repository}.<br/>
         ${%Includes should be case sensitive paths starting from your JENKINS_HOME directory, without / in the beginning; Use of wildcards} (${%* and **}) ${%is allowed}.<br/>
         ${%You can have a look at} <a href="https://wiki.jenkins-ci.org/display/JENKINS/SCM+Sync+Config+shared+additionnal+includes">${%community shared includes in Jenkins wiki}</a>, ${%feel free to share your owns on this page} !<br/>
         ${%Before creating new includes, you should be aware of some things} :
