@@ -24,17 +24,17 @@ public class ScmSyncConfigurationBasicTest extends ScmSyncConfigurationBaseTest 
 	
 	@Test
 	public void shouldRetrieveMockedHudsonInstanceCorrectly() throws Throwable {
-		Hudson hudsonInstance = Hudson.getInstance();
-		assertNotNull("Jenkins instance must not be null", hudsonInstance);
-		assertFalse("Expected a mocked Jenkins instance", "hudson.model.Hudson".equals(hudsonInstance.toString().split("@")[0]));
+		Jenkins jenkins = Jenkins.getInstance();
+		assertNotNull("Jenkins instance must not be null", jenkins);
+		assertFalse("Expected a mocked Jenkins instance", jenkins.getClass().equals(Jenkins.class) || jenkins.getClass().equals(Hudson.class));
 	}
 	
 	@Test
 	public void shouldVerifyIfHudsonRootDirectoryExists() throws Throwable {
-		Hudson hudsonInstance = Hudson.getInstance();
-		File hudsonRootDir = hudsonInstance.getRootDir();
-		assertNotNull("Jenkins instance must not be null", hudsonRootDir);
-		assertTrue("$JENKINS_HOME must be an existing directory", hudsonRootDir.isDirectory());
+		Jenkins jenkins = Jenkins.getInstance();
+		File jenkinsRootDir = jenkins.getRootDir();
+		assertNotNull("Jenkins instance must not be null", jenkinsRootDir);
+		assertTrue("$JENKINS_HOME must be an existing directory", jenkinsRootDir.isDirectory());
 	}
 	
 	@Test

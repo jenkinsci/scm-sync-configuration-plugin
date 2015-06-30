@@ -33,10 +33,11 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.ClassPathResource;
 
+import com.google.common.collect.Lists;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -68,6 +69,7 @@ public abstract class ScmSyncConfigurationBaseTest {
 		this.scmContext = null;
 	}
 	
+	@SuppressWarnings("deprecation") // We need to mock Hudson.getInstance()
 	@Before
 	public void setup() throws Throwable {
 		// Instantiating ScmSyncConfigurationPlugin instance for unit tests by using
@@ -214,12 +216,12 @@ public abstract class ScmSyncConfigurationBaseTest {
 	}
 	
 	protected static List<Pattern> getSpecialSCMDirectoryExcludePattern(){
-		return new ArrayList<Pattern>(){{
-			add(Pattern.compile("\\.svn"));
-			add(Pattern.compile("\\.git.*"));
-            add(Pattern.compile("scm-sync-configuration\\..*\\.log"));
-            add(Pattern.compile("scm-sync-configuration"));
-		}};
+		return Lists.newArrayList(
+			Pattern.compile("\\.svn"),
+			Pattern.compile("\\.git.*"),
+            Pattern.compile("scm-sync-configuration\\..*\\.log"),
+            Pattern.compile("scm-sync-configuration")
+		);
 	}
 	
 	protected String getSuffixForTestFiles() {

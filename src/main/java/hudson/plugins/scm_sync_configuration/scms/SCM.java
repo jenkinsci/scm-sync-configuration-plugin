@@ -1,11 +1,11 @@
 package hudson.plugins.scm_sync_configuration.scms;
 
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import jenkins.model.Jenkins;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.maven.scm.manager.NoSuchScmProviderException;
@@ -17,15 +17,17 @@ import org.apache.maven.scm.repository.ScmRepositoryException;
 import org.codehaus.plexus.util.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 
+import com.google.common.collect.ImmutableList;
+
 public abstract class SCM {
 	
 	protected static final Logger LOGGER = Logger.getLogger(SCM.class.getName());
 	
-	protected static final List<SCM> SCM_IMPLEMENTATIONS = new ArrayList<SCM>(){ {
-		add(new ScmSyncNoSCM());
-		add(new ScmSyncSubversionSCM());
-		add(new ScmSyncGitSCM());
-	} };
+	protected static final List<SCM> SCM_IMPLEMENTATIONS = ImmutableList.of(
+		new ScmSyncNoSCM(),
+		new ScmSyncSubversionSCM(),
+		new ScmSyncGitSCM()
+	);
 	
 	transient protected String title;
 	transient protected String scmClassName;
@@ -51,8 +53,9 @@ public abstract class SCM {
 		return this.scmClassName;
 	}
 	
-	public Descriptor<? extends hudson.scm.SCM> getSCMDescriptor(){
-		return Hudson.getInstance().getDescriptorByName(getSCMClassName());
+	@SuppressWarnings("unchecked")
+	public Descriptor<hudson.scm.SCM> getSCMDescriptor(){
+		return Jenkins.getInstance().getDescriptorByName(getSCMClassName());
 	}
 	
 	public String getRepositoryUrlHelpPath() {
@@ -83,20 +86,21 @@ public abstract class SCM {
         //scmRepo.setPersistCheckout( false );
 
         // TODO: instead of creating a SCMCredentialConfiguration, create a ScmProviderRepository
-        if ( repository.getProviderRepository() instanceof ScmProviderRepositoryWithHost )
-        {
-    		LOGGER.info("Populating host data into SCM repository object ...");
-            ScmProviderRepositoryWithHost repositoryWithHost =
-                (ScmProviderRepositoryWithHost) repository.getProviderRepository();
-            String host = repositoryWithHost.getHost();
-
-            int port = repositoryWithHost.getPort();
-
-            if ( port > 0 )
-            {
-                host += ":" + port;
-            }
-        }
+        // XXX: host & port are unused afterwards?
+//        if ( repository.getProviderRepository() instanceof ScmProviderRepositoryWithHost )
+//        {
+//    		LOGGER.info("Populating host data into SCM repository object ...");
+//            ScmProviderRepositoryWithHost repositoryWithHost =
+//                (ScmProviderRepositoryWithHost) repository.getProviderRepository();
+//            String host = repositoryWithHost.getHost();
+//
+//            int port = repositoryWithHost.getPort();
+//
+//            if ( port > 0 )
+//            {
+//                host += ":" + port;
+//            }
+//        }
 
         if(credentials != null){
     		LOGGER.info("Populating credentials data into SCM repository object ...");

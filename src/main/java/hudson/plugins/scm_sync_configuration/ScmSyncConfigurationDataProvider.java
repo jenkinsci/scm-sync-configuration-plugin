@@ -1,9 +1,11 @@
 package hudson.plugins.scm_sync_configuration;
 
 import hudson.plugins.scm_sync_configuration.model.BotherTimeout;
+
 import org.kohsuke.stapler.Stapler;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -57,6 +59,7 @@ public class ScmSyncConfigurationDataProvider {
 	}
 	
 	protected static Map<BotherTimeout, Date> retrievePurgedBotherTimeouts(){
+		@SuppressWarnings("unchecked")
 		Map<BotherTimeout, Date> botherTimeouts = (Map<BotherTimeout, Date>)retrieveObject(BOTHER_TIMEOUTS_SESSION_KEY, false);
 		if(botherTimeouts != null){
 			purgeOutdatedBotherTimeouts(botherTimeouts);

@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -201,14 +200,12 @@ public class SCMManipulator {
 		return synchronizedFiles;
 	}
 
-    private List<File> refineUpdatedFilesInScmResult(List updatedFiles){
+    private List<File> refineUpdatedFilesInScmResult(List<?> updatedFiles){
         List<File> refinedUpdatedFiles = new ArrayList<File>();
 
         // Cannot use directly a List<ScmFile> or List<File> here, since result type will depend upon
         // current scm api version
-        Iterator scmFileIter = updatedFiles.iterator();
-        while(scmFileIter.hasNext()){
-            Object scmFile = scmFileIter.next();
+        for (Object scmFile :updatedFiles) {
             if(scmFile instanceof File){
                 String checkoutScmDir = ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath();
                 String scmPath = ((File) scmFile).getAbsolutePath();
