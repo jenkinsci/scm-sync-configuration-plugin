@@ -5,7 +5,6 @@ import com.google.common.collect.Collections2;
 import hudson.Plugin;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
-import hudson.model.Hudson;
 import hudson.model.Saveable;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.extensions.ScmSyncConfigurationFilter;
@@ -21,6 +20,8 @@ import hudson.plugins.scm_sync_configuration.transactions.ThreadedTransaction;
 import hudson.plugins.scm_sync_configuration.xstream.ScmSyncConfigurationXStreamConverter;
 import hudson.plugins.scm_sync_configuration.xstream.migration.ScmSyncConfigurationPOJO;
 import hudson.util.PluginServletFilter;
+import jenkins.model.Jenkins;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.acegisecurity.AccessDeniedException;
 import org.apache.maven.scm.ScmException;
@@ -88,6 +89,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     private transient Future<Void> latestCommitFuture;
 
 	private String scmRepositoryUrl;
+    private String scmGitBranch;
 	private SCM scm;
 	private boolean noUserCommitMessage;
 	private boolean displayStatus = true;
@@ -96,6 +98,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     private String commitMessagePattern = "[message]";
     private List<File> filesModifiedByLastReload;
     private List<String> manualSynchronizationIncludes;
+
+    private static final String SCM_SYNC_GIT_PREFX="scm:git:";
 
     public ScmSyncConfigurationPlugin(){
         // By default, transactions should be asynchronous
@@ -121,7 +125,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	public void start() throws Exception {
 		super.start();
 
-		Hudson.XSTREAM.registerConverter(new ScmSyncConfigurationXStreamConverter());
+		Jenkins.XSTREAM.registerConverter(new ScmSyncConfigurationXStreamConverter());
 
 		this.load();
 
@@ -140,6 +144,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
 	public void loadData(ScmSyncConfigurationPOJO pojo){
 		this.scmRepositoryUrl = pojo.getScmRepositoryUrl();
+        this.scmGitBranch = pojo.getScmGitBranch();
 		this.scm = pojo.getScm();
 		this.noUserCommitMessage = pojo.isNoUserCommitMessage();
 		this.displayStatus = pojo.isDisplayStatus();
@@ -174,6 +179,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         this.displayStatus = formData.getBoolean("displayStatus");
         this.commitMessagePattern = req.getParameter("commitMessagePattern");
 
+        String oldGitBranch = this.scmGitBranch;
         String oldScmRepositoryUrl = this.scmRepositoryUrl;
 		String scmType = req.getParameter("scm");
 		if(scmType != null){
@@ -182,8 +188,21 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
 			this.scmRepositoryUrl = newScmRepositoryUrl;
 
+            String newScmGitBranch = null;
+            if ("hudson.plugins.scm_sync_configuration.scms.ScmSyncGitSCM".equals(scmType)){
+                newScmGitBranch = formData.getJSONObject("scm").getString("scmGitBranch");
+            }
+
+            if (oldGitBranch == null) {
+                oldGitBranch = "master";
+            }
+            if (newScmGitBranch == null){
+                newScmGitBranch = "master";
+            }
+            this.scmGitBranch = newScmGitBranch;
+
             // If something changed, let's reinitialize repository in working directory !
-            repoInitializationRequired = newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(oldScmRepositoryUrl);
+            repoInitializationRequired = (newScmRepositoryUrl != null && !newScmRepositoryUrl.equals(oldScmRepositoryUrl)) || !newScmGitBranch.equals(oldGitBranch);
             configsResynchronizationRequired = repoInitializationRequired;
             repoCleaningRequired = newScmRepositoryUrl==null && oldScmRepositoryUrl!=null;
         }
@@ -222,7 +241,14 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
 	public void doReloadAllFilesFromScm(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
 		try {
-			filesModifiedByLastReload = business.reloadAllFilesFromScm();
+            String branchToReload = req.getParameter("scmBranchReload");
+            String urlToReload = req.getParameter("urlRepoReload");
+            LOGGER.info("Switching to URL:" + urlToReload + " branch:"+ branchToReload);
+            scmGitBranch = branchToReload;
+            scmRepositoryUrl = SCM_SYNC_GIT_PREFX + urlToReload;
+            business.removeSourceJobsDuringReload();
+            init();
+            filesModifiedByLastReload = business.reloadAllFilesFromScm();
 			req.getView(this, "/hudson/plugins/scm_sync_configuration/reload.jelly").forward(req, res);
 		}
 		catch(ScmException e) {
@@ -265,13 +291,13 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	private User getCurrentUser(){
 		User user = null;
 		try {
-			user = Hudson.getInstance().getMe();
+			user = Jenkins.getInstance().getMe();
 		}catch(AccessDeniedException e){}
 		return user;
 	}
 
 	public static ScmSyncConfigurationPlugin getInstance(){
-		return Hudson.getInstance().getPlugin(ScmSyncConfigurationPlugin.class);
+		return Jenkins.getInstance().getPlugin(ScmSyncConfigurationPlugin.class);
 	}
 
 	public ScmSyncStrategy getStrategyForSaveable(Saveable s, File f){
@@ -285,7 +311,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 	}
 
 	public ScmContext createScmContext(){
-		return new ScmContext(this.scm, this.scmRepositoryUrl, this.commitMessagePattern);
+		return new ScmContext(this.scm, this.scmRepositoryUrl, this.commitMessagePattern, this.scmGitBranch);
 	}
 
 	public boolean shouldDecorationOccursOnURL(String url){
@@ -347,7 +373,9 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 		}
 	}
 
-	public List<File> getFilesModifiedByLastReload() {
+    public String getScmGitBranch() { return scmGitBranch; }
+
+    public List<File> getFilesModifiedByLastReload() {
 		return filesModifiedByLastReload;
 	}
 

@@ -383,6 +383,56 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		}
 	}
 
+    /**
+     * Test that checks if after reload, disk contains only jobs that were reloaded from SCM. Speaking in other way -
+     * if joba non existent in SCM were removed from the disk.
+     * @throws Throwable
+     */
+    @Test
+    public void shouldReloadAllFilesRemoveNonExistentJobs() throws Throwable {
+        createSCMMock();
+
+        sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
+
+        // Let's checkout current scm view ... and commit something in it ...
+        SCMManipulator scmManipulator = createMockedScmManipulator();
+        File checkoutDirectoryForVerifications = createTmpDirectory(this.getClass().getSimpleName()+"_"+testName.getMethodName()+"__tmpHierarchyForCommit");
+        scmManipulator.checkout(checkoutDirectoryForVerifications);
+
+        verifyCurrentScmContentMatchesCurrentHudsonDir(true);
+
+
+        final String jobDir = checkoutDirectoryForVerifications.getAbsolutePath() + "/jobs/myJob";
+        FileUtils.mkdir(jobDir);
+        final File addedJobFile = new File(jobDir + "/config.xml");
+        FileUtils.fileWrite(addedJobFile.getAbsolutePath(), "titi");
+        scmManipulator.addFile(checkoutDirectoryForVerifications, "jobs/myJob");
+        File jobToRemove = new File(checkoutDirectoryForVerifications.getAbsolutePath() + "/jobs/fakeJob");
+        FileUtils.deleteDirectory(jobToRemove);
+        scmManipulator.deleteHierarchy(jobToRemove);
+        scmManipulator.checkinFiles(checkoutDirectoryForVerifications, "external commit for add myJob file and remove fakeJob");
+
+        verifyCurrentScmContentMatchesCurrentHudsonDir(false);
+
+        // Reload config
+        List<File> removedJobs = sscBusiness.removeSourceJobsDuringReload();
+        List<File> syncedFiles = sscBusiness.reloadAllFilesFromScm();
+
+        verifyCurrentScmContentMatchesCurrentHudsonDir(true);
+
+        assertThat(removedJobs.size(), is(1));
+        assertThat(removedJobs.contains(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/jobs/fakeJob")), is(true));
+
+        assertThat(syncedFiles.size(), is(1));
+        assertThat(syncedFiles.contains(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/jobs/myJob")), is(true));
+
+        assertThat(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/jobs/fakeJob").exists(), is(false));
+        assertThat(new File(getCurrentHudsonRootDirectory().getAbsolutePath() + "/jobs/myJob").exists(), is(true));
+
+
+        assertStatusManagerIsOk();
+    }
+
     @Override
 	protected String getHudsonRootBaseTemplate(){
         if("shouldFileWhichHaveToBeInSCM".equals(testName.getMethodName())){

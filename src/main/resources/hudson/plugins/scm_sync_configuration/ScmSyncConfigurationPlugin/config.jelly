@@ -48,8 +48,26 @@
             </table>
         </f:repeatable>
     </f:entry>
-    <f:entry title="${%Reload config from SCM}" help="${rootUrl}/plugin/scm-sync-configuration/help/reloadScmConfig-help.html">
-    	<a href="${rootURL}/plugin/scm-sync-configuration/reloadAllFilesFromScm" onClick="return confirm('${%WARNING : the Jenkins config will be reloaded from SCM}.\n${%Only file modifications are handled}. ${%File added or removed will not be handled} !\n\n${%Continue} ?')">${%Reload}</a>
+
+    <f:entry title="${%Branch reloading}">
+        <table width="100%">
+            <f:entry title="${%URL Repository to reload from SCM}" help="${rootUrl}/plugin/scm-sync-configuration/help/reloadScmConfig-url-help.html">
+                    <f:textbox id="urlRepoReloadTextId" name="scmURLReload" value="${it.scmURLReload}" />
+            </f:entry>
+
+            <f:entry title="${%Branch to reload from SCM}" help="${rootUrl}/plugin/scm-sync-configuration/help/reloadScmConfig-branch-help.html">
+                    <f:textbox id="scmBranchReloadTextId" name="scmBranchReload" value="${it.scmBranchReload}" />
+            </f:entry>
+
+            <f:entry title="${%}" help="${rootUrl}/plugin/scm-sync-configuration/help/reloadScmConfig-help.html">
+                <a id="reloadId" href="${rootURL}/plugin/scm-sync-configuration/reloadAllFilesFromScm" onClick="
+                if (confirm('${%WARNING : the Jenkins config will be reloaded from SCM Branch:}.\n${%Only file modifications are handled}. ${%File added or removed will not be handled} !\n${%All existing jobs will be removed} !\n\n${%Continue} ?') == true) {
+                    document.getElementById('reloadId').href+='?scmBranchReload='+document.getElementById('scmBranchReloadTextId').value+'&amp;urlRepoReload='+document.getElementById('urlRepoReloadTextId').value;
+                } else {
+                    return false;
+                }" >${%Reload}</a>
+            </f:entry>
+        </table>
     </f:entry>
   </f:section>
   
