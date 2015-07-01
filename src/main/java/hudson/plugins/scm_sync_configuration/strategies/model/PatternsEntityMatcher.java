@@ -1,5 +1,6 @@
 package hudson.plugins.scm_sync_configuration.strategies.model;
 
+import hudson.model.Hudson;
 import hudson.model.Saveable;
 import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import org.apache.tools.ant.DirectoryScanner;
@@ -27,7 +28,7 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
         // adding this check avoids unnecessary Exceptions on Jenkins logs
         if (file.getAbsolutePath() == null ||
             !file.getAbsolutePath().startsWith(Hudson.getInstance().getRootDir().getAbsolutePath())) {
-          	return false;
+            return false;
         }
     
         String filePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
