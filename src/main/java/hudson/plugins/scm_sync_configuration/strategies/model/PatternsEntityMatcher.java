@@ -1,6 +1,6 @@
 package hudson.plugins.scm_sync_configuration.strategies.model;
 
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 import hudson.model.Saveable;
 import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import org.apache.tools.ant.DirectoryScanner;
@@ -27,7 +27,7 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
         // such cases are usual when running Jenkins in Docker as a Phoenix Docker Container
         // adding this check avoids unnecessary Exceptions on Jenkins logs
         if (file.getAbsolutePath() == null ||
-            !file.getAbsolutePath().startsWith(Hudson.getInstance().getRootDir().getAbsolutePath())) {
+            !file.getAbsolutePath().startsWith(Jenkins.getInstance().getRootDir().getAbsolutePath())) {
             return false;
         }
     

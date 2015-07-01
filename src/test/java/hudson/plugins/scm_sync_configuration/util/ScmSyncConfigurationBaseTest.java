@@ -112,7 +112,7 @@ public abstract class ScmSyncConfigurationBaseTest {
 		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(jenkinsMockInstance).getPlugin(ScmSyncConfigurationPlugin.class);
 
 	    PowerMockito.mockStatic(Jenkins.class);
-	    PowerMockito.doReturn(jenkinsMockInstance).when(Jenkins.class); Jenkins.getInstance();
+	    PowerMockito.doReturn(jenkinsMockInstance).when(Jenkins.class); Jenkins.getInstance();	
 	}
 	
 	@After
