@@ -59,7 +59,7 @@ public interface ScmSyncStrategy {
 	List<File> collect(File directory);
 	
     /**
-     * @return List of sync'ed file includes brought by current strategy
+     * @return List of sync'ed file includes brought by current strategy. Used only for informational purposes in the UI.
      */
     List<String> getSyncIncludes();
 
