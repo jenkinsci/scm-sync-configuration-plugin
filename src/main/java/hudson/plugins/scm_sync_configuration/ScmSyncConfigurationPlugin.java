@@ -296,6 +296,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         getTransaction().registerPath(path);
     }
 
+    /**
+     * This method is invoked via jelly to display a list of all the default includes.
+     *
+     * @return a list of explanatory strings about the patterns matched by a specific strategy's matcher.
+     */
     public List<String> getDefaultIncludes(){
         List<String> includes = new ArrayList<String>();
         for(ScmSyncStrategy strategy : DEFAULT_STRATEGIES){
