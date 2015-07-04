@@ -2,16 +2,16 @@ package hudson.plugins.scm_sync_configuration.scms.customproviders.git.gitexe;
 
 import org.apache.maven.scm.provider.git.command.GitCommand;
 import org.apache.maven.scm.provider.git.gitexe.GitExeScmProvider;
-import org.codehaus.plexus.util.Os;
 
 /**
- * Try to fix some very broken maven scm git commands.
+ * Try to fix those very broken maven scm git commands. We should really move to using the git-client plugin.
  */
 public class ScmSyncGitExeScmProvider extends GitExeScmProvider {
     
 	@Override
     protected GitCommand getCheckInCommand() {
-		// Push to origin
+		// Push to origin (fcamblor)
+    	// Handle quoted output from git, and fix relative path computations SCM-695, SCM-772
         return new ScmSyncGitCheckInCommand();
     }
 
@@ -21,25 +21,18 @@ public class ScmSyncGitExeScmProvider extends GitExeScmProvider {
     	return new ScmSyncGitRemoveCommand();
     }
     
-    // More hacks. The command line library used by the gitexe in maven scm does not automatically quote
-    // arguments containing blanks or other funny characters.
-    //
-    // Now this is going to be fun.
-    //
-    // On Unices, we need to protect both $ and blanks: single quote, and escape and single quote inside
-    // On Windows, we need to protect % and blanks: double the %'s and then double quote.
-    protected static String quote(String s) {
-    	String quoteChar = "'";
-    	if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-    		if (s.indexOf('%') >= 0) {
-    			s = s.replaceAll("%", "%%");
-    		}
-    		quoteChar="\"";
-    	}
-    	if (s.indexOf(quoteChar) >= 0) {
-    		return quoteChar + s.replaceAll(quoteChar, '\\' + quoteChar) + quoteChar;
-    	}
-    	return s;
+    @Override
+    protected GitCommand getStatusCommand() {
+    	// Handle quoted output from git, and fix relative path computations SCM-695, SCM-772
+    	return new ScmSyncGitStatusCommand();
     }
-
+    
+    @Override
+    protected GitCommand getAddCommand() {
+    	// Handle quoted output from git, and fix relative path computations SCM-695, SCM-772
+    	return new ScmSyncGitAddCommand();
+    }
+    
+    // TODO: we also use checkout and update. Those call git ls-files, which parses the result wrongly...
+    // (doesn't account for the partial escaping done there for \t, \n, and \\ .)
 }

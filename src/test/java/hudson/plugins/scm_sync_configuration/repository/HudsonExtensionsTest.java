@@ -18,7 +18,6 @@ import hudson.plugins.test.utils.scms.ScmUnderTest;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
@@ -314,7 +313,6 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 	}
 
 	@Test
-	@Ignore // Fails with git
 	public void testJobNameWithBlanks() throws Exception {
 		createSCMMock();
 		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
@@ -351,7 +349,6 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 	}
 
 	@Test
-	@Ignore // Fails with git
 	public void testJobRenameWithBlanksAndDash() throws Exception {
 		createSCMMock();
 		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
