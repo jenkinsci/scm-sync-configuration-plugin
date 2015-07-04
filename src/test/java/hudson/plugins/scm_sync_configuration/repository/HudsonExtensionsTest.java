@@ -18,6 +18,7 @@ import hudson.plugins.test.utils.scms.ScmUnderTest;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
@@ -310,6 +311,102 @@ public abstract class HudsonExtensionsTest extends ScmSyncConfigurationPluginBas
 		verifyCurrentScmContentMatchesHierarchy("hudsonRootBaseTemplate/");
 
 		assertStatusManagerIsOk();		
+	}
+
+	@Test
+	@Ignore // Fails with git
+	public void testJobNameWithBlanks() throws Exception {
+		createSCMMock();
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
+		
+		File jobDirectory = new File(getCurrentHudsonRootDirectory(), "jobs/new fake Job/" );
+		File configFile = new File(jobDirectory, "config.xml");
+		jobDirectory.mkdir();
+		FileUtils.copyFile(new ClassPathResource("expected-scm-hierarchies/HudsonExtensionsTest.testAddJobNameWithBlanks/jobs/new fake Job/config.xml").getFile(), configFile);
+		
+		// Creating fake new job
+		Item mockedItem = Mockito.mock(Job.class);
+		when(mockedItem.getName()).thenReturn("new fake Job");
+		when(mockedItem.getRootDir()).thenReturn(jobDirectory);
+		
+		sscItemListener.onCreated(mockedItem);
+		
+		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/InitRepositoryTest.shouldSynchronizeHudsonFiles/");
+		
+		sscConfigurationSaveableListener.onChange(mockedItem, new XmlFile(configFile));
+		
+		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.testAddJobNameWithBlanks/");
+		
+		assertStatusManagerIsOk();
+		
+		// Now delete it again
+		assertTrue("Config file deletion", configFile.delete());
+		assertTrue("Job dir deletion", jobDirectory.delete());
+		
+		sscItemListener.onDeleted(mockedItem);
+		
+		verifyCurrentScmContentMatchesHierarchy("hudsonRootBaseTemplate/");
+
+		assertStatusManagerIsOk();		
+	}
+
+	@Test
+	@Ignore // Fails with git
+	public void testJobRenameWithBlanksAndDash() throws Exception {
+		createSCMMock();
+		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
+		
+		File jobDirectory = new File(getCurrentHudsonRootDirectory(), "jobs/-newFakeJob/" );
+		File configFile = new File(jobDirectory, "config.xml");
+		jobDirectory.mkdir();
+		FileUtils.copyFile(new ClassPathResource("expected-scm-hierarchies/HudsonExtensionsTest.testAddJobNameStartingWithDash/jobs/-newFakeJob/config.xml").getFile(), configFile);
+		
+		// Creating fake new job
+		Item mockedItem = Mockito.mock(Job.class);
+		when(mockedItem.getName()).thenReturn("-newFakeJob");
+		when(mockedItem.getRootDir()).thenReturn(jobDirectory);
+		
+		sscItemListener.onCreated(mockedItem);
+		
+		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/InitRepositoryTest.shouldSynchronizeHudsonFiles/");
+		
+		sscConfigurationSaveableListener.onChange(mockedItem, new XmlFile(configFile));
+		
+		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.testAddJobNameStartingWithDash/");
+		
+		assertStatusManagerIsOk();
+		
+		// Now fake a rename
+		assertTrue("Config file deletion", configFile.delete());
+		assertTrue("Job dir deletion", jobDirectory.delete());
+		jobDirectory = new File(getCurrentHudsonRootDirectory(), "jobs/new fake Job/" );
+		configFile = new File(jobDirectory, "config.xml");
+		jobDirectory.mkdir();
+		FileUtils.copyFile(new ClassPathResource("expected-scm-hierarchies/HudsonExtensionsTest.testAddJobNameWithBlanks/jobs/new fake Job/config.xml").getFile(), configFile);
+		
+		Item mockedRenamedItem = Mockito.mock(Job.class);
+		when(mockedRenamedItem.getName()).thenReturn("new fake Job");
+		when(mockedRenamedItem.getRootDir()).thenReturn(jobDirectory);
+		
+		sscItemListener.onLocationChanged(mockedRenamedItem, "-newFakeJob", "new fake Job");
+		
+		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.testAddJobNameWithBlanks/");
+
+		assertStatusManagerIsOk();
+		
+		// And while we're at it: let's rename it back
+		assertTrue("Config file deletion", configFile.delete());
+		assertTrue("Job dir deletion", jobDirectory.delete());
+		jobDirectory = new File(getCurrentHudsonRootDirectory(), "jobs/-newFakeJob/" );
+		configFile = new File(jobDirectory, "config.xml");
+		jobDirectory.mkdir();
+		FileUtils.copyFile(new ClassPathResource("expected-scm-hierarchies/HudsonExtensionsTest.testAddJobNameStartingWithDash/jobs/-newFakeJob/config.xml").getFile(), configFile);
+		
+		sscItemListener.onLocationChanged(mockedItem, "new fake Job", "-newFakeJob");
+		
+		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/HudsonExtensionsTest.testAddJobNameStartingWithDash/");
+
+		assertStatusManagerIsOk();
 	}
 
 	@Test
