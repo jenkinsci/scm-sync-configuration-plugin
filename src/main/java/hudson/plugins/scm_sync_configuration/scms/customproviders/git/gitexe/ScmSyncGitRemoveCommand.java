@@ -25,14 +25,12 @@ public class ScmSyncGitRemoveCommand extends GitRemoveCommand {
     protected ScmResult executeRemoveCommand( ScmProviderRepository repo, ScmFileSet fileSet, String message )
         throws ScmException
     {
-
         if ( fileSet.getFileList().isEmpty() )
         {
             throw new ScmException( "You must provide at least one file/directory to remove" );
         }
 
         Commandline cl = createCommandLine( fileSet.getBasedir(), fileSet.getFileList() );
-
         GitRemoveConsumer consumer = new GitRemoveConsumer( getLogger() );
 
         CommandLineUtils.StringStreamConsumer stderr = new CommandLineUtils.StringStreamConsumer();
@@ -76,7 +74,7 @@ public class ScmSyncGitRemoveCommand extends GitRemoveCommand {
 
         cl.createArg().setValue( "--" ); // This is missing upstream.
         
-        GitCommandLineUtils.addTarget( cl, files );
+        ScmSyncGitUtils.addTarget( cl, files );
 
         return cl;
     }

@@ -5,21 +5,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFile;
 import org.apache.maven.scm.ScmFileSet;
 import org.apache.maven.scm.ScmFileStatus;
 import org.apache.maven.scm.ScmVersion;
+import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.command.checkin.CheckInScmResult;
+import org.apache.maven.scm.command.status.StatusScmResult;
 import org.apache.maven.scm.log.ScmLogger;
 import org.apache.maven.scm.provider.ScmProviderRepository;
 import org.apache.maven.scm.provider.git.gitexe.command.GitCommandLineUtils;
-import org.apache.maven.scm.provider.git.gitexe.command.add.GitAddCommand;
 import org.apache.maven.scm.provider.git.gitexe.command.branch.GitBranchCommand;
 import org.apache.maven.scm.provider.git.gitexe.command.checkin.GitCheckInCommand;
-import org.apache.maven.scm.provider.git.gitexe.command.status.GitStatusCommand;
-import org.apache.maven.scm.provider.git.gitexe.command.status.GitStatusConsumer;
 import org.apache.maven.scm.provider.git.repository.GitScmProviderRepository;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
@@ -35,6 +33,10 @@ import org.codehaus.plexus.util.cli.Commandline;
  * This workaround could be betterly handled when something like "checkinAndFetch" could be
  * implemented generically in maven-scm-api
  * (see http://maven.40175.n5.nabble.com/SCM-GitExe-no-fetch-after-push-td5745064.html)
+ * 
+ * @author Tom <tw201207@gmail.com>
+ * Rewritten executeCheckInCommand to account for SCM-772 and SCM-695. Make use of also fixed GitAddCommand
+ * instead of re-inventing the wheel once more again.
  */
 public class ScmSyncGitCheckInCommand extends GitCheckInCommand {
     // Retrieved implementation from GitCheckInCommande v1.8.1, only overriding call to createPushCommandLine()
@@ -48,124 +50,71 @@ public class ScmSyncGitCheckInCommand extends GitCheckInCommand {
         CommandLineUtils.StringStreamConsumer stderr = new CommandLineUtils.StringStreamConsumer();
         CommandLineUtils.StringStreamConsumer stdout = new CommandLineUtils.StringStreamConsumer();
 
-        int exitCode;
-
         File messageFile = FileUtils.createTempFile("maven-scm-", ".commit", null);
-        try
-        {
+        try {
             FileUtils.fileWrite( messageFile.getAbsolutePath(), message );
-        }
-        catch ( IOException ex )
-        {
+        } catch (IOException ex) {
             return new CheckInScmResult( null, "Error while making a temporary file for the commit message: "
                 + ex.getMessage(), null, false );
         }
 
         try
         {
+            // if specific fileSet is given, we have to git-add them first
+            // otherwise we will use 'git-commit -a' later
             if ( !fileSet.getFileList().isEmpty() )
             {
-                // if specific fileSet is given, we have to git-add them first
-                // otherwise we will use 'git-commit -a' later
-
-                Commandline clAdd = GitAddCommand.createCommandLine(fileSet.getBasedir(), fileSet.getFileList());
-
-                exitCode = GitCommandLineUtils.execute(clAdd, stdout, stderr, getLogger());
-
-                if ( exitCode != 0 )
-                {
-                    return new CheckInScmResult( clAdd.toString(), "The git-add command failed.", stderr.getOutput(),
-                                                 false );
-                }
-
-            }
-
-            // git-commit doesn't show single files, but only summary :/
-            // so we must run git-status and consume the output
-            // borrow a few things from the git-status command
-            Commandline clStatus = GitStatusCommand.createCommandLine(repository, fileSet);
-
-            GitStatusConsumer statusConsumer = new GitStatusConsumer( getLogger(), fileSet.getBasedir() );
-            exitCode = GitCommandLineUtils.execute( clStatus, statusConsumer, stderr, getLogger() );
-            if ( exitCode != 0 )
-            {
-                // git-status returns non-zero if nothing to do
-                if ( getLogger().isInfoEnabled() )
-                {
-                    getLogger().info( "nothing added to commit but untracked files present (use \"git add\" to " +
-                            "track)" );
+            	ScmSyncGitAddCommand addCommand = new ScmSyncGitAddCommand();
+            	addCommand.setLogger(getLogger());
+            	AddScmResult addResult = addCommand.executeAddFileSet(fileSet);
+            	if (addResult != null && addResult.isSuccess()) {
+                    return new CheckInScmResult(new ArrayList<ScmFile>(), addResult);
                 }
             }
-
-            if ( statusConsumer.getChangedFiles().isEmpty() )
-            {
-                return new CheckInScmResult( null, statusConsumer.getChangedFiles() );
+            // Must run status here. There might have been earlier additions!!
+    		ScmSyncGitStatusCommand statusCommand = new ScmSyncGitStatusCommand();
+    		statusCommand.setLogger(getLogger());
+    		StatusScmResult status = statusCommand.executeStatusCommand(repository, new ScmFileSet(fileSet.getBasedir()));
+    		List<ScmFile> changedFiles = null;
+    		if (status.isSuccess()) {
+	    		changedFiles = status.getChangedFiles();
+	            if (changedFiles.isEmpty()) {
+	                return new CheckInScmResult(null, changedFiles);
+	            }
+    		} else {
+    			return new CheckInScmResult(new ArrayList<ScmFile>(), status);
+    		}
+            Commandline clCommit = createCommitCommandLine(repository, fileSet, messageFile);
+            int exitCode = GitCommandLineUtils.execute(clCommit, stdout, stderr, getLogger());
+            if ( exitCode != 0 ) {
+            	String msg = stderr.getOutput();
+                return new CheckInScmResult(clCommit.toString(), "The git-commit command failed.", msg, false);
             }
-
-            Commandline clCommit = createCommitCommandLine( repository, fileSet, messageFile );
-
-            exitCode = GitCommandLineUtils.execute( clCommit, stdout, stderr, getLogger() );
-            if ( exitCode != 0 )
-            {
-                return new CheckInScmResult( clCommit.toString(), "The git-commit command failed.", stderr.getOutput(),
-                                             false );
-            }
-
-            if( repo.isPushChanges() )
-            {
+            if (repo.isPushChanges()) {
                 Commandline cl = createSpecificPushCommandLine( getLogger(), repository, fileSet, version );
-
                 exitCode = GitCommandLineUtils.execute( cl, stdout, stderr, getLogger() );
-                if ( exitCode != 0 )
-                {
-                    return new CheckInScmResult( cl.toString(), "The git-push command failed.", stderr.getOutput(), false );
+                if ( exitCode != 0 ) {
+                	String msg = stderr.getOutput();
+                    return new CheckInScmResult(cl.toString(), "The git-push command failed.", msg, false);
                 }
             }
 
-            List<ScmFile> checkedInFiles = new ArrayList<ScmFile>( statusConsumer.getChangedFiles().size() );
+            List<ScmFile> checkedInFiles = new ArrayList<ScmFile>( changedFiles.size() );
 
             // rewrite all detected files to now have status 'checked_in'
-            for ( ScmFile changedFile : statusConsumer.getChangedFiles() )
-            {
-                ScmFile scmfile = new ScmFile( changedFile.getPath(), ScmFileStatus.CHECKED_IN );
-
-                if ( fileSet.getFileList().isEmpty() )
-                {
-                    checkedInFiles.add( scmfile );
-                }
-                else
-                {
-                    // if a specific fileSet is given, we have to check if the file is really tracked
-                    for ( File f : fileSet.getFileList() )
-                    {
-                        if ( FilenameUtils.separatorsToUnix(f.getPath()).equals( scmfile.getPath() ) )
-                        {
-                            checkedInFiles.add( scmfile );
-                        }
-
-                    }
-                }
+            for (ScmFile changedFile : changedFiles) {
+                checkedInFiles.add( new ScmFile(changedFile.getPath(), ScmFileStatus.CHECKED_IN));
             }
 
-            return new CheckInScmResult( clCommit.toString(), checkedInFiles );
-        }
-        finally
-        {
-            try
-            {
+            return new CheckInScmResult(clCommit.toString(), checkedInFiles);
+        } finally {
+            try {
                 FileUtils.forceDelete( messageFile );
-            }
-            catch ( IOException ex )
-            {
+            } catch ( IOException ex ) {
                 // ignore
             }
         }
-
     }
-
-    // ----------------------------------------------------------------------
-    //
-    // ----------------------------------------------------------------------
 
     public static Commandline createSpecificPushCommandLine( ScmLogger logger, GitScmProviderRepository repository,
                                                      ScmFileSet fileSet, ScmVersion version )
