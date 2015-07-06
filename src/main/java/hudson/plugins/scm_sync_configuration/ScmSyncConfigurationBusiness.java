@@ -166,9 +166,15 @@ public class ScmSyncConfigurationBusiness {
             for(Commit commit: currentCommitQueue){
                 String logMessage = "Processing commit : " + commit.toString();
                 LOGGER.finest(logMessage);
-
                 // Preparing files to add / delete
+                //
+                // Two points:
+                // 1. getPathContents() already returns only those paths that are not also to be deleted.
+                // 2. For svn, we must not run svn add for files already in the repo. For git, we should run git add to stage the
+                //    change. The second happens to work per chance because the git checkIn implementation will use git commit -a
+                //    if a file set without files but only some directory is given, which we do.
                 List<File> updatedFiles = new ArrayList<File>();
+                
                 for(Map.Entry<Path,byte[]> pathContent : commit.getChangeset().getPathContents().entrySet()){
                     Path pathRelativeToJenkinsRoot = pathContent.getKey();
                     byte[] content = pathContent.getValue();
