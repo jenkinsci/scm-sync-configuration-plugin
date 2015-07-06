@@ -24,7 +24,7 @@ public class Path {
     }
 
     public Path(String path, boolean isDirectory) {
-        this.path = path;
+        this.path = path.replace(File.separatorChar, '/'); // Make sure we use the system-independent separator.
         this.isDirectory = isDirectory;
     }
 
@@ -39,7 +39,7 @@ public class Path {
     public File getScmFile(){
         // TODO: Externalize ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath()
         // in another class ?
-        return new File(ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath()+File.separator+getPath());
+        return new File(ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath(), getPath());
     }
 
     public String getFirstNonExistingParentScmPath(){
@@ -59,7 +59,18 @@ public class Path {
     }
 
     public boolean contains(Path p){
-        return this.isDirectory() && p.getPath().startsWith(this.getPath());
+    	if (this.isDirectory()) {
+    		String path = this.getPath();
+    		if (!path.endsWith("/")) {
+    			path += '/';
+    		}
+    		String otherPath = p.getPath();
+    		if (p.isDirectory() && !otherPath.endsWith("/")) {
+    			otherPath += '/';
+    		}
+    		return otherPath.startsWith(path);
+    	}
+    	return false;
     }
 
     @Override
