@@ -1,6 +1,6 @@
 package hudson.plugins.scm_sync_configuration;
 
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,8 +21,8 @@ public class ScmSyncConfigurationStatusManager {
 	private File success;
 	
 	public ScmSyncConfigurationStatusManager() {
-		fail = new File(Hudson.getInstance().getRootDir().getAbsolutePath()+File.separator+LOG_FAIL_FILENAME);
-		success = new File(Hudson.getInstance().getRootDir().getAbsolutePath()+File.separator+LOG_SUCCESS_FILENAME);
+		fail = new File(Jenkins.getInstance().getRootDir().getAbsolutePath()+File.separator+LOG_FAIL_FILENAME);
+		success = new File(Jenkins.getInstance().getRootDir().getAbsolutePath()+File.separator+LOG_SUCCESS_FILENAME);
 	}
 
 	public String getLastFail() {

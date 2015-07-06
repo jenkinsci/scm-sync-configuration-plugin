@@ -1,6 +1,6 @@
 package hudson.plugins.scm_sync_configuration.strategies.model;
 
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 import hudson.model.Saveable;
 import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import org.apache.tools.ant.DirectoryScanner;
