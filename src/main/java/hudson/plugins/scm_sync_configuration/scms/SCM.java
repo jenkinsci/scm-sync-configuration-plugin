@@ -1,7 +1,7 @@
 package hudson.plugins.scm_sync_configuration.scms;
 
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public abstract class SCM {
 	}
 	
 	public Descriptor<? extends hudson.scm.SCM> getSCMDescriptor(){
-		return Hudson.getInstance().getDescriptorByName(getSCMClassName());
+		return Jenkins.getInstance().getDescriptorByName(getSCMClassName());
 	}
 	
 	public String getRepositoryUrlHelpPath() {

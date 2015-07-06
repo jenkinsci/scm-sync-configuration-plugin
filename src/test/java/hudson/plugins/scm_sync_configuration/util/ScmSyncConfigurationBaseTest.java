@@ -2,7 +2,7 @@ package hudson.plugins.scm_sync_configuration.util;
 
 import hudson.Plugin;
 import hudson.PluginWrapper;
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.SCMManagerFactory;
 import hudson.plugins.scm_sync_configuration.SCMManipulator;
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({ "org.tmatesoft.svn.*" })
-@PrepareForTest({Hudson.class, SCM.class, ScmSyncSubversionSCM.class, PluginWrapper.class})
+@PrepareForTest({Jenkins.class, SCM.class, ScmSyncSubversionSCM.class, PluginWrapper.class})
 public abstract class ScmSyncConfigurationBaseTest {
 	
 	@Rule protected TestName testName = new TestName();
@@ -105,14 +105,14 @@ public abstract class ScmSyncConfigurationBaseTest {
 		// Mocking Hudson singleton instance ...
 	    // Warning : this line will only work on Objenesis supported VMs :
 	    // http://code.google.com/p/objenesis/wiki/ListOfCurrentlySupportedVMs
-	    Hudson hudsonMockedInstance = spy((Hudson) new ObjenesisStd().getInstantiatorOf(Hudson.class).newInstance());
-		PowerMockito.doReturn(currentHudsonRootDirectory).when(hudsonMockedInstance).getRootDir();
-		PowerMockito.doReturn(mockedUser).when(hudsonMockedInstance).getMe();
-		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(hudsonMockedInstance).getPlugin(ScmSyncConfigurationPlugin.class);
+	    Jenkins jenkinsMockedInstance = spy((Jenkins) new ObjenesisStd().getInstantiatorOf(Jenkins.class).newInstance());
+		PowerMockito.doReturn(currentHudsonRootDirectory).when(jenkinsMockedInstance).getRootDir();
+		PowerMockito.doReturn(mockedUser).when(jenkinsMockedInstance).getMe();
+		PowerMockito.doReturn(scmSyncConfigPluginInstance).when(jenkinsMockedInstance).getPlugin(ScmSyncConfigurationPlugin.class);
 		
-	    PowerMockito.mockStatic(Hudson.class);
-	    PowerMockito.doReturn(hudsonMockedInstance).when(Hudson.class); Hudson.getInstance();
-	    //when(Hudson.getInstance()).thenReturn(hudsonMockedInstance);
+	    PowerMockito.mockStatic(Jenkins.class);
+	    PowerMockito.doReturn(jenkinsMockedInstance).when(Jenkins.class); Jenkins.getInstance();
+	    //when(Jenkins.getInstance()).thenReturn(jenkinsMockedInstance);
 	}
 	
 	@After
