@@ -1,6 +1,7 @@
 package hudson.plugins.scm_sync_configuration.transactions;
 
 import java.io.File;
+import java.util.concurrent.Future;
 
 import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
@@ -30,12 +31,11 @@ public abstract class ScmTransaction {
     }
 
     public void commit(){
-        ScmSyncConfigurationPlugin.getInstance().commitChangeset(changeset);
-        if(synchronousCommit){
-            // Synchronous transactions should wait for latest commit future to be fully processed
-            // before going further
+        Future<Void> future = ScmSyncConfigurationPlugin.getInstance().commitChangeset(changeset);
+        if (synchronousCommit && future != null) {
+            // Synchronous transactions should wait for the future to be fully processed
             try {
-               ScmSyncConfigurationPlugin.getInstance().getLatestCommitFuture().get();
+               future.get();
             } catch (Exception e) {
                throw new RuntimeException(e);
             }
