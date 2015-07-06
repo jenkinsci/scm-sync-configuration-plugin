@@ -1,6 +1,7 @@
 package hudson.plugins.scm_sync_configuration.strategies;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import hudson.XmlFile;
 import hudson.model.Hudson;
@@ -10,6 +11,7 @@ import hudson.plugins.scm_sync_configuration.model.MessageWeight;
 import hudson.plugins.scm_sync_configuration.model.WeightedMessage;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
+import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationBusiness;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -22,6 +24,12 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
     private static final Function<String,File> PATH_TO_FILE_IN_HUDSON = new Function<String, File>() {
         public File apply(@Nullable String path) {
             return new File(Hudson.getInstance().getRootDir()+File.separator+path);
+        }
+    };
+
+    private static final Predicate<File> FILTER_PATH_TO_SCM_DIR = new Predicate<File>() {
+        public boolean apply(@Nullable File file) {
+            return !file.getAbsolutePath().startsWith(ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath());
         }
     };
 
@@ -72,7 +80,7 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
     public List<File> createInitializationSynchronizedFileset() {
         File hudsonRoot = Hudson.getInstance().getRootDir();
         String[] matchingFilePaths = createConfigEntityMatcher().matchingFilesFrom(hudsonRoot);
-        return new ArrayList(Collections2.transform(Arrays.asList(matchingFilePaths), PATH_TO_FILE_IN_HUDSON));
+        return new ArrayList(Collections2.filter(Collections2.transform(Arrays.asList(matchingFilePaths), PATH_TO_FILE_IN_HUDSON), FILTER_PATH_TO_SCM_DIR));
     }
 
 	public boolean isCurrentUrlApplicable(String url) {
