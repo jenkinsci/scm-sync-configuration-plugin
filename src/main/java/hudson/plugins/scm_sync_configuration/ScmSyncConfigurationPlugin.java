@@ -105,8 +105,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
      */
     private transient ThreadLocal<ScmTransaction> transaction = new ThreadLocal<ScmTransaction>();
 
-    private transient Future<Void> latestCommitFuture;
-
 	private String scmRepositoryUrl;
 	private SCM scm;
 	private boolean noUserCommitMessage;
@@ -434,8 +432,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     public Future<Void> commitChangeset(ChangeSet changeset){
         try {
             if(!changeset.isEmpty()){
-                latestCommitFuture = this.business.queueChangeSet(createScmContext(), changeset, getCurrentUser(), ScmSyncConfigurationDataProvider.retrieveComment(false));
-                return latestCommitFuture;
+                return this.business.queueChangeSet(createScmContext(), changeset, getCurrentUser(), ScmSyncConfigurationDataProvider.retrieveComment(false));
             } else {
                 return null;
             }
@@ -461,10 +458,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
     public boolean currentUserCannotPurgeFailLogs() {
         return !business.canCurrentUserPurgeFailLogs();
-    }
-
-    public Future<Void> getLatestCommitFuture() {
-        return latestCommitFuture;
     }
     
     private static final Pattern STARTS_WITH_DRIVE_LETTER = Pattern.compile("^[a-zA-Z]:");

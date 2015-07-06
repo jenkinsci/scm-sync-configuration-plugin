@@ -47,7 +47,7 @@ public class ScmSyncConfigurationBusiness {
     /*package*/ final ExecutorService writer = Executors.newFixedThreadPool(1, new DaemonThreadFactory());
 
     //  TODO: Refactor this into the plugin object ???
-    private List<Commit> commitsQueue = Collections.synchronizedList(new ArrayList<Commit>());
+    private List<Commit> commitsQueue = new ArrayList<Commit>();
 
     public ScmSyncConfigurationBusiness(){
     }
@@ -139,21 +139,26 @@ public class ScmSyncConfigurationBusiness {
 
         Commit commit = new Commit(changeset, user, userMessage, scmContext);
         LOGGER.finest("Queuing commit "+commit.toString()+" to SCM ...");
-        commitsQueue.add(commit);
-
-        return writer.submit(new Callable<Void>() {
-            public Void call() throws Exception {
-                processCommitsQueue();
-                return null;
-            }
-        });
+        synchronized(commitsQueue) {
+	        commitsQueue.add(commit);
+	
+	        return writer.submit(new Callable<Void>() {
+	            public Void call() throws Exception {
+	                processCommitsQueue();
+	                return null;
+	            }
+	        });
+        }
     }
 
     private void processCommitsQueue() {
         File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
 
         // Copying shared commitQueue in order to allow conccurrent modification
-        List<Commit> currentCommitQueue = new ArrayList<Commit>(commitsQueue);
+        List<Commit> currentCommitQueue;
+        synchronized (commitsQueue) {
+        	currentCommitQueue = new ArrayList<Commit>(commitsQueue);
+        }
         List<Commit> checkedInCommits = new ArrayList<Commit>();
 
         try {
@@ -227,7 +232,9 @@ public class ScmSyncConfigurationBusiness {
             signal(e.getMessage(), false);
         } finally {
             // We should remove every checkedInCommits
-            commitsQueue.removeAll(checkedInCommits);
+        	synchronized (commitsQueue) {
+        		commitsQueue.removeAll(checkedInCommits);
+        	}
         }
     }
 
