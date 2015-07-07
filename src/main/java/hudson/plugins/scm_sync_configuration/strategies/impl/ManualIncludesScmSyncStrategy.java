@@ -12,9 +12,9 @@ import java.util.List;
 
 public class ManualIncludesScmSyncStrategy extends AbstractScmSyncStrategy {
 
-	public ManualIncludesScmSyncStrategy(){
-		super(null, Collections.<PageMatcher>emptyList());
-	}
+    public ManualIncludesScmSyncStrategy(){
+        super(null, Collections.<PageMatcher>emptyList());
+    }
 
     @Override
     protected ConfigurationEntityMatcher createConfigEntityMatcher(){
@@ -26,8 +26,9 @@ public class ManualIncludesScmSyncStrategy extends AbstractScmSyncStrategy {
         return new PatternsEntityMatcher(includes);
     }
 
-	public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
-		// Best we can do here. We'll double check later on in the transaction.
-		return true;
-	}
+    @Override
+    public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
+        // Best we can do here. We'll double check later on in the transaction.
+        return true;
+    }
 }

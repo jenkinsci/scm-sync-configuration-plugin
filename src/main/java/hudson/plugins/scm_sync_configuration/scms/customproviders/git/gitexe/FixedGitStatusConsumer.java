@@ -38,7 +38,7 @@ import com.google.common.base.Strings;
  * and fixed to account for https://issues.apache.org/jira/browse/SCM-772 .
  */
 public class FixedGitStatusConsumer
-    implements StreamConsumer
+implements StreamConsumer
 {
 
     /**
@@ -61,19 +61,19 @@ public class FixedGitStatusConsumer
      */
     private static final Pattern RENAMED_PATTERN = Pattern.compile( "^R  (.*) -> (.*)$" );
 
-    private ScmLogger logger;
+    private final ScmLogger logger;
 
-    private File workingDirectory;
+    private final File workingDirectory;
 
     /**
      * Entries are relative to working directory, not to the repositoryroot
      */
-    private List<ScmFile> changedFiles = new ArrayList<ScmFile>();
+    private final List<ScmFile> changedFiles = new ArrayList<ScmFile>();
 
     private String relativeRepositoryPath;
-    
+
     private final File repositoryRoot;
-    
+
     // ----------------------------------------------------------------------
     //
     // ----------------------------------------------------------------------
@@ -82,20 +82,20 @@ public class FixedGitStatusConsumer
         this.logger = logger;
         this.workingDirectory = workingDirectory;
         if (repositoryRoot != null) {
-    		String absoluteRepositoryRoot = repositoryRoot.getAbsolutePath(); // Make sure all separators are File.separator
-    		// The revparse runs with fileset.getBasedir(). That of course must be under the repo root.
-           	String basePath = workingDirectory.getAbsolutePath();
-           	if (!absoluteRepositoryRoot.endsWith(File.separator)) {
-           		absoluteRepositoryRoot += File.separator;
-           	}
-           	if (basePath.startsWith(absoluteRepositoryRoot)) {
-           		String pathInsideRepo = basePath.substring(absoluteRepositoryRoot.length());
-           		if (!Strings.isNullOrEmpty(pathInsideRepo)) {
-           			relativeRepositoryPath = pathInsideRepo;
-           		}
-           	}  
+            String absoluteRepositoryRoot = repositoryRoot.getAbsolutePath(); // Make sure all separators are File.separator
+            // The revparse runs with fileset.getBasedir(). That of course must be under the repo root.
+            String basePath = workingDirectory.getAbsolutePath();
+            if (!absoluteRepositoryRoot.endsWith(File.separator)) {
+                absoluteRepositoryRoot += File.separator;
+            }
+            if (basePath.startsWith(absoluteRepositoryRoot)) {
+                String pathInsideRepo = basePath.substring(absoluteRepositoryRoot.length());
+                if (!Strings.isNullOrEmpty(pathInsideRepo)) {
+                    relativeRepositoryPath = pathInsideRepo;
+                }
+            }
         }
-       	this.repositoryRoot = repositoryRoot;
+        this.repositoryRoot = repositoryRoot;
         // Either the workingDirectory == repositoryRoot: we have no relativeRepositoryPath set
         // Or the working  directory was a subdirectory (in the workspace!) of repositoryRoot, then
         // relativeRepositoryPath contains now the relative path to the working directory.
@@ -111,6 +111,7 @@ public class FixedGitStatusConsumer
     /**
      * {@inheritDoc}
      */
+    @Override
     public void consumeLine( String line )
     {
         if ( logger.isDebugEnabled() )
@@ -125,7 +126,7 @@ public class FixedGitStatusConsumer
         ScmFileStatus status = null;
 
         List<String> files = new ArrayList<String>();
-        
+
         Matcher matcher;
         if ( ( matcher = ADDED_PATTERN.matcher( line ) ).find() )
         {
@@ -150,23 +151,23 @@ public class FixedGitStatusConsumer
         }
         else
         {
-        	logger.warn( "Ignoring unrecognized line: " +  line );
-        	return;
+            logger.warn( "Ignoring unrecognized line: " +  line );
+            return;
         }
 
         // If the file isn't a file; don't add it.
         if (files.isEmpty() || status == null) {
-        	return;
+            return;
         }
         File checkDir = repositoryRoot;
         if (workingDirectory != null && relativeRepositoryPath != null) {
-        	// Make all paths relative to this directory.
-        	List<String> relativeNames = new ArrayList<String>();
-        	for (String repoRelativeName : files) {
-        		relativeNames.add(ScmSyncGitUtils.relativizePath(relativeRepositoryPath, new File(repoRelativeName).getPath()));
-        	}
-        	files = relativeNames;
-        	checkDir = workingDirectory;
+            // Make all paths relative to this directory.
+            List<String> relativeNames = new ArrayList<String>();
+            for (String repoRelativeName : files) {
+                relativeNames.add(ScmSyncGitUtils.relativizePath(relativeRepositoryPath, new File(repoRelativeName).getPath()));
+            }
+            files = relativeNames;
+            checkDir = workingDirectory;
         }
         // Now check them all against the checkDir. This check has been taken over from the base implementation
         // in maven-scm's GitStatusConsumer, but I'm not really sure this makes sense. Who said the workspace

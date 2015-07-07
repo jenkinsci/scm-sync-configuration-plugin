@@ -29,22 +29,23 @@ public class JobConfigScmSyncStrategyTest extends ScmSyncConfigurationPluginBase
     }
 
     @Before
-   	public void initObjectsUnderTests() throws Throwable{
-   		this.sscConfigurationSaveableListener = new ScmSyncConfigurationSaveableListener();
+    public void initObjectsUnderTests() throws Throwable{
+        this.sscConfigurationSaveableListener = new ScmSyncConfigurationSaveableListener();
     }
 
+    @Override
     protected String getHudsonRootBaseTemplate(){
-   		return "jobConfigStrategyTemplate/";
-   	}
+        return "jobConfigStrategyTemplate/";
+    }
 
     // Reproducing JENKINS-17545
     @Test
     public void shouldConfigInSubmodulesNotSynced() throws ComponentLookupException, PlexusContainerException, IOException {
-		// Initializing the repository...
-		createSCMMock();
+        // Initializing the repository...
+        createSCMMock();
 
-		// Synchronizing hudson config files
-		sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
+        // Synchronizing hudson config files
+        sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
 
         File subModuleConfigFile = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/modules/submodule/config.xml" );
 
@@ -54,9 +55,9 @@ public class JobConfigScmSyncStrategyTest extends ScmSyncConfigurationPluginBase
 
         sscConfigurationSaveableListener.onChange(mockedItem, new XmlFile(subModuleConfigFile));
 
-		verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/JobConfigScmSyncStrategyTest.shouldConfigInSubmodulesNotSynced/");
+        verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/JobConfigScmSyncStrategyTest.shouldConfigInSubmodulesNotSynced/");
 
-		assertStatusManagerIsOk();
+        assertStatusManagerIsOk();
     }
 
 }

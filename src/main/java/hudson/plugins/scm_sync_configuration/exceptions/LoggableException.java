@@ -6,10 +6,10 @@ package hudson.plugins.scm_sync_configuration.exceptions;
  */
 public class LoggableException extends RuntimeException {
 
-	private static final long serialVersionUID = 442135528912013310L;
+    private static final long serialVersionUID = 442135528912013310L;
 
-	Class<?> clazz;
-    String methodName;
+    private final Class<?> clazz;
+    private final String methodName;
 
     public LoggableException(String message, Class<?> clazz, String methodName, Throwable cause) {
         super(message, cause);

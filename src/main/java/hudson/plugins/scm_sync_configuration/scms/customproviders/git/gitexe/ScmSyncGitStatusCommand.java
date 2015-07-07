@@ -14,6 +14,7 @@ import org.codehaus.plexus.util.cli.Commandline;
 
 public class ScmSyncGitStatusCommand extends GitStatusCommand {
 
+    @Override
     protected StatusScmResult executeStatusCommand(ScmProviderRepository repo, ScmFileSet fileSet) throws ScmException {
         Commandline cl = createCommandLine( (GitScmProviderRepository) repo, fileSet );
         File repoRootDirectory = ScmSyncGitUtils.getRepositoryRootDirectory(fileSet.getBasedir(), getLogger());
@@ -27,10 +28,6 @@ public class ScmSyncGitStatusCommand extends GitStatusCommand {
         }
         return new StatusScmResult( cl.toString(), consumer.getChangedFiles() );
     }
-
-    // ----------------------------------------------------------------------
-    //
-    // ----------------------------------------------------------------------
 
     public static Commandline createCommandLine( GitScmProviderRepository repository, ScmFileSet fileSet )
     {

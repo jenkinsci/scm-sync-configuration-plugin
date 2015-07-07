@@ -12,8 +12,8 @@ import java.io.File;
  */
 public class Path {
 
-    private String path;
-    private boolean isDirectory;
+    private final String path;
+    private final boolean isDirectory;
 
     public Path(String path){
         this(JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(path));
@@ -59,29 +59,37 @@ public class Path {
     }
 
     public boolean contains(Path p){
-    	if (this.isDirectory()) {
-    		String path = this.getPath();
-    		if (!path.endsWith("/")) {
-    			path += '/';
-    		}
-    		String otherPath = p.getPath();
-    		if (p.isDirectory() && !otherPath.endsWith("/")) {
-    			otherPath += '/';
-    		}
-    		return otherPath.startsWith(path);
-    	}
-    	return false;
+        if (this.isDirectory()) {
+            String path = this.getPath();
+            if (!path.endsWith("/")) {
+                path += '/';
+            }
+            String otherPath = p.getPath();
+            if (p.isDirectory() && !otherPath.endsWith("/")) {
+                otherPath += '/';
+            }
+            return otherPath.startsWith(path);
+        }
+        return false;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Path)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Path)) {
+            return false;
+        }
 
         Path path1 = (Path) o;
 
-        if (isDirectory != path1.isDirectory) return false;
-        if (path != null ? !path.equals(path1.path) : path1.path != null) return false;
+        if (isDirectory != path1.isDirectory) {
+            return false;
+        }
+        if (path != null ? !path.equals(path1.path) : path1.path != null) {
+            return false;
+        }
 
         return true;
     }

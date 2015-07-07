@@ -21,96 +21,98 @@ import org.codehaus.plexus.util.cli.Commandline;
 
 public class ScmSyncGitAddCommand extends GitAddCommand {
 
-	protected AddScmResult executeAddCommand(ScmProviderRepository repo, ScmFileSet fileSet, String message, boolean binary) throws ScmException {
-		GitScmProviderRepository repository = (GitScmProviderRepository) repo;
+    @Override
+    protected AddScmResult executeAddCommand(ScmProviderRepository repo, ScmFileSet fileSet, String message, boolean binary)
+            throws ScmException {
+        GitScmProviderRepository repository = (GitScmProviderRepository) repo;
 
-		if (fileSet.getFileList().isEmpty()) {
-			throw new ScmException("You must provide at least one file/directory to add");
-		}
+        if (fileSet.getFileList().isEmpty()) {
+            throw new ScmException("You must provide at least one file/directory to add");
+        }
 
-		AddScmResult result = executeAddFileSet(fileSet);
+        AddScmResult result = executeAddFileSet(fileSet);
 
-		if (result != null) {
-			return result;
-		}
+        if (result != null) {
+            return result;
+        }
 
-		ScmSyncGitStatusCommand statusCommand = new ScmSyncGitStatusCommand();
-		statusCommand.setLogger(getLogger());
-		StatusScmResult status = statusCommand.executeStatusCommand(repository, fileSet);
-		getLogger().warn("add - status - " + status.isSuccess());
-		for (ScmFile s : status.getChangedFiles()) {
-			getLogger().warn("added " + s.getPath());
-		}
-		List<ScmFile> changedFiles = new ArrayList<ScmFile>();
+        ScmSyncGitStatusCommand statusCommand = new ScmSyncGitStatusCommand();
+        statusCommand.setLogger(getLogger());
+        StatusScmResult status = statusCommand.executeStatusCommand(repository, fileSet);
+        getLogger().warn("add - status - " + status.isSuccess());
+        for (ScmFile s : status.getChangedFiles()) {
+            getLogger().warn("added " + s.getPath());
+        }
+        List<ScmFile> changedFiles = new ArrayList<ScmFile>();
 
-		if (fileSet.getFileList().isEmpty()) {
-			changedFiles = status.getChangedFiles();
-		} else {
-			for (ScmFile scmfile : status.getChangedFiles()) {
-				// if a specific fileSet is given, we have to check if the file is really tracked
-				for (File f : fileSet.getFileList()) {
-					if (FilenameUtils.separatorsToUnix(f.getPath()).equals(scmfile.getPath())) {
-						changedFiles.add(scmfile);
-					}
-				}
-			}
-		}
-		Commandline cl = createCommandLine(fileSet.getBasedir(), fileSet.getFileList());
-		return new AddScmResult(cl.toString(), changedFiles);
-	}
+        if (fileSet.getFileList().isEmpty()) {
+            changedFiles = status.getChangedFiles();
+        } else {
+            for (ScmFile scmfile : status.getChangedFiles()) {
+                // if a specific fileSet is given, we have to check if the file is really tracked
+                for (File f : fileSet.getFileList()) {
+                    if (FilenameUtils.separatorsToUnix(f.getPath()).equals(scmfile.getPath())) {
+                        changedFiles.add(scmfile);
+                    }
+                }
+            }
+        }
+        Commandline cl = createCommandLine(fileSet.getBasedir(), fileSet.getFileList());
+        return new AddScmResult(cl.toString(), changedFiles);
+    }
 
-	public static Commandline createCommandLine(File workingDirectory, List<File> files) throws ScmException {
-		Commandline cl = GitCommandLineUtils.getBaseGitCommandLine(workingDirectory, "add");
+    public static Commandline createCommandLine(File workingDirectory, List<File> files) throws ScmException {
+        Commandline cl = GitCommandLineUtils.getBaseGitCommandLine(workingDirectory, "add");
 
-		// use this separator to make clear that the following parameters are files and not revision info.
-		cl.createArg().setValue("--");
+        // use this separator to make clear that the following parameters are files and not revision info.
+        cl.createArg().setValue("--");
 
-		ScmSyncGitUtils.addTarget(cl, files);
+        ScmSyncGitUtils.addTarget(cl, files);
 
-		return cl;
-	}
+        return cl;
+    }
 
-	protected AddScmResult executeAddFileSet(ScmFileSet fileSet) throws ScmException {
-		File workingDirectory = fileSet.getBasedir();
-		List<File> files = fileSet.getFileList();
+    protected AddScmResult executeAddFileSet(ScmFileSet fileSet) throws ScmException {
+        File workingDirectory = fileSet.getBasedir();
+        List<File> files = fileSet.getFileList();
 
-		// command line can be too long for windows so add files individually (see SCM-697)
-		if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-			for (File file : files) {
-				AddScmResult result = executeAddFiles(workingDirectory, Collections.singletonList(file));
-				if (result != null) {
-					return result;
-				}
-			}
-		} else {
-			AddScmResult result = executeAddFiles(workingDirectory, files);
-			if (result != null) {
-				return result;
-			}
-		}
+        // command line can be too long for windows so add files individually (see SCM-697)
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            for (File file : files) {
+                AddScmResult result = executeAddFiles(workingDirectory, Collections.singletonList(file));
+                if (result != null) {
+                    return result;
+                }
+            }
+        } else {
+            AddScmResult result = executeAddFiles(workingDirectory, files);
+            if (result != null) {
+                return result;
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	private AddScmResult executeAddFiles(File workingDirectory, List<File> files) throws ScmException {
-		Commandline cl = createCommandLine(workingDirectory, files);
+    private AddScmResult executeAddFiles(File workingDirectory, List<File> files) throws ScmException {
+        Commandline cl = createCommandLine(workingDirectory, files);
 
-		CommandLineUtils.StringStreamConsumer stderr = new CommandLineUtils.StringStreamConsumer();
-		CommandLineUtils.StringStreamConsumer stdout = new CommandLineUtils.StringStreamConsumer();
- 
-		int exitCode = -1;
-		try {
-		    exitCode = GitCommandLineUtils.execute(cl, stdout, stderr, getLogger());
-		} catch (Throwable t) {
-			getLogger().error("Failed:", t);
-		}
-		if (exitCode != 0) {
-			String msg = stderr.getOutput();
-			getLogger().info("Add failed:" + msg);
-			return new AddScmResult(cl.toString(), "The git-add command failed.", msg, false);
-		}
+        CommandLineUtils.StringStreamConsumer stderr = new CommandLineUtils.StringStreamConsumer();
+        CommandLineUtils.StringStreamConsumer stdout = new CommandLineUtils.StringStreamConsumer();
 
-		return null;
-	}
+        int exitCode = -1;
+        try {
+            exitCode = GitCommandLineUtils.execute(cl, stdout, stderr, getLogger());
+        } catch (Throwable t) {
+            getLogger().error("Failed:", t);
+        }
+        if (exitCode != 0) {
+            String msg = stderr.getOutput();
+            getLogger().info("Add failed:" + msg);
+            return new AddScmResult(cl.toString(), "The git-add command failed.", msg, false);
+        }
+
+        return null;
+    }
 
 }

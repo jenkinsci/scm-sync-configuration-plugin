@@ -20,21 +20,25 @@ public class BasicPluginsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
         "scm-sync-configuration.xml"
     };
 
-	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new PatternsEntityMatcher(PATTERNS);
+    private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new PatternsEntityMatcher(PATTERNS);
 
-	public BasicPluginsConfigScmSyncStrategy(){
-		super(CONFIG_ENTITY_MATCHER, Collections.<PageMatcher>emptyList());
-	}
+    public BasicPluginsConfigScmSyncStrategy(){
+        super(CONFIG_ENTITY_MATCHER, Collections.<PageMatcher>emptyList());
+    }
 
+    @Override
     public CommitMessageFactory getCommitMessageFactory(){
         return new CommitMessageFactory(){
+            @Override
             public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
                 return new WeightedMessage("Plugin configuration files updated", MessageWeight.MINIMAL);
             }
+            @Override
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
                 // It should never happen... but who cares how will behave *every* plugin in the jenkins land ?
                 return new WeightedMessage("Plugin configuration files renamed", MessageWeight.MINIMAL);
             }
+            @Override
             public WeightedMessage getMessageWhenItemDeleted(Item item) {
                 // It should never happen... but who cares how will behave *every* plugin in the jenkins land ?
                 return new WeightedMessage("Plugin configuration files deleted", MessageWeight.MINIMAL);
@@ -42,7 +46,8 @@ public class BasicPluginsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
         };
     }
 
-	public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
-		return !wasDirectory && pathRelativeToRoot != null && CONFIG_ENTITY_MATCHER.matches(saveable,  pathRelativeToRoot, false);
-	}
+    @Override
+    public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
+        return !wasDirectory && pathRelativeToRoot != null && CONFIG_ENTITY_MATCHER.matches(saveable,  pathRelativeToRoot, false);
+    }
 }

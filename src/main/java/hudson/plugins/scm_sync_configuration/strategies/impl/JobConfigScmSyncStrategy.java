@@ -14,22 +14,26 @@ import java.util.Collections;
 
 public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
-	private static final ConfigurationEntityMatcher CONFIG_MATCHER = new JobOrFolderConfigurationEntityMatcher();
-	
-    public JobConfigScmSyncStrategy(){
-		super(CONFIG_MATCHER, Collections.singletonList(new PageMatcher("^(.*view/[^/]+/)?(job/[^/]+/)+configure$", "form[name='config']")));
-	}
+    private static final ConfigurationEntityMatcher CONFIG_MATCHER = new JobOrFolderConfigurationEntityMatcher();
 
+    public JobConfigScmSyncStrategy(){
+        super(CONFIG_MATCHER, Collections.singletonList(new PageMatcher("^(.*view/[^/]+/)?(job/[^/]+/)+configure$", "form[name='config']")));
+    }
+
+    @Override
     public CommitMessageFactory getCommitMessageFactory(){
         return new CommitMessageFactory(){
+            @Override
             public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
                 return new WeightedMessage("Job ["+((Item)s).getName()+"] configuration updated",
                         MessageWeight.IMPORTANT);
             }
+            @Override
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
                 return new WeightedMessage("Job ["+item.getName()+"] hierarchy renamed from ["+oldPath+"] to ["+newPath+"]",
                         MessageWeight.MORE_IMPORTANT);
             }
+            @Override
             public WeightedMessage getMessageWhenItemDeleted(Item item) {
                 return new WeightedMessage("Job ["+item.getName()+"] hierarchy deleted",
                         MessageWeight.MORE_IMPORTANT);
@@ -37,7 +41,8 @@ public class JobConfigScmSyncStrategy extends AbstractScmSyncStrategy {
         };
     }
 
-	public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeFromRoot, boolean wasDirectory) {
-		return CONFIG_MATCHER.matches(saveable, pathRelativeFromRoot, wasDirectory);
-	}
+    @Override
+    public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeFromRoot, boolean wasDirectory) {
+        return CONFIG_MATCHER.matches(saveable, pathRelativeFromRoot, wasDirectory);
+    }
 }
