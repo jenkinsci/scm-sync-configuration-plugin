@@ -193,7 +193,7 @@ public class FixedGitStatusConsumer
         }
 
         for (String file : files) {
-            changedFiles.add(new ScmFile(file.replaceAll(File.separator, "/"), status));
+            changedFiles.add(new ScmFile(file.replace(File.separatorChar, '/'), status));
         }
     }
 

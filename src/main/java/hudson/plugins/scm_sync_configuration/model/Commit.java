@@ -43,10 +43,10 @@ public class Commit {
    	    if (user != null) {
    		    commitMessage.append(user.getId()).append(": ");
    	    }
-   	    commitMessage.append(messagePrefix);
-   	    commitMessage.append("\n\n");
-   	    commitMessage.append("Change performed by ").append(user.getDisplayName());
-   	    commitMessage.append('\n');
+   	    commitMessage.append(messagePrefix).append('\n');
+   	    if (user != null) {
+   	    	commitMessage.append('\n').append("Change performed by ").append(user.getDisplayName()).append('\n');
+   	    }
    	    if (userComment != null && !"".equals(userComment.trim())){
    	   	    commitMessage.append('\n').append(userComment.trim());
    	   	}
