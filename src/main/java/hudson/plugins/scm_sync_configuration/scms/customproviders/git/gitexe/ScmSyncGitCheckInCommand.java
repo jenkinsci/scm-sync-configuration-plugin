@@ -67,7 +67,7 @@ public class ScmSyncGitCheckInCommand extends GitCheckInCommand {
             	ScmSyncGitAddCommand addCommand = new ScmSyncGitAddCommand();
             	addCommand.setLogger(getLogger());
             	AddScmResult addResult = addCommand.executeAddFileSet(fileSet);
-            	if (addResult != null && addResult.isSuccess()) {
+            	if (addResult != null && !addResult.isSuccess()) {
                     return new CheckInScmResult(new ArrayList<ScmFile>(), addResult);
                 }
             }
