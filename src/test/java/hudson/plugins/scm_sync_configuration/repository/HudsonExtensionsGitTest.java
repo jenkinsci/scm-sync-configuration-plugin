@@ -8,8 +8,4 @@ public class HudsonExtensionsGitTest extends HudsonExtensionsTest {
         super(new ScmUnderTestGit());
     }
 
-    @Override
-    public void shouldJobRenameBeCorrectlyImpactedOnSCM() throws Throwable {
-        super.shouldJobRenameBeCorrectlyImpactedOnSCM();
-    }
 }
