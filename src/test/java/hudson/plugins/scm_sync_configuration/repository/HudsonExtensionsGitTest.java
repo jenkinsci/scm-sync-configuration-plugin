@@ -4,10 +4,11 @@ import hudson.plugins.test.utils.scms.ScmUnderTestGit;
 
 public class HudsonExtensionsGitTest extends HudsonExtensionsTest {
 
-	public HudsonExtensionsGitTest() {
-		super(new ScmUnderTestGit());
-	}
+    public HudsonExtensionsGitTest() {
+        super(new ScmUnderTestGit());
+    }
 
+    @Override
     public void shouldJobRenameBeCorrectlyImpactedOnSCM() throws Throwable {
         super.shouldJobRenameBeCorrectlyImpactedOnSCM();
     }

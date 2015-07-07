@@ -47,7 +47,7 @@ public class ScmSyncConfigurationBusiness {
     /*package*/ final ExecutorService writer = Executors.newFixedThreadPool(1, new DaemonThreadFactory());
 
     //  TODO: Refactor this into the plugin object ???
-    private List<Commit> commitsQueue = new ArrayList<Commit>();
+    private final List<Commit> commitsQueue = new ArrayList<Commit>();
 
     public ScmSyncConfigurationBusiness(){
     }
@@ -135,19 +135,20 @@ public class ScmSyncConfigurationBusiness {
         if(scmManipulator == null || !scmManipulator.scmConfigurationSettledUp(scmContext, false)){
             LOGGER.info("Queue of changeset "+changeset.toString()+" aborted (scm manipulator not settled !)");
             return null;
-          }
+        }
 
         Commit commit = new Commit(changeset, user, userMessage, scmContext);
         LOGGER.finest("Queuing commit "+commit.toString()+" to SCM ...");
         synchronized(commitsQueue) {
-	        commitsQueue.add(commit);
-	
-	        return writer.submit(new Callable<Void>() {
-	            public Void call() throws Exception {
-	                processCommitsQueue();
-	                return null;
-	            }
-	        });
+            commitsQueue.add(commit);
+
+            return writer.submit(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    processCommitsQueue();
+                    return null;
+                }
+            });
         }
     }
 
@@ -157,7 +158,7 @@ public class ScmSyncConfigurationBusiness {
         // Copying shared commitQueue in order to allow conccurrent modification
         List<Commit> currentCommitQueue;
         synchronized (commitsQueue) {
-        	currentCommitQueue = new ArrayList<Commit>(commitsQueue);
+            currentCommitQueue = new ArrayList<Commit>(commitsQueue);
         }
         List<Commit> checkedInCommits = new ArrayList<Commit>();
 
@@ -174,7 +175,7 @@ public class ScmSyncConfigurationBusiness {
                 //    change. The second happens to work per chance because the git checkIn implementation will use git commit -a
                 //    if a file set without files but only some directory is given, which we do.
                 List<File> updatedFiles = new ArrayList<File>();
-                
+
                 for(Map.Entry<Path,byte[]> pathContent : commit.getChangeset().getPathContents().entrySet()){
                     Path pathRelativeToJenkinsRoot = pathContent.getKey();
                     byte[] content = pathContent.getValue();
@@ -231,21 +232,21 @@ public class ScmSyncConfigurationBusiness {
                     signal(logMessage, true);
                 }
             }
-        // As soon as a commit doesn't goes well, we should abort commit queue processing...
+            // As soon as a commit doesn't goes well, we should abort commit queue processing...
         }catch(LoggableException e){
             LOGGER.throwing(e.getClazz().getName(), e.getMethodName(), e);
             LOGGER.severe("Error while processing commit queue : "+e.getMessage());
             signal(e.getMessage(), false);
         } finally {
             // We should remove every checkedInCommits
-        	synchronized (commitsQueue) {
-        		commitsQueue.removeAll(checkedInCommits);
-        	}
+            synchronized (commitsQueue) {
+                commitsQueue.removeAll(checkedInCommits);
+            }
         }
     }
 
     private boolean writeScmContentOnlyIfItDiffers(Path pathRelativeToJenkinsRoot, byte[] content, File fileTranslatedInScm)
-                throws LoggableException {
+            throws LoggableException {
         boolean scmContentUpdated = false;
         boolean contentDiffer = false;
         try {
@@ -264,7 +265,7 @@ public class ScmSyncConfigurationBusiness {
     }
 
     private void createScmContent(Path pathRelativeToJenkinsRoot, byte[] content, File fileTranslatedInScm)
-                        throws LoggableException {
+            throws LoggableException {
         Stack<File> directoriesToCreate = new Stack<File>();
         File directory = fileTranslatedInScm.getParentFile();
 
@@ -335,6 +336,7 @@ public class ScmSyncConfigurationBusiness {
                 if (!jenkinsFile.exists()) {
                     FileUtils.copyDirectory(f, jenkinsFile, new FileFilter() {
 
+                        @Override
                         public boolean accept(File f) {
                             return !f.getName().equals(scmManipulator.getScmSpecificFilename());
                         }
@@ -369,9 +371,9 @@ public class ScmSyncConfigurationBusiness {
     }
 
     public static String getScmDirectoryName() {
-    	return WORKING_DIRECTORY;
+        return WORKING_DIRECTORY;
     }
-    
+
     public void purgeFailLogs() {
         Jenkins.getInstance().checkPermission(purgeFailLogPermission());
         scmSyncConfigurationStatusManager.purgeFailLogs();

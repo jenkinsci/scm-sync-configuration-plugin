@@ -16,40 +16,45 @@ import com.google.common.collect.ImmutableList;
 
 public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
-	private static final List<PageMatcher> PAGE_MATCHERS = ImmutableList.of(
-        // Global configuration page
-        new PageMatcher("^configure$", "form[name='config']"),
-        // View configuration pages
-        new PageMatcher("^(.+/)?view/[^/]+/configure$", "form[name='viewConfig']"),
-        new PageMatcher("^newView$", "form[name='createView'],form[name='createItem']")
-    );
-    
+    private static final List<PageMatcher> PAGE_MATCHERS = ImmutableList.of(
+            // Global configuration page
+            new PageMatcher("^configure$", "form[name='config']"),
+            // View configuration pages
+            new PageMatcher("^(.+/)?view/[^/]+/configure$", "form[name='viewConfig']"),
+            new PageMatcher("^newView$", "form[name='createView'],form[name='createItem']")
+            );
+
     private static final String[] PATTERNS = new String[]{
         "config.xml"
     };
-    
-	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new PatternsEntityMatcher(PATTERNS);
-	
-	public JenkinsConfigScmSyncStrategy(){
-		super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
-	}
 
+    private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new PatternsEntityMatcher(PATTERNS);
+
+    public JenkinsConfigScmSyncStrategy(){
+        super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
+    }
+
+    @Override
     public CommitMessageFactory getCommitMessageFactory(){
         return new CommitMessageFactory(){
+            @Override
             public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
                 return new WeightedMessage("Jenkins configuration files updated", MessageWeight.NORMAL);
             }
+            @Override
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
                 throw new IllegalStateException("Jenkins configuration files should never be renamed !");
             }
+            @Override
             public WeightedMessage getMessageWhenItemDeleted(Item item) {
                 throw new IllegalStateException("Jenkins configuration files should never be deleted !");
             }
         };
     }
 
-	public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
-		// Uh-oh... Jenkins config should never be deleted.
-		return false;
-	}
+    @Override
+    public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
+        // Uh-oh... Jenkins config should never be deleted.
+        return false;
+    }
 }

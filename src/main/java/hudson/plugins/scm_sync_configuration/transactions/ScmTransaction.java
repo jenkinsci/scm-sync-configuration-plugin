@@ -12,10 +12,10 @@ import hudson.plugins.scm_sync_configuration.model.WeightedMessage;
  * @author fcamblor
  */
 public abstract class ScmTransaction {
-    private ChangeSet changeset;
+    private final ChangeSet changeset;
     // Flag allowing to say if transaction will be asynchronous (default) or synchronous
     // Synchronous commit are useful during tests execution
-    private boolean synchronousCommit;
+    private final boolean synchronousCommit;
 
     protected ScmTransaction(){
         this(false);
@@ -35,9 +35,9 @@ public abstract class ScmTransaction {
         if (synchronousCommit && future != null) {
             // Synchronous transactions should wait for the future to be fully processed
             try {
-               future.get();
+                future.get();
             } catch (Exception e) {
-               throw new RuntimeException(e);
+                throw new RuntimeException(e);
             }
         }
     }
@@ -51,19 +51,19 @@ public abstract class ScmTransaction {
     }
 
     public void registerRenamedPath(String oldPath, String newPath){
-    	File newFile = JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(newPath);
-    	if (newFile.isDirectory()) {
+        File newFile = JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(newPath);
+        if (newFile.isDirectory()) {
             for (File f : ScmSyncConfigurationPlugin.getInstance().collectAllFilesForScm(newFile)) {
-            	String pathRelativeToRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(f);
-            	if (pathRelativeToRoot != null) {
-            		this.changeset.registerPath(pathRelativeToRoot);
-            	}
+                String pathRelativeToRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(f);
+                if (pathRelativeToRoot != null) {
+                    this.changeset.registerPath(pathRelativeToRoot);
+                }
             }
-    	} else {
-    		this.changeset.registerPath(newPath);
-    	}
+        } else {
+            this.changeset.registerPath(newPath);
+        }
         if (oldPath != null) {
-        	this.changeset.registerPathForDeletion(oldPath);
+            this.changeset.registerPathForDeletion(oldPath);
         }
     }
 }

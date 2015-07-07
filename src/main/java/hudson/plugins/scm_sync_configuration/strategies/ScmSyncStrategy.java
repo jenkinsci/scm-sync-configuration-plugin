@@ -16,48 +16,48 @@ public interface ScmSyncStrategy {
         public WeightedMessage getMessageWhenItemDeleted(Item item);
     }
 
-	/**
-	 * Is the given Saveable eligible for the current strategy ?
-	 * @param saveable A saveable which is saved
-	 * @param file Corresponding file to the given Saveable object
-	 * @return true if current Saveable instance matches with current ScmSyncStrategy target,
-	 * false otherwise
-	 */
-	boolean isSaveableApplicable(Saveable saveable, File file);
-	
-	/**
-	 * Determines whether the strategy might have applied to a deleted item.
-	 * 
-	 * @param saveable that was deleted; still exists in Jenkins' model but has already been eradicated from disk
-	 * @param pathRelativeToRoot where the item resided
-	 * @param wasDirectory whether it was a directory
-	 * @return 
-	 */
-	boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory);
-	
-	/**
-	 * Is the given url eligible for the current strategy ?
-	 * @param url Current url, where hudson root url has been truncated
-	 * @return true if current url matches with current ScmSyncStrategy target, false otherwise
-	 */
-	boolean isCurrentUrlApplicable(String url);
-	
-	/**
-	 * Collects all files, from Jenkins' root directory, that match this strategy.
-	 * 
-	 * @return the list of files matched.
-	 */
-	List<File> collect();
+    /**
+     * Is the given Saveable eligible for the current strategy ?
+     * @param saveable A saveable which is saved
+     * @param file Corresponding file to the given Saveable object
+     * @return true if current Saveable instance matches with current ScmSyncStrategy target,
+     * false otherwise
+     */
+    boolean isSaveableApplicable(Saveable saveable, File file);
 
-	/**
-	 * Collects all files in the given directory, which must be under Jenkins' root directory, that match this strategy.
-	 * 
-	 * @param directory to search in
-	 * @return the list of files
-	 * @throws IllegalArgumentException if the given directory is not under Jenkins' root directory
-	 */
-	List<File> collect(File directory);
-	
+    /**
+     * Determines whether the strategy might have applied to a deleted item.
+     * 
+     * @param saveable that was deleted; still exists in Jenkins' model but has already been eradicated from disk
+     * @param pathRelativeToRoot where the item resided
+     * @param wasDirectory whether it was a directory
+     * @return
+     */
+    boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory);
+
+    /**
+     * Is the given url eligible for the current strategy ?
+     * @param url Current url, where hudson root url has been truncated
+     * @return true if current url matches with current ScmSyncStrategy target, false otherwise
+     */
+    boolean isCurrentUrlApplicable(String url);
+
+    /**
+     * Collects all files, from Jenkins' root directory, that match this strategy.
+     * 
+     * @return the list of files matched.
+     */
+    List<File> collect();
+
+    /**
+     * Collects all files in the given directory, which must be under Jenkins' root directory, that match this strategy.
+     * 
+     * @param directory to search in
+     * @return the list of files
+     * @throws IllegalArgumentException if the given directory is not under Jenkins' root directory
+     */
+    List<File> collect(File directory);
+
     /**
      * @return List of sync'ed file includes brought by current strategy. Used only for informational purposes in the UI.
      */

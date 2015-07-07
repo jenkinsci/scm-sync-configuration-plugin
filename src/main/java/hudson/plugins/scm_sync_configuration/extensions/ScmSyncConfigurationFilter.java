@@ -20,9 +20,11 @@ public class ScmSyncConfigurationFilter implements Filter {
 
     private static final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(ScmSyncConfigurationFilter.class.getName());
 
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
+    @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
         // In the beginning of every http request, we should create a new threaded transaction
         final ScmSyncConfigurationPlugin plugin;
@@ -40,6 +42,7 @@ public class ScmSyncConfigurationFilter implements Filter {
                 // Providing current ServletRequest in ScmSyncConfigurationDataProvider's thread local
                 // in order to be able to access it from everywhere inside this call
                 ScmSyncConfigurationDataProvider.provideRequestDuring((HttpServletRequest)request, new Callable<Void>() {
+                    @Override
                     public Void call() throws Exception {
                         try {
                             // Handling "normally" http request
@@ -64,6 +67,7 @@ public class ScmSyncConfigurationFilter implements Filter {
         }
     }
 
+    @Override
     public void destroy() {
     }
 }
