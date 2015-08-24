@@ -1,6 +1,7 @@
 package hudson.plugins.scm_sync_configuration;
 
 import com.google.common.io.Files;
+
 import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.exceptions.LoggableException;
@@ -9,6 +10,7 @@ import hudson.plugins.scm_sync_configuration.strategies.ScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.utils.Checksums;
 import hudson.security.Permission;
 import hudson.util.DaemonThreadFactory;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.manager.ScmManager;
@@ -36,6 +38,7 @@ public class ScmSyncConfigurationBusiness {
     private SCMManipulator scmManipulator;
     private File checkoutScmDirectory = null;
     private ScmSyncConfigurationStatusManager scmSyncConfigurationStatusManager = null;
+    private List<String> manualSynchronizationIncludes = new ArrayList<String>();
 
     /**
      * Use of a size 1 thread pool frees us from worrying about accidental thread death and
@@ -172,8 +175,17 @@ public class ScmSyncConfigurationBusiness {
                             String firstNonExistingParentScmPath = pathRelativeToJenkinsRoot.getFirstNonExistingParentScmPath();
 
                             try {
-                                FileUtils.copyDirectory(JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(pathRelativeToJenkinsRoot.getPath()),
-                                        fileTranslatedInScm);
+                                File buildFileFromPathRelativeToHudsonRoot = JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(pathRelativeToJenkinsRoot.getPath());
+                                FileUtils.copyDirectory(buildFileFromPathRelativeToHudsonRoot, fileTranslatedInScm, new FileFilter() {
+                                  @Override
+                                  public boolean accept(File pathname) {
+                                    if(pathname.getPath().endsWith(".xml") 
+                                        || getManualSynchronizationIncludes().contains(pathname)){
+                                      return true;
+                                    }
+                                    return false;
+                                  }
+                                });
                             } catch (IOException e) {
                                 throw new LoggableException("Error while copying file hierarchy to SCM checkouted directory", FileUtils.class, "copyDirectory", e);
                             }
@@ -197,7 +209,8 @@ public class ScmSyncConfigurationBusiness {
                 }
                 for(Path path : commit.getChangeset().getPathsToDelete()){
                     List<File> deletedFiles = deleteHierarchy(commit.getScmContext(), path);
-                    updatedFiles.addAll(deletedFiles);
+                    if(deletedFiles != null)
+                      updatedFiles.addAll(deletedFiles);
                 }
 
                 if(updatedFiles.isEmpty()){
@@ -226,6 +239,15 @@ public class ScmSyncConfigurationBusiness {
             // We should remove every checkedInCommits
             commitsQueue.removeAll(checkedInCommits);
         }
+    }
+
+    public List<String> getManualSynchronizationIncludes() {
+      return manualSynchronizationIncludes;
+    }
+
+    public void setManualSynchronizationIncludes(
+        List<String> manualSynchronizationIncludes) {
+      this.manualSynchronizationIncludes = manualSynchronizationIncludes;
     }
 
     private boolean writeScmContentOnlyIfItDiffers(Path pathRelativeToJenkinsRoot, byte[] content, File fileTranslatedInScm)
