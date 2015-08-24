@@ -75,7 +75,7 @@ public class ChangeSet {
         for(Path pathToAdd : filteredPathContents.keySet()){
             for(Path pathToDelete : pathsToDelete){
                 // Removing paths being both in pathsToDelete and pathContents
-                if(pathToDelete.contains(pathToAdd)){
+                if(pathToDelete.equals(pathToAdd)){
                     filteredPaths.add(pathToAdd);
                 }
             }
