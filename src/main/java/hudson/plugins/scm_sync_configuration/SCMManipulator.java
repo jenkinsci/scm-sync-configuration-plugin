@@ -2,17 +2,6 @@ package hudson.plugins.scm_sync_configuration;
 
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
-import org.apache.maven.scm.ScmException;
-import org.apache.maven.scm.ScmFile;
-import org.apache.maven.scm.ScmFileSet;
-import org.apache.maven.scm.command.add.AddScmResult;
-import org.apache.maven.scm.command.checkin.CheckInScmResult;
-import org.apache.maven.scm.command.checkout.CheckOutScmResult;
-import org.apache.maven.scm.command.remove.RemoveScmResult;
-import org.apache.maven.scm.command.update.UpdateScmResult;
-import org.apache.maven.scm.manager.NoSuchScmProviderException;
-import org.apache.maven.scm.manager.ScmManager;
-import org.apache.maven.scm.repository.ScmRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +11,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.maven.scm.ScmException;
+import org.apache.maven.scm.ScmFile;
+import org.apache.maven.scm.ScmFileSet;
+import org.apache.maven.scm.command.add.AddScmResult;
+import org.apache.maven.scm.command.checkin.CheckInScmResult;
+import org.apache.maven.scm.command.checkout.CheckOutScmResult;
+import org.apache.maven.scm.command.remove.RemoveScmResult;
+import org.apache.maven.scm.command.status.StatusScmResult;
+import org.apache.maven.scm.command.update.UpdateScmResult;
+import org.apache.maven.scm.manager.NoSuchScmProviderException;
+import org.apache.maven.scm.manager.ScmManager;
+import org.apache.maven.scm.repository.ScmRepository;
 
 /**
  * Class providing atomic scm commands and wrapping calls to maven scm api
@@ -123,7 +125,17 @@ public class SCMManipulator {
 
         try {
             ScmFileSet deleteFileSet = new ScmFileSet(enclosingDirectory, hierarchyToDelete);
-            RemoveScmResult removeResult = this.scmManager.remove(this.scmRepository, deleteFileSet, "");
+            StatusScmResult checkForChanges = this.scmManager.status(scmRepository, deleteFileSet);
+            LOGGER.fine("Checking for changes on SCM hierarchy ["+hierarchyToDelete.getAbsolutePath()+"] from SCM ...");
+            for (ScmFile changedFile : checkForChanges.getChangedFiles()) {
+                //check in this change as it affect our hierarchy
+                LOGGER.fine("[checkForChanges] Found changed file "+changedFile.toString()+", try to check-in...");
+                CheckInScmResult checkedInChangedFile = scmManager.checkIn(scmRepository, new ScmFileSet(enclosingDirectory.getParentFile(), new File(changedFile.getPath())), "Check-In changes for "+changedFile.getPath());
+                if(!checkedInChangedFile.isSuccess()){
+                  LOGGER.severe("[checkForChanges] Failed to check-in changed file ["+changedFile.getPath()+"]: "+checkedInChangedFile.getProviderMessage());
+              }
+            }
+            RemoveScmResult removeResult = this.scmManager.remove(this.scmRepository, deleteFileSet, "Delete hierarchy "+hierarchyToDelete.getPath());
             if(!removeResult.isSuccess()){
                 LOGGER.severe("[deleteHierarchy] Problem during remove : "+removeResult.getProviderMessage());
                 return null;
