@@ -25,6 +25,11 @@
       <name>Bertrand Paquet</name>
       <email>bertrand.paquet@gmail.com</email>
     </developer>
+    <developer>
+      <id>rodrigc</id>
+      <name>Craig Rodrigues</name>
+      <email>rodrigc@FreeBSD.org</email>
+    </developer>
   </developers>
 
   <properties>
