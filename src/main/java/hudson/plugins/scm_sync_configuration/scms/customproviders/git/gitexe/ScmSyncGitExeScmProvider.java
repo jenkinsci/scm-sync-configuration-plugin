@@ -29,7 +29,7 @@ import java.util.List;
  * checkin is originally made by passing pushUrl instead of a local reference (such as "origin")
  * Problem is passing pushUrl doesn't update current local reference once pushed => after push,
  * origin/<targetBranch> will not be updated to latest commit => on next push, there will be an
- * error saying some pull is needed.
+ * error saying some ull is needed.
  * This workaround could be betterly handled when something like "checkinAndFetch" could be
  * implemented generically in maven-scm-api
  * (see http://maven.40175.n5.nabble.com/SCM-GitExe-no-fetch-after-push-td5745064.html)
@@ -113,7 +113,11 @@ public class ScmSyncGitExeScmProvider extends GitExeScmProvider {
                 if( repo.isPushChanges() )
                 {
                     Commandline cl = createSpecificPushCommandLine( getLogger(), repository, fileSet, version );
-
+                    StringBuffer clOutput = new StringBuffer();
+                    String[] clTab = cl.getCommandline();
+                    for (int i = 0; i < clTab.length; i++) {
+                        clOutput.append(clTab[i] + ", ");
+                    }
                     exitCode = GitCommandLineUtils.execute( cl, stdout, stderr, getLogger() );
                     if ( exitCode != 0 )
                     {

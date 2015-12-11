@@ -1,6 +1,6 @@
 package hudson.plugins.scm_sync_configuration.strategies.model;
 
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 import hudson.model.Saveable;
 import hudson.plugins.scm_sync_configuration.JenkinsFilesHelper;
 import org.apache.tools.ant.DirectoryScanner;
@@ -22,14 +22,23 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
 		if (file == null) {
 			return false;
 		}
-		String filePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
+
+        // in case jobs directory is a link to a mounted volume so nextBuildNumber stays in sync with buildHistory and symlinks
+        // such cases are usual when running Jenkins in Docker as a Phoenix Docker Container
+        // adding this check avoids unnecessary Exceptions on Jenkins logs
+        if (file.getAbsolutePath() == null ||
+            !file.getAbsolutePath().startsWith(Jenkins.getInstance().getRootDir().getAbsolutePath())) {
+            return false;
+        }
+    
+        String filePathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(file);
         AntPathMatcher matcher = new AntPathMatcher();
         for(String pattern : includesPatterns) {
-            if(matcher.match(pattern, filePathRelativeToHudsonRoot)){
-                return true;
+            if(matcher.match(pattern, filePathRelativeToHudsonRoot)) {
+            	return true;
             }
-		}
-		return false;
+        }
+        return false;
 	}
 
     public List<String> getIncludes(){
