@@ -7,7 +7,7 @@ import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.test.utils.scms.ScmUnderTest;
 
 // Class will start current ScmSyncConfigurationPlugin instance
-public class ScmSyncConfigurationPluginBaseTest extends
+public abstract class ScmSyncConfigurationPluginBaseTest extends
 		ScmSyncConfigurationBaseTest {
 
 	protected ScmSyncConfigurationPluginBaseTest(ScmUnderTest scmUnderTest) {
@@ -27,12 +27,12 @@ public class ScmSyncConfigurationPluginBaseTest extends
 
 		super.teardown();
 	}
-	
+
 	protected void assertStatusManagerIsOk() {
 		assertThat(sscBusiness.getScmSyncConfigurationStatusManager().getLastFail(), nullValue());
 		assertThat(sscBusiness.getScmSyncConfigurationStatusManager().getLastSuccess(), notNullValue());
 	}
-		    
+
 	protected void assertStatusManagerIsNull() {
 		assertThat(sscBusiness.getScmSyncConfigurationStatusManager().getLastFail(), nullValue());
 		assertThat(sscBusiness.getScmSyncConfigurationStatusManager().getLastSuccess(), nullValue());
