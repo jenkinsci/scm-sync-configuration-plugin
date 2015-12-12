@@ -284,8 +284,8 @@
   </dependencies>
   
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/scm-sync-configuration-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/scm-sync-configuration-plugin.git</developerConnection>
+    <connection>scm:git:https://github.com/jenkinsci/scm-sync-configuration-plugin.git</connection>
+    <developerConnection>scm:git:https://github.com/jenkinsci/scm-sync-configuration-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/scm-sync-configuration-plugin</url>
     <tag>HEAD</tag>
   </scm>
