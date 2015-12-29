@@ -262,6 +262,16 @@ public class ScmSyncConfigurationPlugin extends Plugin{
             }}));
     }
 
+    // public method for UI-less reload in e. g. Groovy scripts
+    public void reloadAllFilesFromScm() throws ServletException, IOException {
+        try {
+            filesModifiedByLastReload = business.reloadAllFilesFromScm();
+        }
+        catch(ScmException e) {
+            throw new ServletException("Unable to reload SCM " + scm.getTitle() + ":" + getScmUrl(), e);
+        }
+    }
+
     public void doReloadAllFilesFromScm(StaplerRequest req, StaplerResponse res) throws ServletException, IOException {
         try {
             filesModifiedByLastReload = business.reloadAllFilesFromScm();
