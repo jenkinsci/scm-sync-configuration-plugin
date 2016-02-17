@@ -1,23 +1,20 @@
 package hudson.plugins.scm_sync_configuration.strategies.impl;
 
+import hudson.model.Saveable;
 import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PatternsEntityMatcher;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ManualIncludesScmSyncStrategy extends AbstractScmSyncStrategy {
 
-	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ {
-        // No page matcher for this particular implementation
-    } };
-
-	public ManualIncludesScmSyncStrategy(){
-		super(null, PAGE_MATCHERS);
-	}
+    public ManualIncludesScmSyncStrategy(){
+        super(null, Collections.<PageMatcher>emptyList());
+    }
 
     @Override
     protected ConfigurationEntityMatcher createConfigEntityMatcher(){
@@ -27,5 +24,11 @@ public class ManualIncludesScmSyncStrategy extends AbstractScmSyncStrategy {
             includes = manualSynchronizationIncludes.toArray(new String[0]);
         }
         return new PatternsEntityMatcher(includes);
+    }
+
+    @Override
+    public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
+        // Best we can do here. We'll double check later on in the transaction.
+        return true;
     }
 }

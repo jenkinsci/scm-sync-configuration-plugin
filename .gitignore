@@ -8,6 +8,7 @@ work*/
 .idea/
 
 # eclipse project file
+.factorypath
 .settings
 .classpath
 .project

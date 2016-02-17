@@ -8,14 +8,12 @@ import hudson.plugins.scm_sync_configuration.utils.Checksums;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * @author fcamblor
  * POJO representing a Changeset built during a scm transaction
  */
 public class ChangeSet {
-    private static final Logger LOGGER = Logger.getLogger(ChangeSet.class.getName());
 
     // Changeset commit message
     WeightedMessage message = null;
@@ -57,11 +55,6 @@ public class ChangeSet {
         }
     }
 
-    public void registerRenamedPath(String oldPath, String newPath) {
-        registerPathForDeletion(oldPath);
-        registerPath(newPath);
-    }
-
     public void registerPathForDeletion(String path){
         // We should determine if path is a directory by watching scm path (and not hudson path) because in most of time,
         // when we are here, directory is already deleted in hudson hierarchy...
@@ -101,7 +94,7 @@ public class ChangeSet {
 
     public void defineMessage(WeightedMessage weightedMessage) {
         // Defining message only once !
-        if(this.message == null || weightedMessage.getWeight().weighterThan(message.getWeight())){
+        if(this.message == null || weightedMessage.getWeight().compareTo(message.getWeight()) > 0){
             this.message = weightedMessage;
         }
     }

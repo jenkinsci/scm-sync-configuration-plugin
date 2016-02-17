@@ -2,7 +2,6 @@ package hudson.plugins.scm_sync_configuration;
 
 import com.google.common.io.Files;
 
-import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.scm_sync_configuration.exceptions.LoggableException;
 import hudson.plugins.scm_sync_configuration.model.*;
@@ -27,10 +26,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
+import jenkins.model.Jenkins;
+
 
 public class ScmSyncConfigurationBusiness {
 
-    private static final String WORKING_DIRECTORY_PATH = "/scm-sync-configuration/";
+    private static final String WORKING_DIRECTORY = "scm-sync-configuration";
     private static final String CHECKOUT_SCM_DIRECTORY = "checkoutConfiguration";
     private static final Logger LOGGER = Logger.getLogger(ScmSyncConfigurationBusiness.class.getName());
 
@@ -47,7 +48,7 @@ public class ScmSyncConfigurationBusiness {
     /*package*/ final ExecutorService writer = Executors.newFixedThreadPool(1, new DaemonThreadFactory());
 
     //  TODO: Refactor this into the plugin object ???
-    private List<Commit> commitsQueue = Collections.synchronizedList(new ArrayList<Commit>());
+    private final List<Commit> commitsQueue = new ArrayList<Commit>();
 
     public ScmSyncConfigurationBusiness(){
     }
@@ -139,21 +140,27 @@ public class ScmSyncConfigurationBusiness {
 
         Commit commit = new Commit(changeset, user, userMessage, scmContext);
         LOGGER.finest("Queuing commit "+commit.toString()+" to SCM ...");
+        synchronized(commitsQueue) {
         commitsQueue.add(commit);
 
         return writer.submit(new Callable<Void>() {
+                @Override
             public Void call() throws Exception {
                 processCommitsQueue();
                 return null;
             }
         });
     }
+    }
 
     private void processCommitsQueue() {
         File scmRoot = new File(getCheckoutScmDirectoryAbsolutePath());
 
         // Copying shared commitQueue in order to allow conccurrent modification
-        List<Commit> currentCommitQueue = new ArrayList<Commit>(commitsQueue);
+        List<Commit> currentCommitQueue;
+        synchronized (commitsQueue) {
+            currentCommitQueue = new ArrayList<Commit>(commitsQueue);
+        }
         List<Commit> checkedInCommits = new ArrayList<Commit>();
 
         try {
@@ -161,9 +168,15 @@ public class ScmSyncConfigurationBusiness {
             for(Commit commit: currentCommitQueue){
                 String logMessage = "Processing commit : " + commit.toString();
                 LOGGER.finest(logMessage);
-
                 // Preparing files to add / delete
+                //
+                // Two points:
+                // 1. getPathContents() already returns only those paths that are not also to be deleted.
+                // 2. For svn, we must not run svn add for files already in the repo. For git, we should run git add to stage the
+                //    change. The second happens to work per chance because the git checkIn implementation will use git commit -a
+                //    if a file set without files but only some directory is given, which we do.
                 List<File> updatedFiles = new ArrayList<File>();
+
                 for(Map.Entry<Path,byte[]> pathContent : commit.getChangeset().getPathContents().entrySet()){
                     Path pathRelativeToJenkinsRoot = pathContent.getKey();
                     byte[] content = pathContent.getValue();
@@ -187,7 +200,7 @@ public class ScmSyncConfigurationBusiness {
                                   }
                                 });
                             } catch (IOException e) {
-                                throw new LoggableException("Error while copying file hierarchy to SCM checkouted directory", FileUtils.class, "copyDirectory", e);
+                                throw new LoggableException("Error while copying file hierarchy to SCM directory", FileUtils.class, "copyDirectory", e);
                             }
                             updatedFiles.addAll(scmManipulator.addFile(scmRoot, firstNonExistingParentScmPath));
                         }
@@ -237,8 +250,10 @@ public class ScmSyncConfigurationBusiness {
             signal(e.getMessage(), false);
         } finally {
             // We should remove every checkedInCommits
+            synchronized (commitsQueue) {
             commitsQueue.removeAll(checkedInCommits);
         }
+    }
     }
 
     public List<String> getManualSynchronizationIncludes() {
@@ -296,7 +311,7 @@ public class ScmSyncConfigurationBusiness {
                 Files.write(content, fileTranslatedInScm);
             }
         } catch (IOException e) {
-            throw new LoggableException("Error while creating file in checkouted directory", Files.class, "write", e);
+            throw new LoggableException("Error while creating file in SCM directory", Files.class, "write", e);
         }
     }
 
@@ -304,7 +319,7 @@ public class ScmSyncConfigurationBusiness {
         List<File> filesToSync = new ArrayList<File>();
         // Building synced files from strategies
         for(ScmSyncStrategy strategy : availableStrategies){
-            filesToSync.addAll(strategy.createInitializationSynchronizedFileset());
+            filesToSync.addAll(strategy.collect());
         }
 
         ScmSyncConfigurationPlugin plugin = ScmSyncConfigurationPlugin.getInstance();
@@ -313,7 +328,7 @@ public class ScmSyncConfigurationBusiness {
             for(File fileToSync : filesToSync){
                 String hudsonConfigPathRelativeToHudsonRoot = JenkinsFilesHelper.buildPathRelativeToHudsonRoot(fileToSync);
 
-                plugin.getTransaction().defineCommitMessage(new WeightedMessage("Repository initialization", MessageWeight.IMPORTANT));
+                plugin.getTransaction().defineCommitMessage(new WeightedMessage("New included files", MessageWeight.IMPORTANT));
                 plugin.getTransaction().registerPath(hudsonConfigPathRelativeToHudsonRoot);
             }
         } finally {
@@ -327,21 +342,21 @@ public class ScmSyncConfigurationBusiness {
 
     public List<File> reloadAllFilesFromScm() throws IOException, ScmException {
         this.scmManipulator.update(new File(getCheckoutScmDirectoryAbsolutePath()));
-        return syncDirectories(new File(getCheckoutScmDirectoryAbsolutePath() + File.separator), "");
+        return syncDirectories(new File(getCheckoutScmDirectoryAbsolutePath()), "");
     }
 
     private List<File> syncDirectories(File from, String relative) throws IOException {
         List<File> l = new ArrayList<File>();
         for(File f : from.listFiles()) {
             String newRelative = relative + File.separator + f.getName();
-            File jenkinsFile = new File(Hudson.getInstance().getRootDir() + newRelative);
+            File jenkinsFile = new File(Jenkins.getInstance().getRootDir() + newRelative);
             if (f.getName().equals(scmManipulator.getScmSpecificFilename())) {
                 // nothing to do
-            }
-            else if (f.isDirectory()) {
+            } else if (f.isDirectory()) {
                 if (!jenkinsFile.exists()) {
                     FileUtils.copyDirectory(f, jenkinsFile, new FileFilter() {
 
+                        @Override
                         public boolean accept(File f) {
                             return !f.getName().equals(scmManipulator.getScmSpecificFilename());
                         }
@@ -352,8 +367,7 @@ public class ScmSyncConfigurationBusiness {
                 else {
                     l.addAll(syncDirectories(f, newRelative));
                 }
-            }
-            else {
+            } else {
                 if (!jenkinsFile.exists() || !FileUtils.contentEquals(f, jenkinsFile)) {
                     FileUtils.copyFile(f, jenkinsFile);
                     l.add(jenkinsFile);
@@ -373,20 +387,24 @@ public class ScmSyncConfigurationBusiness {
     }
 
     public static String getCheckoutScmDirectoryAbsolutePath(){
-        return Hudson.getInstance().getRootDir().getAbsolutePath()+WORKING_DIRECTORY_PATH+CHECKOUT_SCM_DIRECTORY;
+        return new File(new File(Jenkins.getInstance().getRootDir(), WORKING_DIRECTORY), CHECKOUT_SCM_DIRECTORY).getAbsolutePath();
+    }
+
+    public static String getScmDirectoryName() {
+        return WORKING_DIRECTORY;
     }
 
     public void purgeFailLogs() {
-        Hudson.getInstance().checkPermission(purgeFailLogPermission());
+        Jenkins.getInstance().checkPermission(purgeFailLogPermission());
         scmSyncConfigurationStatusManager.purgeFailLogs();
     }
 
     public boolean canCurrentUserPurgeFailLogs() {
-        return Hudson.getInstance().hasPermission(purgeFailLogPermission());
+        return Jenkins.getInstance().hasPermission(purgeFailLogPermission());
     }
 
     private static Permission purgeFailLogPermission(){
         // Only administrators should be able to purge logs
-        return Hudson.ADMINISTER;
+        return Jenkins.ADMINISTER;
     }
 }

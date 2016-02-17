@@ -34,7 +34,7 @@ public class SCMManipulator {
 
     private static final Logger LOGGER = Logger.getLogger(SCMManipulator.class.getName());
 
-	private ScmManager scmManager;
+    private final ScmManager scmManager;
 	private ScmRepository scmRepository = null;
 	private String scmSpecificFilename = null;
 
@@ -73,7 +73,9 @@ public class SCMManipulator {
 	
 	private boolean expectScmRepositoryInitiated(){
 		boolean scmRepositoryInitiated = this.scmRepository != null;
-		if(!scmRepositoryInitiated) LOGGER.warning("SCM Repository has not yet been initiated !");
+        if(!scmRepositoryInitiated) {
+            LOGGER.warning("SCM Repository has not yet been initiated !");
+        }
 		return scmRepositoryInitiated;
 	}
 	
@@ -88,7 +90,7 @@ public class SCMManipulator {
 		}
 		
 		// Checkouting sources
-		LOGGER.fine("Checkouting SCM files into ["+checkoutDirectory.getAbsolutePath()+"] ...");
+        LOGGER.fine("Checking out SCM files into ["+checkoutDirectory.getAbsolutePath()+"] ...");
 		try {
 			CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory));
 			if(!result.isSuccess()){
@@ -103,7 +105,7 @@ public class SCMManipulator {
 		}
 		
 		if(checkoutOk){
-			LOGGER.fine("Checkouted SCM files into ["+checkoutDirectory.getAbsolutePath()+"] !");
+            LOGGER.fine("Checked out SCM files into ["+checkoutDirectory.getAbsolutePath()+"] !");
 		}
 
 		return checkoutOk;
@@ -213,14 +215,12 @@ public class SCMManipulator {
 		return synchronizedFiles;
 	}
 
-    private List<File> refineUpdatedFilesInScmResult(List updatedFiles){
+    private List<File> refineUpdatedFilesInScmResult(List<?> updatedFiles){
         List<File> refinedUpdatedFiles = new ArrayList<File>();
 
         // Cannot use directly a List<ScmFile> or List<File> here, since result type will depend upon
         // current scm api version
-        Iterator scmFileIter = updatedFiles.iterator();
-        while(scmFileIter.hasNext()){
-            Object scmFile = scmFileIter.next();
+        for (Object scmFile :updatedFiles) {
             if(scmFile instanceof File){
                 String checkoutScmDir = ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath();
                 String scmPath = ((File) scmFile).getAbsolutePath();
