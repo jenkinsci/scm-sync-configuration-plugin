@@ -39,6 +39,7 @@ public class ScmSyncConfigurationBusiness {
     private SCMManipulator scmManipulator;
     private File checkoutScmDirectory = null;
     private ScmSyncConfigurationStatusManager scmSyncConfigurationStatusManager = null;
+    private List<String> manualSynchronizationIncludes = new ArrayList<String>();
 
     /**
      * Use of a size 1 thread pool frees us from worrying about accidental thread death and
@@ -135,21 +136,21 @@ public class ScmSyncConfigurationBusiness {
         if(scmManipulator == null || !scmManipulator.scmConfigurationSettledUp(scmContext, false)){
             LOGGER.info("Queue of changeset "+changeset.toString()+" aborted (scm manipulator not settled !)");
             return null;
-        }
+          }
 
         Commit commit = new Commit(changeset, user, userMessage, scmContext);
         LOGGER.finest("Queuing commit "+commit.toString()+" to SCM ...");
         synchronized(commitsQueue) {
-            commitsQueue.add(commit);
+        commitsQueue.add(commit);
 
-            return writer.submit(new Callable<Void>() {
+        return writer.submit(new Callable<Void>() {
                 @Override
-                public Void call() throws Exception {
-                    processCommitsQueue();
-                    return null;
-                }
-            });
-        }
+            public Void call() throws Exception {
+                processCommitsQueue();
+                return null;
+            }
+        });
+    }
     }
 
     private void processCommitsQueue() {
@@ -187,8 +188,17 @@ public class ScmSyncConfigurationBusiness {
                             String firstNonExistingParentScmPath = pathRelativeToJenkinsRoot.getFirstNonExistingParentScmPath();
 
                             try {
-                                FileUtils.copyDirectory(JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(pathRelativeToJenkinsRoot.getPath()),
-                                        fileTranslatedInScm);
+                                File buildFileFromPathRelativeToHudsonRoot = JenkinsFilesHelper.buildFileFromPathRelativeToHudsonRoot(pathRelativeToJenkinsRoot.getPath());
+                                FileUtils.copyDirectory(buildFileFromPathRelativeToHudsonRoot, fileTranslatedInScm, new FileFilter() {
+                                  @Override
+                                  public boolean accept(File pathname) {
+                                    if(pathname.getPath().endsWith(".xml") 
+                                        || getManualSynchronizationIncludes().contains(pathname)){
+                                      return true;
+                                    }
+                                    return false;
+                                  }
+                                });
                             } catch (IOException e) {
                                 throw new LoggableException("Error while copying file hierarchy to SCM directory", FileUtils.class, "copyDirectory", e);
                             }
@@ -212,7 +222,8 @@ public class ScmSyncConfigurationBusiness {
                 }
                 for(Path path : commit.getChangeset().getPathsToDelete()){
                     List<File> deletedFiles = deleteHierarchy(commit.getScmContext(), path);
-                    updatedFiles.addAll(deletedFiles);
+                    if(deletedFiles != null)
+                      updatedFiles.addAll(deletedFiles);
                 }
 
                 if(updatedFiles.isEmpty()){
@@ -232,7 +243,7 @@ public class ScmSyncConfigurationBusiness {
                     signal(logMessage, true);
                 }
             }
-            // As soon as a commit doesn't goes well, we should abort commit queue processing...
+        // As soon as a commit doesn't goes well, we should abort commit queue processing...
         }catch(LoggableException e){
             LOGGER.throwing(e.getClazz().getName(), e.getMethodName(), e);
             LOGGER.severe("Error while processing commit queue : "+e.getMessage());
@@ -240,13 +251,22 @@ public class ScmSyncConfigurationBusiness {
         } finally {
             // We should remove every checkedInCommits
             synchronized (commitsQueue) {
-                commitsQueue.removeAll(checkedInCommits);
-            }
+            commitsQueue.removeAll(checkedInCommits);
         }
+    }
+    }
+
+    public List<String> getManualSynchronizationIncludes() {
+      return manualSynchronizationIncludes;
+    }
+
+    public void setManualSynchronizationIncludes(
+        List<String> manualSynchronizationIncludes) {
+      this.manualSynchronizationIncludes = manualSynchronizationIncludes;
     }
 
     private boolean writeScmContentOnlyIfItDiffers(Path pathRelativeToJenkinsRoot, byte[] content, File fileTranslatedInScm)
-            throws LoggableException {
+                throws LoggableException {
         boolean scmContentUpdated = false;
         boolean contentDiffer = false;
         try {
@@ -265,7 +285,7 @@ public class ScmSyncConfigurationBusiness {
     }
 
     private void createScmContent(Path pathRelativeToJenkinsRoot, byte[] content, File fileTranslatedInScm)
-            throws LoggableException {
+                        throws LoggableException {
         Stack<File> directoriesToCreate = new Stack<File>();
         File directory = fileTranslatedInScm.getParentFile();
 
