@@ -164,7 +164,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         this.displayStatus = pojo.isDisplayStatus();
         this.commitMessagePattern = pojo.getCommitMessagePattern();
         this.manualSynchronizationIncludes = pojo.getManualSynchronizationIncludes();
-    }
+        this.business.setManualSynchronizationIncludes(manualSynchronizationIncludes);
+	}
 
     protected void initialInit() throws Exception {
         // We need to init() here in addition to ScmSyncConfigurationItemListener.onLoaded() to ensure that we do
@@ -227,6 +228,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         } else {
             this.manualSynchronizationIncludes = new ArrayList<String>();
         }
+        
+        this.business.setManualSynchronizationIncludes(manualSynchronizationIncludes);
 
         // Repo initialization should be made _before_ plugin save, in order to let scm-sync-configuration.xml
         // file synchronizable
