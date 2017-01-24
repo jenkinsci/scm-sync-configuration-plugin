@@ -25,6 +25,14 @@ import org.apache.maven.scm.manager.NoSuchScmProviderException;
 import org.apache.maven.scm.manager.ScmManager;
 import org.apache.maven.scm.repository.ScmRepository;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Class providing atomic scm commands and wrapping calls to maven scm api
  * with logging informations
@@ -34,80 +42,82 @@ public class SCMManipulator {
 
     private static final Logger LOGGER = Logger.getLogger(SCMManipulator.class.getName());
 
-	private ScmManager scmManager;
-	private ScmRepository scmRepository = null;
-	private String scmSpecificFilename = null;
+    private final ScmManager scmManager;
+    private ScmRepository scmRepository = null;
+    private String scmSpecificFilename = null;
 
-	public SCMManipulator(ScmManager _scmManager) {
-		this.scmManager = _scmManager;
-	}
-	
-	/**
-	 * Will check if everything is settled up (useful before a scm manipulation)
-	 * @param scmContext
-	 * @param resetScmRepository
-	 * @return
-	 */
-	public boolean scmConfigurationSettledUp(ScmContext scmContext, boolean resetScmRepository){
-		String scmRepositoryUrl = scmContext.getScmRepositoryUrl();
-		SCM scm = scmContext.getScm();
-		if(scmRepositoryUrl == null || scm == null){
-			return false;
-		}
-		
-		if(resetScmRepository){
-			LOGGER.info("Creating scmRepository connection data ..");
-			this.scmRepository = scm.getConfiguredRepository(this.scmManager, scmRepositoryUrl);
-			try {
-				this.scmSpecificFilename = this.scmManager.getProviderByRepository(this.scmRepository).getScmSpecificFilename();
-			}
-			catch(NoSuchScmProviderException e) {
-				LOGGER.throwing(ScmManager.class.getName(), "getScmSpecificFilename", e);
-				LOGGER.severe("[getScmSpecificFilename] Error while getScmSpecificFilename : "+e.getMessage());
-				return false;
-			}
-		}
-		
-		return expectScmRepositoryInitiated();
-	}
-	
-	private boolean expectScmRepositoryInitiated(){
-		boolean scmRepositoryInitiated = this.scmRepository != null;
-		if(!scmRepositoryInitiated) LOGGER.warning("SCM Repository has not yet been initiated !");
-		return scmRepositoryInitiated;
-	}
-	
-	public UpdateScmResult update(File root) throws ScmException {
-		return this.scmManager.update(scmRepository, new ScmFileSet(root));
-	}
-	public boolean checkout(File checkoutDirectory){
-		boolean checkoutOk = false;
-		
-		if(!expectScmRepositoryInitiated()){
-			return checkoutOk;
-		}
-		
-		// Checkouting sources
-		LOGGER.fine("Checkouting SCM files into ["+checkoutDirectory.getAbsolutePath()+"] ...");
-		try {
-			CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory));
-			if(!result.isSuccess()){
-				LOGGER.severe("[checkout] Error during checkout : "+result.getProviderMessage()+" || "+result.getCommandOutput());
-				return checkoutOk;
-			}
-			checkoutOk = true;
-		} catch (ScmException e) {
-			LOGGER.throwing(ScmManager.class.getName(), "checkOut", e);
-			LOGGER.severe("[checkout] Error during checkout : "+e.getMessage());
-			return checkoutOk;
-		}
-		
-		if(checkoutOk){
-			LOGGER.fine("Checkouted SCM files into ["+checkoutDirectory.getAbsolutePath()+"] !");
-		}
+    public SCMManipulator(ScmManager _scmManager) {
+        this.scmManager = _scmManager;
+    }
 
-		return checkoutOk;
-	}
+    /**
+     * Will check if everything is settled up (useful before a scm manipulation)
+     * @param scmContext
+     * @param resetScmRepository
+     * @return
+     */
+    public boolean scmConfigurationSettledUp(ScmContext scmContext, boolean resetScmRepository){
+        String scmRepositoryUrl = scmContext.getScmRepositoryUrl();
+        SCM scm = scmContext.getScm();
+        if(scmRepositoryUrl == null || scm == null){
+            return false;
+        }
+
+        if(resetScmRepository){
+            LOGGER.info("Creating scmRepository connection data ..");
+            this.scmRepository = scm.getConfiguredRepository(this.scmManager, scmRepositoryUrl);
+            try {
+                this.scmSpecificFilename = this.scmManager.getProviderByRepository(this.scmRepository).getScmSpecificFilename();
+            }
+            catch(NoSuchScmProviderException e) {
+                LOGGER.throwing(ScmManager.class.getName(), "getScmSpecificFilename", e);
+                LOGGER.severe("[getScmSpecificFilename] Error while getScmSpecificFilename : "+e.getMessage());
+                return false;
+            }
+        }
+
+        return expectScmRepositoryInitiated();
+    }
+
+    private boolean expectScmRepositoryInitiated(){
+        boolean scmRepositoryInitiated = this.scmRepository != null;
+        if(!scmRepositoryInitiated) {
+            LOGGER.warning("SCM Repository has not yet been initiated !");
+        }
+        return scmRepositoryInitiated;
+    }
+
+    public UpdateScmResult update(File root) throws ScmException {
+        return this.scmManager.update(scmRepository, new ScmFileSet(root));
+    }
+    public boolean checkout(File checkoutDirectory){
+        boolean checkoutOk = false;
+
+        if(!expectScmRepositoryInitiated()){
+            return checkoutOk;
+        }
+
+        // Checkouting sources
+        LOGGER.fine("Checking out SCM files into ["+checkoutDirectory.getAbsolutePath()+"] ...");
+        try {
+            CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory));
+            if(!result.isSuccess()){
+                LOGGER.severe("[checkout] Error during checkout : "+result.getProviderMessage()+" || "+result.getCommandOutput());
+                return checkoutOk;
+            }
+            checkoutOk = true;
+        } catch (ScmException e) {
+            LOGGER.throwing(ScmManager.class.getName(), "checkOut", e);
+            LOGGER.severe("[checkout] Error during checkout : "+e.getMessage());
+            return checkoutOk;
+        }
+
+        if(checkoutOk){
+            LOGGER.fine("Checked out SCM files into ["+checkoutDirectory.getAbsolutePath()+"] !");
+        }
+
+        return checkoutOk;
+    }
 
     public List<File> deleteHierarchy(File hierarchyToDelete){
         if(!expectScmRepositoryInitiated()){
@@ -153,32 +163,32 @@ public class SCMManipulator {
         }
     }
 
-	public List<File> addFile(File scmRoot, String filePathRelativeToScmRoot){
-		List<File> synchronizedFiles = new ArrayList<File>();
-		
-		if(!expectScmRepositoryInitiated()){
-			return synchronizedFiles;
-		}
-		
-		LOGGER.fine("Adding SCM file ["+filePathRelativeToScmRoot+"] ...");
-		
-		try {
-			// Split every directory leading through modifiedFilePathRelativeToHudsonRoot
-			// and try add it in the scm
-			String[] pathChunks = filePathRelativeToScmRoot.split("\\\\|/");
-			StringBuilder currentPath = new StringBuilder();
-			for(int i=0; i<pathChunks.length; i++){
-				currentPath.append(pathChunks[i]);
-				if(i != pathChunks.length-1){
-					currentPath.append(File.separator);
-				}
-				File currentFile = new File(currentPath.toString());
+    public List<File> addFile(File scmRoot, String filePathRelativeToScmRoot){
+        List<File> synchronizedFiles = new ArrayList<File>();
 
-				// Trying to add current path to the scm ...
-				AddScmResult addResult = this.scmManager.add(this.scmRepository, new ScmFileSet(scmRoot, currentFile));
-				// If current has not yet been synchronized, addResult.isSuccess() should be true
-				if(addResult.isSuccess()){
-					synchronizedFiles.addAll(refineUpdatedFilesInScmResult(addResult.getAddedFiles()));
+        if(!expectScmRepositoryInitiated()){
+            return synchronizedFiles;
+        }
+
+        LOGGER.fine("Adding SCM file ["+filePathRelativeToScmRoot+"] ...");
+
+        try {
+            // Split every directory leading through modifiedFilePathRelativeToHudsonRoot
+            // and try add it in the scm
+            String[] pathChunks = filePathRelativeToScmRoot.split("\\\\|/");
+            StringBuilder currentPath = new StringBuilder();
+            for(int i=0; i<pathChunks.length; i++){
+                currentPath.append(pathChunks[i]);
+                if(i != pathChunks.length-1){
+                    currentPath.append(File.separator);
+                }
+                File currentFile = new File(currentPath.toString());
+
+                // Trying to add current path to the scm ...
+                AddScmResult addResult = this.scmManager.add(this.scmRepository, new ScmFileSet(scmRoot, currentFile));
+                // If current has not yet been synchronized, addResult.isSuccess() should be true
+                if(addResult.isSuccess()){
+                    synchronizedFiles.addAll(refineUpdatedFilesInScmResult(addResult.getAddedFiles()));
 
                     if(i == pathChunks.length-1 && new File(scmRoot.getAbsolutePath()+File.separator+currentPath.toString()).isDirectory()){
                         addResult = this.scmManager.add(this.scmRepository, new ScmFileSet(scmRoot, currentPath.toString()+"/**/*"));
@@ -188,39 +198,37 @@ public class SCMManipulator {
                             LOGGER.severe("Error while adding SCM files in directory : " + addResult.getCommandOutput());
                         }
                     }
-				} else {
+                } else {
                     // If addResult.isSuccess() is false, it isn't an error if it is related to path chunks (except for latest one) :
                     // if pathChunk is already synchronized, addResult.isSuccess() will be false.
                     Level logLevel = (i==pathChunks.length-1)?Level.SEVERE:Level.FINE;
                     LOGGER.log(logLevel, "Error while adding SCM file : " + addResult.getCommandOutput());
                 }
-			}
+            }
         } catch (IOException e) {
             LOGGER.throwing(ScmFileSet.class.getName(), "init<>", e);
             LOGGER.warning("[addFile] Error while creating ScmFileset : "+e.getMessage());
             return synchronizedFiles;
-		} catch (ScmException e) {
-			LOGGER.throwing(ScmManager.class.getName(), "add", e);
-			LOGGER.warning("[addFile] Error while adding file : "+e.getMessage());
-			return synchronizedFiles;
-		}
+        } catch (ScmException e) {
+            LOGGER.throwing(ScmManager.class.getName(), "add", e);
+            LOGGER.warning("[addFile] Error while adding file : "+e.getMessage());
+            return synchronizedFiles;
+        }
 
 
-		if(!synchronizedFiles.isEmpty()){
-			LOGGER.fine("Added SCM files : "+Arrays.toString(synchronizedFiles.toArray(new File[0]))+" !");
-		}
-		
-		return synchronizedFiles;
-	}
+        if(!synchronizedFiles.isEmpty()){
+            LOGGER.fine("Added SCM files : "+Arrays.toString(synchronizedFiles.toArray(new File[0]))+" !");
+        }
 
-    private List<File> refineUpdatedFilesInScmResult(List updatedFiles){
+        return synchronizedFiles;
+    }
+
+    private List<File> refineUpdatedFilesInScmResult(List<?> updatedFiles){
         List<File> refinedUpdatedFiles = new ArrayList<File>();
 
         // Cannot use directly a List<ScmFile> or List<File> here, since result type will depend upon
         // current scm api version
-        Iterator scmFileIter = updatedFiles.iterator();
-        while(scmFileIter.hasNext()){
-            Object scmFile = scmFileIter.next();
+        for (Object scmFile :updatedFiles) {
             if(scmFile instanceof File){
                 String checkoutScmDir = ScmSyncConfigurationBusiness.getCheckoutScmDirectoryAbsolutePath();
                 String scmPath = ((File) scmFile).getAbsolutePath();
@@ -237,42 +245,42 @@ public class SCMManipulator {
 
         return refinedUpdatedFiles;
     }
-	
-	public boolean checkinFiles(File scmRoot, String commitMessage){
-		boolean checkinOk = false;
 
-		if(!expectScmRepositoryInitiated()){
-			return checkinOk;
-		}
+    public boolean checkinFiles(File scmRoot, String commitMessage){
+        boolean checkinOk = false;
 
-		LOGGER.fine("Checking in SCM files ...");
+        if(!expectScmRepositoryInitiated()){
+            return checkinOk;
+        }
 
-		ScmFileSet fileSet = new ScmFileSet(scmRoot);
+        LOGGER.fine("Checking in SCM files ...");
 
-		// Let's commit everything !
-		try {
-			CheckInScmResult result = this.scmManager.checkIn(this.scmRepository, fileSet, commitMessage);
-			if(!result.isSuccess()){
-				LOGGER.severe("[checkinFiles] Problem during SCM commit : "+result.getCommandOutput());
-				return checkinOk;
-			}
-			checkinOk = true;
-		} catch (ScmException e) {
-			LOGGER.throwing(ScmManager.class.getName(), "checkIn", e);
-			LOGGER.severe("[checkinFiles] Error while checkin : "+e.getMessage());
-			return checkinOk;
-		}
+        ScmFileSet fileSet = new ScmFileSet(scmRoot);
+
+        // Let's commit everything !
+        try {
+            CheckInScmResult result = this.scmManager.checkIn(this.scmRepository, fileSet, commitMessage);
+            if(!result.isSuccess()){
+                LOGGER.severe("[checkinFiles] Problem during SCM commit : "+result.getCommandOutput());
+                return checkinOk;
+            }
+            checkinOk = true;
+        } catch (ScmException e) {
+            LOGGER.throwing(ScmManager.class.getName(), "checkIn", e);
+            LOGGER.severe("[checkinFiles] Error while checkin : "+e.getMessage());
+            return checkinOk;
+        }
 
 
-		if(checkinOk){
-			LOGGER.fine("Checked in SCM files !");
-		}
-		
-		return checkinOk;
-	}
+        if(checkinOk){
+            LOGGER.fine("Checked in SCM files !");
+        }
 
-	public String getScmSpecificFilename() {
-		return scmSpecificFilename;
-	}
-	
+        return checkinOk;
+    }
+
+    public String getScmSpecificFilename() {
+        return scmSpecificFilename;
+    }
+
 }

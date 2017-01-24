@@ -10,43 +10,51 @@ import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntit
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PatternsEntityMatcher;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 
 public class JenkinsConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
-	private static final List<PageMatcher> PAGE_MATCHERS = new ArrayList<PageMatcher>(){ {
-        // Global configuration page
-        add(new PageMatcher("^configure$", "form[name='config']"));
-        // View configuration pages
-        add(new PageMatcher("^(.+/)?view/[^/]+/configure$", "form[name='viewConfig']"));
-        add(new PageMatcher("^newView$", "form[name='createView'],form[name='createItem']"));
-    } };
-    
+    private static final List<PageMatcher> PAGE_MATCHERS = ImmutableList.of(
+            // Global configuration page
+            new PageMatcher("^configure$", "form[name='config']"),
+            // View configuration pages
+            new PageMatcher("^(.+/)?view/[^/]+/configure$", "form[name='viewConfig']"),
+            new PageMatcher("^newView$", "form[name='createView'],form[name='createItem']")
+            );
+
     private static final String[] PATTERNS = new String[]{
         "config.xml"
     };
-    
-	private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new PatternsEntityMatcher(PATTERNS);
-	
-	public JenkinsConfigScmSyncStrategy(){
-		super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
-	}
 
+    private static final ConfigurationEntityMatcher CONFIG_ENTITY_MATCHER = new PatternsEntityMatcher(PATTERNS);
+
+    public JenkinsConfigScmSyncStrategy(){
+        super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
+    }
+
+    @Override
     public CommitMessageFactory getCommitMessageFactory(){
         return new CommitMessageFactory(){
+            @Override
             public WeightedMessage getMessageWhenSaveableUpdated(Saveable s, XmlFile file) {
-                return new WeightedMessage("Jenkins configuration files updated",
-                        // Jenkins config update message should be considered as "important", especially
-                        // more important than the plugin descriptors Saveable updates
-                        MessageWeight.NORMAL);
+                return new WeightedMessage("Jenkins configuration files updated", MessageWeight.NORMAL);
             }
+            @Override
             public WeightedMessage getMessageWhenItemRenamed(Item item, String oldPath, String newPath) {
                 throw new IllegalStateException("Jenkins configuration files should never be renamed !");
             }
+            @Override
             public WeightedMessage getMessageWhenItemDeleted(Item item) {
                 throw new IllegalStateException("Jenkins configuration files should never be deleted !");
             }
         };
+    }
+
+    @Override
+    public boolean mightHaveBeenApplicableToDeletedSaveable(Saveable saveable, String pathRelativeToRoot, boolean wasDirectory) {
+        // Uh-oh... Jenkins config should never be deleted.
+        return false;
     }
 }

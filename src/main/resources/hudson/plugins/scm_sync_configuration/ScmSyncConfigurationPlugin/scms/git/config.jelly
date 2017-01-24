@@ -1,7 +1,9 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project">
 
 	<f:entry title="${%Repository URL}" help="${rootURL}/plugin/scm-sync-configuration/helpForRepositoryUrl?scm=${scm.id}">
-		<f:textbox id="gitRepositoryUrl" name="gitRepositoryUrl" value="${it.isScmSelected(scm) ? it.scmUrl : null}"/>
+		<f:textbox id="gitRepositoryUrl" name="gitRepositoryUrl" value="${it.isScmSelected(scm) ? it.scmUrl : null}"
+			checkUrl="'${rootURL}/plugin/scm-sync-configuration/checkGitUrl?value=' + toValue(this)"
+		/>
 	</f:entry>
 
 </j:jelly>
