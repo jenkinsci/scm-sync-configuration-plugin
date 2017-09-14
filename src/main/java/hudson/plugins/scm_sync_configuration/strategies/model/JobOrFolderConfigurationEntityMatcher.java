@@ -77,6 +77,9 @@ public class JobOrFolderConfigurationEntityMatcher extends PatternsEntityMatcher
         FileSelector combinedSelector = new FileSelector() {
             @Override
             public boolean isSelected(File basedir, String pathRelativeToBaseDir, File file) throws BuildException {
+            	// Make paths match the defined patterns on Windows
+            	pathRelativeToBaseDir = pathRelativeToBaseDir.replace('\\', '/');
+
                 if (originalSelector != null && !originalSelector.isSelected(basedir, pathRelativeToBaseDir, file)) {
                     return false;
                 }

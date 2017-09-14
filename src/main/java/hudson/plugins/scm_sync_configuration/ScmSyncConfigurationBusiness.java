@@ -295,10 +295,10 @@ public class ScmSyncConfigurationBusiness {
         }
     }
 
-    public void synchronizeAllConfigs(ScmSyncStrategy[] availableStrategies){
+    public void synchronizeAllConfigs(List<ScmSyncStrategy> enabledStrategies){
         List<File> filesToSync = new ArrayList<File>();
         // Building synced files from strategies
-        for(ScmSyncStrategy strategy : availableStrategies){
+        for(ScmSyncStrategy strategy : enabledStrategies){
             filesToSync.addAll(strategy.collect());
         }
 

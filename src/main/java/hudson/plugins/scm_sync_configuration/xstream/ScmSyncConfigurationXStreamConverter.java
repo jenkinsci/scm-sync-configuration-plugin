@@ -78,7 +78,23 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 		writer.startNode(AbstractMigrator.SCM_DISPLAY_STATUS);
 		writer.setValue(Boolean.toString(plugin.isDisplayStatus()));
 		writer.endNode();
+		
+		writer.startNode(AbstractMigrator.SCM_SYNC_JENKINS_CONFIG);
+		writer.setValue(Boolean.toString(plugin.isSyncJenkinsConfig()));
+		writer.endNode();
 
+		writer.startNode(AbstractMigrator.SCM_SYNC_PLUGINS_CONFIG);
+		writer.setValue(Boolean.toString(plugin.isSyncBasicPluginsConfig()));
+		writer.endNode();
+		
+		writer.startNode(AbstractMigrator.SCM_SYNC_JOB_CONFIG);
+		writer.setValue(Boolean.toString(plugin.isSyncJobConfig()));
+		writer.endNode();
+		
+		writer.startNode(AbstractMigrator.SCM_SYNC_USER_DATA);
+		writer.setValue(Boolean.toString(plugin.isSyncUserConfig()));
+		writer.endNode();
+		
         if(plugin.getCommitMessagePattern() != null){
             writer.startNode(AbstractMigrator.SCM_COMMIT_MESSAGE_PATTERN);
             writer.setValue(plugin.getCommitMessagePattern());

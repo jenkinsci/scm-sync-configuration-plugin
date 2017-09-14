@@ -6,7 +6,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 import hudson.Plugin;
 import hudson.model.Descriptor;
@@ -60,18 +59,37 @@ import jenkins.model.Jenkins;
 
 public class ScmSyncConfigurationPlugin extends Plugin{
 
-    public static final transient ScmSyncStrategy[] AVAILABLE_STRATEGIES = new ScmSyncStrategy[]{
+    private static final transient ScmSyncStrategy[] AVAILABLE_STRATEGIES = new ScmSyncStrategy[]{
         new JenkinsConfigScmSyncStrategy(),
         new BasicPluginsConfigScmSyncStrategy(),
         new JobConfigScmSyncStrategy(),
         new UserConfigScmSyncStrategy(),
         new ManualIncludesScmSyncStrategy()
     };
-
+    
+    private List<ScmSyncStrategy> enabledStrategies = new ArrayList<ScmSyncStrategy>();
+    
+    private void setEnabledStrategies() {
+    	enabledStrategies.clear();
+    	for (ScmSyncStrategy strategy : AVAILABLE_STRATEGIES) {
+    		if ( (strategy instanceof JenkinsConfigScmSyncStrategy && syncJenkinsConfig) ||
+    		     (strategy instanceof BasicPluginsConfigScmSyncStrategy && syncBasicPluginsConfig) ||
+    		     (strategy instanceof JobConfigScmSyncStrategy && syncJobConfig) ||
+    		     (strategy instanceof UserConfigScmSyncStrategy && syncUserConfig) ||
+    		     (strategy instanceof ManualIncludesScmSyncStrategy) ) {
+    			enabledStrategies.add(strategy);
+    		}
+    	}
+    }
+    
+    public List<ScmSyncStrategy> getEnabledStrategies() {
+    	return enabledStrategies;
+    }
+    
     /**
      * Strategies that cannot be updated by user
      */
-    public static final transient List<ScmSyncStrategy> DEFAULT_STRATEGIES = ImmutableList.copyOf(
+    private static final transient List<ScmSyncStrategy> DEFAULT_STRATEGIES = ImmutableList.copyOf(
             Collections2.filter(Arrays.asList(AVAILABLE_STRATEGIES), new Predicate<ScmSyncStrategy>() {
                 @Override
                 public boolean apply(@Nullable ScmSyncStrategy scmSyncStrategy) {
@@ -109,6 +127,11 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     private SCM scm;
     private boolean noUserCommitMessage;
     private boolean displayStatus = true;
+	private boolean syncJenkinsConfig = true;
+	private boolean syncBasicPluginsConfig = true;
+	private boolean syncJobConfig = true;
+	private boolean syncUserConfig = true;
+
     // The [message] is a magic string that will be replaced with commit message
     // when commit occurs
     private String commitMessagePattern = "[message]";
@@ -162,8 +185,13 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         this.scm = pojo.getScm();
         this.noUserCommitMessage = pojo.isNoUserCommitMessage();
         this.displayStatus = pojo.isDisplayStatus();
+        this.syncJenkinsConfig = pojo.isSyncJenkinsConfig();
+        this.syncBasicPluginsConfig = pojo.isSyncBasicPluginsConfig();
+        this.syncJobConfig = pojo.isSyncJobConfig();
+        this.syncUserConfig = pojo.isSyncUserConfig();
         this.commitMessagePattern = pojo.getCommitMessagePattern();
         this.manualSynchronizationIncludes = pojo.getManualSynchronizationIncludes();
+        this.setEnabledStrategies();
     }
 
     protected void initialInit() throws Exception {
@@ -199,6 +227,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
         this.noUserCommitMessage = formData.getBoolean("noUserCommitMessage");
         this.displayStatus = formData.getBoolean("displayStatus");
+        this.syncJenkinsConfig = formData.getBoolean("syncJenkinsConfig");
+        this.syncBasicPluginsConfig = formData.getBoolean("syncBasicPluginsConfig");
+        this.syncJobConfig = formData.getBoolean("syncJobConfig");
+        this.syncUserConfig = formData.getBoolean("syncUserConfig");
         this.commitMessagePattern = req.getParameter("commitMessagePattern");
 
         String oldScmRepositoryUrl = this.scmRepositoryUrl;
@@ -223,9 +255,17 @@ public class ScmSyncConfigurationPlugin extends Plugin{
             }
             this.manualSynchronizationIncludes = submittedManualIncludes;
 
-            configsResynchronizationRequired = !newManualIncludes.isEmpty();
+            configsResynchronizationRequired = configsResynchronizationRequired || !newManualIncludes.isEmpty();
         } else {
             this.manualSynchronizationIncludes = new ArrayList<String>();
+        }
+
+        // Load strategies and check whether they should be reloaded
+        List<ScmSyncStrategy> currentEnabledStrategies = new ArrayList<ScmSyncStrategy>(this.enabledStrategies);
+        this.setEnabledStrategies();
+        if (currentEnabledStrategies.size() < this.enabledStrategies.size()) {
+            currentEnabledStrategies.removeAll(this.enabledStrategies);
+        	configsResynchronizationRequired = configsResynchronizationRequired || currentEnabledStrategies.isEmpty();
         }
 
         // Repo initialization should be made _before_ plugin save, in order to let scm-sync-configuration.xml
@@ -234,7 +274,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
             this.business.initializeRepository(createScmContext(), true);
         }
         if(configsResynchronizationRequired){
-            this.business.synchronizeAllConfigs(AVAILABLE_STRATEGIES);
+            this.business.synchronizeAllConfigs(this.enabledStrategies);
         }
         if(repoCleaningRequired){
             this.business.cleanChekoutScmDirectory();
@@ -247,7 +287,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     }
 
     public Iterable<File> collectAllFilesForScm() {
-        return Iterables.concat(Iterables.transform(Lists.newArrayList(AVAILABLE_STRATEGIES), new Function<ScmSyncStrategy, Iterable<File>>() {
+        return Iterables.concat(Iterables.transform(enabledStrategies, new Function<ScmSyncStrategy, Iterable<File>>() {
             @Override
             public Iterable<File> apply(ScmSyncStrategy strategy) {
                 return strategy.collect();
@@ -255,7 +295,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     }
 
     public Iterable<File> collectAllFilesForScm(final File fromSubDirectory) {
-        return Iterables.concat(Iterables.transform(Lists.newArrayList(AVAILABLE_STRATEGIES), new Function<ScmSyncStrategy, Iterable<File>>() {
+        return Iterables.concat(Iterables.transform(enabledStrategies, new Function<ScmSyncStrategy, Iterable<File>>() {
             @Override
             public Iterable<File> apply(ScmSyncStrategy strategy) {
                 return strategy.collect(fromSubDirectory);
@@ -332,7 +372,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     }
 
     public ScmSyncStrategy getStrategyForSaveable(Saveable s, File f){
-        for(ScmSyncStrategy strat : AVAILABLE_STRATEGIES){
+        for(ScmSyncStrategy strat : enabledStrategies){
             if(strat.isSaveableApplicable(s, f)){
                 return strat;
             }
@@ -350,7 +390,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
      * @return a strategy that thinks it might have applied
      */
     public ScmSyncStrategy getStrategyForDeletedSaveable(Saveable s, String pathRelativeToRoot, boolean wasDirectory) {
-        for (ScmSyncStrategy strategy : AVAILABLE_STRATEGIES) {
+        for (ScmSyncStrategy strategy : enabledStrategies) {
             if (strategy.mightHaveBeenApplicableToDeletedSaveable(s, pathRelativeToRoot, wasDirectory)) {
                 return strategy;
             }
@@ -376,7 +416,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     }
 
     public ScmSyncStrategy getStrategyForURL(String url){
-        for(ScmSyncStrategy strat : AVAILABLE_STRATEGIES){
+        for(ScmSyncStrategy strat : enabledStrategies){
             if(strat.isCurrentUrlApplicable(url)){
                 return strat;
             }
@@ -428,6 +468,22 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     public boolean isDisplayStatus() {
         return displayStatus;
     }
+
+	public boolean isSyncJenkinsConfig() {
+		return syncJenkinsConfig;
+	}
+
+	public boolean isSyncBasicPluginsConfig() {
+		return syncBasicPluginsConfig;
+	}
+
+	public boolean isSyncJobConfig() {
+		return syncJobConfig;
+	}
+
+	public boolean isSyncUserConfig() {
+		return syncUserConfig;
+	}
 
     public String getCommitMessagePattern() {
         return commitMessagePattern;

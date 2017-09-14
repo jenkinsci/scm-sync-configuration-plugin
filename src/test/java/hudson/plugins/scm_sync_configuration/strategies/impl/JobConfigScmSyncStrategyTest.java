@@ -45,7 +45,7 @@ public class JobConfigScmSyncStrategyTest extends ScmSyncConfigurationPluginBase
         createSCMMock();
 
         // Synchronizing hudson config files
-        sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
+        sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.getInstance().getEnabledStrategies());
 
         File subModuleConfigFile = new File(getCurrentHudsonRootDirectory() + "/jobs/fakeJob/modules/submodule/config.xml" );
 

@@ -75,7 +75,7 @@ public abstract class InitRepositoryTest extends ScmSyncConfigurationPluginBaseT
         createSCMMock();
 
         // Synchronizing hudson config files
-        sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
+        sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.getInstance().getEnabledStrategies());
 
         verifyCurrentScmContentMatchesHierarchy("expected-scm-hierarchies/InitRepositoryTest.shouldSynchronizeHudsonFiles/");
 
