@@ -191,6 +191,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         this.syncUserConfig = pojo.isSyncUserConfig();
         this.commitMessagePattern = pojo.getCommitMessagePattern();
         this.manualSynchronizationIncludes = pojo.getManualSynchronizationIncludes();
+        this.business.setManualSynchronizationIncludes(manualSynchronizationIncludes);
         this.setEnabledStrategies();
     }
 
@@ -259,6 +260,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         } else {
             this.manualSynchronizationIncludes = new ArrayList<String>();
         }
+
+        this.business.setManualSynchronizationIncludes(manualSynchronizationIncludes);
 
         // Load strategies and check whether they should be reloaded
         List<ScmSyncStrategy> currentEnabledStrategies = new ArrayList<ScmSyncStrategy>(this.enabledStrategies);
