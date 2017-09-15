@@ -10,6 +10,12 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 	private SCM scm;
 	private boolean noUserCommitMessage;
 	private boolean displayStatus;
+	private boolean syncJenkinsConfig;
+	private boolean syncBasicPluginsConfig;
+	private boolean syncJobConfig;
+	private boolean syncUserConfig;
+
+
     private String commitMessagePattern;
     private List<String> manualSynchronizationIncludes;
 	
@@ -36,6 +42,31 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 	}
 	public void setDisplayStatus(boolean displayStatus) {
 		this.displayStatus = displayStatus;
+	}
+	
+	public boolean isSyncJenkinsConfig() {
+		return syncJenkinsConfig;
+	}
+	public void setSyncJenkinsConfig(boolean syncJenkinsConfig) {
+		this.syncJenkinsConfig = syncJenkinsConfig;
+	}
+	public boolean isSyncBasicPluginsConfig() {
+		return syncBasicPluginsConfig;
+	}
+	public void setSyncBasicPluginsConfig(boolean syncBasicPluginsConfig) {
+		this.syncBasicPluginsConfig = syncBasicPluginsConfig;
+	}
+	public boolean isSyncJobConfig() {
+		return syncJobConfig;
+	}
+	public void setSyncJobConfig(boolean syncJobConfig) {
+		this.syncJobConfig = syncJobConfig;
+	}
+	public boolean isSyncUserConfig() {
+		return syncUserConfig;
+	}
+	public void setSyncUserConfig(boolean syncUserConfig) {
+		this.syncUserConfig = syncUserConfig;
 	}
 
     public String getCommitMessagePattern() {

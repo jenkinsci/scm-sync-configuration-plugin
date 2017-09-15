@@ -17,6 +17,14 @@ public interface ScmSyncConfigurationPOJO {
 	public void setNoUserCommitMessage(boolean noUserCommitMessage);
 	public boolean isDisplayStatus();
 	public void setDisplayStatus(boolean displayStatus);
+	public boolean isSyncJenkinsConfig();
+	public void setSyncJenkinsConfig(boolean syncJenkinsConfig);
+	public boolean isSyncBasicPluginsConfig();
+	public void setSyncBasicPluginsConfig(boolean syncBasicPluginsConfig);
+	public boolean isSyncJobConfig();
+	public void setSyncJobConfig(boolean syncJobConfig);
+	public boolean isSyncUserConfig();
+	public void setSyncUserConfig(boolean syncUserConfig);
     public String getCommitMessagePattern();
     public void setCommitMessagePattern(String commitMessagePattern);
     public List<String> getManualSynchronizationIncludes();

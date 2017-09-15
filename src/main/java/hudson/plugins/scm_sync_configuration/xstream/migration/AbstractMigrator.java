@@ -16,6 +16,10 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 	public static final String SCM_CLASS_ATTRIBUTE = "class";
 	public static final String SCM_NO_USER_COMMIT_MESSAGE = "noUserCommitMessage";
     public static final String SCM_DISPLAY_STATUS = "displayStatus";
+    public static final String SCM_SYNC_JENKINS_CONFIG = "syncJenkinsConfig";
+    public static final String SCM_SYNC_PLUGINS_CONFIG = "syncBasicPluginsConfig";
+    public static final String SCM_SYNC_JOB_CONFIG = "syncJobConfig";
+    public static final String SCM_SYNC_USER_DATA = "syncUserConfig";
     public static final String SCM_COMMIT_MESSAGE_PATTERN = "commitMessagePattern";
     public static final String SCM_MANUAL_INCLUDES = "manualSynchronizationIncludes";
 
@@ -40,6 +44,10 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		String scmContent = null;
 		boolean noUserCommitMessage = false;
 		boolean displayStatus = true;
+		boolean syncJenkinsConfig = true;
+		boolean syncBasicPluginsConfig = true;
+		boolean syncJobConfig = true;
+		boolean syncUserConfig = true;
         String commitMessagePattern = "[message]";
         List<String> manualIncludes = null;
 		
@@ -51,6 +59,14 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 				noUserCommitMessage = Boolean.parseBoolean(reader.getValue());
 			} else if(SCM_DISPLAY_STATUS.equals(reader.getNodeName())){
 				displayStatus = Boolean.parseBoolean(reader.getValue());
+			} else if(SCM_SYNC_JENKINS_CONFIG.equals(reader.getNodeName())){
+				syncJenkinsConfig = Boolean.parseBoolean(reader.getValue());
+			} else if(SCM_SYNC_PLUGINS_CONFIG.equals(reader.getNodeName())){
+				syncBasicPluginsConfig = Boolean.parseBoolean(reader.getValue());
+			} else if(SCM_SYNC_JOB_CONFIG.equals(reader.getNodeName())){
+				syncJobConfig = Boolean.parseBoolean(reader.getValue());
+			} else if(SCM_SYNC_USER_DATA.equals(reader.getNodeName())){
+				syncUserConfig = Boolean.parseBoolean(reader.getValue());
 			} else if(SCM_TAG.equals(reader.getNodeName())){
 				scmClassAttribute = reader.getAttribute(SCM_CLASS_ATTRIBUTE);
 				scmContent = reader.getValue();
@@ -76,6 +92,10 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		pojo.setScmRepositoryUrl(scmRepositoryUrl);
 		pojo.setNoUserCommitMessage(noUserCommitMessage);
 		pojo.setDisplayStatus(displayStatus);
+		pojo.setSyncJenkinsConfig(syncJenkinsConfig);
+		pojo.setSyncBasicPluginsConfig(syncBasicPluginsConfig);
+		pojo.setSyncJobConfig(syncJobConfig);
+		pojo.setSyncUserConfig(syncUserConfig);
         pojo.setCommitMessagePattern(commitMessagePattern);
         pojo.setManualSynchronizationIncludes(manualIncludes);
 		

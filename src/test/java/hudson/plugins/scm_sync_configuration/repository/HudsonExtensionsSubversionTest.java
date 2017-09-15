@@ -30,7 +30,7 @@ public class HudsonExtensionsSubversionTest extends HudsonExtensionsTest {
         createSCMMock();
 
         // Synchronizing hudson config files
-        sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
+        sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.getInstance().getEnabledStrategies());
 
         // Let's checkout current scm view ... and commit something in it ...
         SCMManipulator scmManipulator = createMockedScmManipulator();
@@ -64,7 +64,7 @@ public class HudsonExtensionsSubversionTest extends HudsonExtensionsTest {
         createSCMMock();
 
         // Synchronizing hudson config files
-        sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.AVAILABLE_STRATEGIES);
+        sscBusiness.synchronizeAllConfigs(ScmSyncConfigurationPlugin.getInstance().getEnabledStrategies());
 
         // Let's checkout current scm view ... and commit something in it ...
         SCMManipulator scmManipulator = createMockedScmManipulator();

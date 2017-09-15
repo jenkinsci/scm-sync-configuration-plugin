@@ -30,6 +30,46 @@
             </j:otherwise>
         </j:choose>
     </f:entry>
+    <f:entry title="${%Sync global Jenkins configuration}">
+        <j:choose>
+            <j:when test="${it.syncJenkinsConfig}">
+                <f:checkbox name="syncJenkinsConfig" checked="${it.syncJenkinsConfig}" value="true" />
+            </j:when>
+            <j:otherwise>
+                <f:checkbox name="syncJenkinsConfig" value="true" />
+            </j:otherwise>
+        </j:choose>
+    </f:entry>
+    <f:entry title="${%Sync basic plugin configuration}">
+        <j:choose>
+            <j:when test="${it.syncBasicPluginsConfig}">
+                <f:checkbox name="syncBasicPluginsConfig" checked="${it.syncBasicPluginsConfig}" value="true" />
+            </j:when>
+            <j:otherwise>
+                <f:checkbox name="syncBasicPluginsConfig" value="true" />
+            </j:otherwise>
+        </j:choose>
+    </f:entry>
+    <f:entry title="${%Sync jobs configuration}">
+        <j:choose>
+            <j:when test="${it.syncJobConfig}">
+                <f:checkbox name="syncJobConfig" checked="${it.syncJobConfig}" value="true" />
+            </j:when>
+            <j:otherwise>
+                <f:checkbox name="syncJobConfig" value="true" />
+            </j:otherwise>
+        </j:choose>
+    </f:entry>
+    <f:entry title="${%Sync user data}">
+        <j:choose>
+            <j:when test="${it.syncUserConfig}">
+                <f:checkbox name="syncUserConfig" checked="${it.syncUserConfig}" value="true" />
+            </j:when>
+            <j:otherwise>
+                <f:checkbox name="syncUserConfig" value="true" />
+            </j:otherwise>
+        </j:choose>
+    </f:entry>
     <f:entry title="${%Commit message pattern}" help="${rootUrl}/plugin/scm-sync-configuration/help/commitMessagePattern-help.html">
         <f:textbox name="commitMessagePattern" value="${it.commitMessagePattern}" />
     </f:entry>
