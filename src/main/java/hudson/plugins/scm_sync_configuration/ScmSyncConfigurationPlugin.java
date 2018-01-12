@@ -154,7 +154,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         // because, for some unknown reasons, we reach plexus bootstraping exceptions when
         // calling Embedder.start() when everything is loaded (very strange...)
         SCMManagerFactory.getInstance().start();
-        initialInit();
     }
 
     public void loadData(ScmSyncConfigurationPOJO pojo){
@@ -165,14 +164,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         this.commitMessagePattern = pojo.getCommitMessagePattern();
         this.manualSynchronizationIncludes = pojo.getManualSynchronizationIncludes();
         this.business.setManualSynchronizationIncludes(manualSynchronizationIncludes);
-    }
-
-    protected void initialInit() throws Exception {
-        // We need to init() here in addition to ScmSyncConfigurationItemListener.onLoaded() to ensure that we do
-        // indeed create the SCM work directory when we are loaded. Otherwise, the plugin can be installed but
-        // then fails to operate until the next time Jenkins is restarted. Using postInitialize() for this might
-        // be too late if the plugin is copied to the plugin directory and then Jenkins is started.
-        this.business.init(createScmContext());
     }
 
     public void init() {
