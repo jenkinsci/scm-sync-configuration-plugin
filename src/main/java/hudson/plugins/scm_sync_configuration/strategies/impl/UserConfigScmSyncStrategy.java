@@ -4,6 +4,7 @@ import hudson.XmlFile;
 import hudson.model.Item;
 import hudson.model.Saveable;
 import hudson.model.User;
+import hudson.plugins.scm_sync_configuration.ScmSyncConfigurationPlugin;
 import hudson.plugins.scm_sync_configuration.model.MessageWeight;
 import hudson.plugins.scm_sync_configuration.model.WeightedMessage;
 import hudson.plugins.scm_sync_configuration.strategies.AbstractScmSyncStrategy;
@@ -11,6 +12,7 @@ import hudson.plugins.scm_sync_configuration.strategies.model.ClassAndFileConfig
 import hudson.plugins.scm_sync_configuration.strategies.model.ConfigurationEntityMatcher;
 import hudson.plugins.scm_sync_configuration.strategies.model.PageMatcher;
 
+import java.io.File;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -32,6 +34,24 @@ public class UserConfigScmSyncStrategy extends AbstractScmSyncStrategy {
 
     public UserConfigScmSyncStrategy(){
         super(CONFIG_ENTITY_MATCHER, PAGE_MATCHERS);
+    }
+
+    @Override
+    public boolean isSaveableApplicable(Saveable saveable, File file) {
+        if(!ScmSyncConfigurationPlugin.getInstance().isIncludeUserConfig()){
+            return false;
+        } else {
+            return super.isSaveableApplicable(saveable, file);
+        }
+    }
+
+    @Override
+    public boolean isCurrentUrlApplicable(String url) {
+        if(!ScmSyncConfigurationPlugin.getInstance().isIncludeUserConfig()){
+            return false;
+        } else {
+            return super.isCurrentUrlApplicable(url);
+        }
     }
 
     @Override

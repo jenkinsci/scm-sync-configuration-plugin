@@ -11,6 +11,7 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 	private boolean noUserCommitMessage;
 	private boolean displayStatus;
     private String commitMessagePattern;
+    private boolean includeUserConfig;
     private List<String> manualSynchronizationIncludes;
 	
 	public String getScmRepositoryUrl() {
@@ -44,6 +45,14 @@ public class DefaultSSCPOJO implements ScmSyncConfigurationPOJO {
 
     public void setCommitMessagePattern(String commitMessagePattern) {
         this.commitMessagePattern = commitMessagePattern;
+    }
+
+    public boolean isIncludeUserConfig() {
+        return includeUserConfig;
+    }
+
+    public void setIncludeUserConfig(boolean includeUserConfig) {
+        this.includeUserConfig = includeUserConfig;
     }
 
     public void setManualSynchronizationIncludes(List<String> _manualSynchronizationIncludes){

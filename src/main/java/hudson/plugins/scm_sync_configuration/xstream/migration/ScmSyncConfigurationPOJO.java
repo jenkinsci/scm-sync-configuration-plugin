@@ -21,4 +21,6 @@ public interface ScmSyncConfigurationPOJO {
     public void setCommitMessagePattern(String commitMessagePattern);
     public List<String> getManualSynchronizationIncludes();
     public void setManualSynchronizationIncludes(List<String> manualSynchronizationIncludes);
+    public boolean isIncludeUserConfig();
+    public void setIncludeUserConfig(boolean includeUserConfig);
 }

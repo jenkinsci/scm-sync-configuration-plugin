@@ -113,6 +113,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     // when commit occurs
     private String commitMessagePattern = "[message]";
     private List<File> filesModifiedByLastReload;
+    private boolean includeUserConfig = true;
     private List<String> manualSynchronizationIncludes;
 
     public ScmSyncConfigurationPlugin(){
@@ -165,6 +166,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         this.commitMessagePattern = pojo.getCommitMessagePattern();
         this.manualSynchronizationIncludes = pojo.getManualSynchronizationIncludes();
         this.business.setManualSynchronizationIncludes(manualSynchronizationIncludes);
+        this.includeUserConfig = pojo.isIncludeUserConfig();
     }
 
     protected void initialInit() throws Exception {
@@ -201,6 +203,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         this.noUserCommitMessage = formData.getBoolean("noUserCommitMessage");
         this.displayStatus = formData.getBoolean("displayStatus");
         this.commitMessagePattern = req.getParameter("commitMessagePattern");
+        this.includeUserConfig = formData.getBoolean("includeUserConfig");
 
         String oldScmRepositoryUrl = this.scmRepositoryUrl;
         String scmType = req.getParameter("scm");
@@ -430,6 +433,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
     public boolean isDisplayStatus() {
         return displayStatus;
+    }
+
+    public boolean isIncludeUserConfig() {
+        return includeUserConfig;
     }
 
     public String getCommitMessagePattern() {
