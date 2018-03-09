@@ -346,7 +346,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
     /**
      * Tries to find at least one strategy that would have applied to a deleted item.
-     * 
+     *
      * @param s the saveable that was deleted. It still exists in Jenkins' model, but has already been eradicated from disk.
      * @param pathRelativeToRoot where the item had lived on disk
      * @param wasDirectory whether it was a directory
@@ -466,7 +466,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
     protected void setTransaction(ScmTransaction transactionToRegister){
         if(transaction.get() != null && transactionToRegister != null){
-            LOGGER.warning("Existing threaded transaction will be overriden !");
+            LOGGER.warning("Existing threaded transaction will be overridden !");
         }
         transaction.set(transactionToRegister);
     }
@@ -479,7 +479,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
     /**
      * UI form validation for the git repository URL. Must be non-empty, a valid URL, and git must be able to access the repository through it.
-     * 
+     *
      * @param value from the UI form
      * @return the validation status, with possible error or warning messages.
      */
@@ -529,7 +529,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
     /**
      * Determines whether the given string is a valid URL.
-     * 
+     *
      * @param input to check
      * @return {@code true} if the input string is a vlid URL, {@code false} otherwise.
      */
