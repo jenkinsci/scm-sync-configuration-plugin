@@ -18,6 +18,7 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
     public static final String SCM_DISPLAY_STATUS = "displayStatus";
     public static final String SCM_COMMIT_MESSAGE_PATTERN = "commitMessagePattern";
     public static final String SCM_MANUAL_INCLUDES = "manualSynchronizationIncludes";
+	public static final String SCM_REPOSITORY_BRANCH = "gitRepositoryBranch";
 
     private static final Logger LOGGER = Logger.getLogger(AbstractMigrator.class.getName());
 
@@ -36,17 +37,20 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		TTO pojo = createMigratedPojo();
 		
 		String scmRepositoryUrl = null;
+		String gitRepositoryBranch = null;
 		String scmClassAttribute = null;
 		String scmContent = null;
 		boolean noUserCommitMessage = false;
 		boolean displayStatus = true;
         String commitMessagePattern = "[message]";
         List<String> manualIncludes = null;
-		
-		while(reader.hasMoreChildren()){
+
+		while(reader.hasMoreChildren()) {
 			reader.moveDown();
-			if(SCM_REPOSITORY_URL_TAG.equals(reader.getNodeName())){
+			if (SCM_REPOSITORY_URL_TAG.equals(reader.getNodeName())) {
 				scmRepositoryUrl = reader.getValue();
+			} else if (SCM_REPOSITORY_BRANCH.equals(reader.getNodeName())) {
+				gitRepositoryBranch = reader.getValue();
 			} else if(SCM_NO_USER_COMMIT_MESSAGE.equals(reader.getNodeName())){
 				noUserCommitMessage = Boolean.parseBoolean(reader.getValue());
 			} else if(SCM_DISPLAY_STATUS.equals(reader.getNodeName())){
@@ -74,6 +78,7 @@ public abstract class AbstractMigrator<TFROM extends ScmSyncConfigurationPOJO, T
 		
 		pojo.setScm(createSCMFrom(scmClassAttribute, scmContent));
 		pojo.setScmRepositoryUrl(scmRepositoryUrl);
+		pojo.setGitRepositoryBranch(gitRepositoryBranch);
 		pojo.setNoUserCommitMessage(noUserCommitMessage);
 		pojo.setDisplayStatus(displayStatus);
         pojo.setCommitMessagePattern(commitMessagePattern);
