@@ -11,6 +11,8 @@ import java.util.List;
 public interface ScmSyncConfigurationPOJO {
 	public String getScmRepositoryUrl();
 	public void setScmRepositoryUrl(String scmRepositoryUrl);
+	public String getGitRepositoryBranch();
+	public void setGitRepositoryBranch(String gitRepositoryBranch);
 	public SCM getScm();
 	public void setScm(SCM scm);
 	public boolean isNoUserCommitMessage();

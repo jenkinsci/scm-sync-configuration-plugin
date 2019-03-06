@@ -112,6 +112,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     // The [message] is a magic string that will be replaced with commit message
     // when commit occurs
     private String commitMessagePattern = "[message]";
+    private String gitRepositoryBranch = "master";
     private List<File> filesModifiedByLastReload;
     private List<String> manualSynchronizationIncludes;
 
@@ -201,7 +202,8 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         this.noUserCommitMessage = formData.getBoolean("noUserCommitMessage");
         this.displayStatus = formData.getBoolean("displayStatus");
         this.commitMessagePattern = req.getParameter("commitMessagePattern");
-
+        LOGGER.info("Here: "+ req.getParameter("gitRepositoryBranch"));
+        this.gitRepositoryBranch = req.getParameter("gitRepositoryBranch");
         String oldScmRepositoryUrl = this.scmRepositoryUrl;
         String scmType = req.getParameter("scm");
         if(scmType != null){
@@ -362,7 +364,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     }
 
     public ScmContext createScmContext(){
-        return new ScmContext(this.scm, this.scmRepositoryUrl, this.commitMessagePattern);
+        return new ScmContext(this.scm, this.scmRepositoryUrl, this.commitMessagePattern, this.gitRepositoryBranch);
     }
 
     public boolean shouldDecorationOccursOnURL(String url){
@@ -414,6 +416,10 @@ public class ScmSyncConfigurationPlugin extends Plugin{
 
     public SCM getSCM(){
         return this.scm;
+    }
+
+    public String getGitRepositoryBranch() {
+        return this.gitRepositoryBranch;
     }
 
     public String getScmUrl(){

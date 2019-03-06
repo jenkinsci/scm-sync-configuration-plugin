@@ -5,5 +5,8 @@
 			checkUrl="'${rootURL}/plugin/scm-sync-configuration/checkGitUrl?value=' + toValue(this)"
 		/>
 	</f:entry>
+	<f:entry title="${%Repository Branch}">
+		<f:textbox id="gitRepositoryBranch" name="gitRepositoryBranch" value="${it.isScmSelected(scm) ? it.getGitRepositoryBranch() : null}"/>
+	</f:entry>
 
 </j:jelly>

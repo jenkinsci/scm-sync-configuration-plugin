@@ -2,9 +2,7 @@ package hudson.plugins.scm_sync_configuration;
 
 import hudson.plugins.scm_sync_configuration.model.ScmContext;
 import hudson.plugins.scm_sync_configuration.scms.SCM;
-import org.apache.maven.scm.ScmException;
-import org.apache.maven.scm.ScmFile;
-import org.apache.maven.scm.ScmFileSet;
+import org.apache.maven.scm.*;
 import org.apache.maven.scm.command.add.AddScmResult;
 import org.apache.maven.scm.command.checkin.CheckInScmResult;
 import org.apache.maven.scm.command.checkout.CheckOutScmResult;
@@ -36,6 +34,7 @@ public class SCMManipulator {
     private final ScmManager scmManager;
     private ScmRepository scmRepository = null;
     private String scmSpecificFilename = null;
+    private String gitRepositoryBranch = null;
 
     public SCMManipulator(ScmManager _scmManager) {
         this.scmManager = _scmManager;
@@ -50,6 +49,7 @@ public class SCMManipulator {
     public boolean scmConfigurationSettledUp(ScmContext scmContext, boolean resetScmRepository){
         String scmRepositoryUrl = scmContext.getScmRepositoryUrl();
         SCM scm = scmContext.getScm();
+        gitRepositoryBranch = scmContext.getGitRepositoryBranch();
         if(scmRepositoryUrl == null || scm == null){
             return false;
         }
@@ -91,7 +91,8 @@ public class SCMManipulator {
         // Checkouting sources
         LOGGER.fine("Checking out SCM files into ["+checkoutDirectory.getAbsolutePath()+"] ...");
         try {
-            CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory));
+            ScmVersion version = new NewScmVersion(this.gitRepositoryBranch);
+            CheckOutScmResult result = scmManager.checkOut(this.scmRepository, new ScmFileSet(checkoutDirectory), version);
             if(!result.isSuccess()){
                 LOGGER.severe("[checkout] Error during checkout : "+result.getProviderMessage()+" || "+result.getCommandOutput());
                 return checkoutOk;
@@ -250,7 +251,8 @@ public class SCMManipulator {
 
         // Let's commit everything !
         try {
-            CheckInScmResult result = this.scmManager.checkIn(this.scmRepository, fileSet, commitMessage);
+            ScmVersion version = new NewScmVersion(this.gitRepositoryBranch);
+            CheckInScmResult result = this.scmManager.checkIn(this.scmRepository, fileSet, version, commitMessage);
             if(!result.isSuccess()){
                 LOGGER.severe("[checkinFiles] Problem during SCM commit : "+result.getCommandOutput());
                 return checkinOk;
@@ -273,5 +275,26 @@ public class SCMManipulator {
     public String getScmSpecificFilename() {
         return scmSpecificFilename;
     }
+    public class NewScmVersion implements ScmVersion {
+        String name = null;
 
+        public NewScmVersion(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getType() {
+            return name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 }

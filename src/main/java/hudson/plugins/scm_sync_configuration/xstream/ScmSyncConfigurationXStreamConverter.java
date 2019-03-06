@@ -64,7 +64,12 @@ public class ScmSyncConfigurationXStreamConverter implements Converter {
 			writer.addAttribute(AbstractMigrator.SCM_CLASS_ATTRIBUTE, plugin.getSCM().getId());
 			writer.endNode();
 		}
-		
+		if(plugin.getGitRepositoryBranch() != null) {
+			writer.startNode(AbstractMigrator.SCM_REPOSITORY_BRANCH);
+			writer.setValue(plugin.getGitRepositoryBranch());
+			writer.endNode();
+		}
+
 		if(plugin.getScmRepositoryUrl() != null){
 			writer.startNode(AbstractMigrator.SCM_REPOSITORY_URL_TAG);
 			writer.setValue(plugin.getScmRepositoryUrl());
