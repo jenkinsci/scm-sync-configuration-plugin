@@ -1,0 +1,41 @@
+<div>
+    <strong>Beware</strong> : Some of your Jenkins config files can be overriden by this reload.<br/>
+    That is to say, if you want to get your repository configuration files back, you can do it by clicking this link.<br/><br/>
+    Following strategies will be applied :
+    <table border="1" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Local (jenkins) file</th>
+                <th>Repository file</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>XXX</td>
+                <td>XXX (same as Jenkins one)</td>
+                <td><em>Nothing</em></td>
+            </tr>
+            <tr>
+                <td>XXX</td>
+                <td>YYY (different as Jenkins one)</td>
+                <td>YYY will override XXX</td>
+            </tr>
+            <tr>
+                <td>XXX</td>
+                <td><em>Doesn't exist</em></td>
+                <td>
+                    <em>Nothing</em> (Jenkins file won't be removed)<br/>
+                    <em>Note that it should never happen since as soon as you activate scm sync config, every of your config file should be commited to the repository</em>
+                </td>
+            </tr>
+            <tr>
+                <td><em>Doesn't exist</em></td>
+                <td>XXX</td>
+                <td>
+                    XXX will be imported from repository<br/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

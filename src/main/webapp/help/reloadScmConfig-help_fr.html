@@ -1,0 +1,41 @@
+<div>
+    <strong>Attention</strong> : Certaines de vos configurations Jenkins peuvent être écrasées par ce rechargement.<br/>
+    En cliquant sur ce lien, vous rapatrierez la configuration de votre repository dans Jenkins.<br/><br/>
+    Les stratégies suivantes seront appliquées :
+    <table border="1" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Fichier local (jenkins)</th>
+                <th>Fichier du repository</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>XXX</td>
+                <td>XXX (même contenu que celui de Jenkins)</td>
+                <td><em>Rien</em></td>
+            </tr>
+            <tr>
+                <td>XXX</td>
+                <td>YYY (contenu différent de celui de Jenkins)</td>
+                <td>YYY écrasera XXX</td>
+            </tr>
+            <tr>
+                <td>XXX</td>
+                <td><em>N'existe pas</em></td>
+                <td>
+                    <em>Rien</em> (le fichier de Jenkins ne sera pas supprimé)<br/>
+                    <em>Notez que ce cas ne devrait jamais arriver puisque dès que vous activez le plugin scm sync config, tous vos fichiers de configuration sont commités dans le repository</em>
+                </td>
+            </tr>
+            <tr>
+                <td><em>N'existe pas</em></td>
+                <td>XXX</td>
+                <td>
+                    XXX sera importé depuis le repository<br/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

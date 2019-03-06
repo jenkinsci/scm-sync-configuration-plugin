@@ -1,0 +1,20 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+<l:layout>  
+  <l:main-panel>
+     <h2 style="margin-top:4em">
+     	${%Config reloaded from} ${it.SCM.title}, url : ${it.scmUrl}
+      </h2>
+      <h3>Modified files : ${it.filesModifiedByLastReload.size()}</h3>
+      <p style="color:gray;">
+      	<ul>
+        <j:forEach var="file" items="${it.filesModifiedByLastReload}">
+        	<li>${file}</li>
+        </j:forEach>
+        </ul>
+      </p>
+      <h3>Please reload Jenkins config from disk by clicking <a href="${rootURL}/reload">here</a></h3>
+      
+    </l:main-panel>
+ </l:layout>
+</j:jelly>
