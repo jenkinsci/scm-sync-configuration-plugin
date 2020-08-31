@@ -30,7 +30,6 @@ import hudson.util.FormValidation;
 import hudson.util.PluginServletFilter;
 import net.sf.json.JSONObject;
 
-import org.acegisecurity.AccessDeniedException;
 import org.apache.maven.scm.CommandParameters;
 import org.apache.maven.scm.ScmException;
 import org.apache.maven.scm.ScmFileSet;
@@ -322,14 +321,6 @@ public class ScmSyncConfigurationPlugin extends Plugin{
         return includes;
     }
 
-    private User getCurrentUser(){
-        User user = null;
-        try {
-            user = Jenkins.getInstance().getMe();
-        }catch(AccessDeniedException e){}
-        return user;
-    }
-
     public static ScmSyncConfigurationPlugin getInstance(){
         return Jenkins.getInstance().getPlugin(ScmSyncConfigurationPlugin.class);
     }
@@ -447,7 +438,7 @@ public class ScmSyncConfigurationPlugin extends Plugin{
     public Future<Void> commitChangeset(ChangeSet changeset){
         try {
             if(!changeset.isEmpty()){
-                return this.business.queueChangeSet(createScmContext(), changeset, getCurrentUser(), ScmSyncConfigurationDataProvider.retrieveComment(false));
+                return this.business.queueChangeSet(createScmContext(), changeset, User.current(), ScmSyncConfigurationDataProvider.retrieveComment(false));
             } else {
                 return null;
             }
