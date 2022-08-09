@@ -38,6 +38,7 @@ import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -143,9 +144,7 @@ public abstract class ScmSyncConfigurationBaseTest {
     }
 
     protected static File createTmpDirectory(String directoryPrefix) throws IOException {
-        final File temp = File.createTempFile(directoryPrefix, Long.toString(System.nanoTime()));
-        if(!(temp.delete())) { throw new IOException("Could not delete temp file: " + temp.getAbsolutePath()); }
-        if(!(temp.mkdir())) { throw new IOException("Could not create temp directory: " + temp.getAbsolutePath()); }
+        final File temp = Files.createTempDirectory(directoryPrefix + Long.toString(System.nanoTime())).toFile();
         return (temp);
     }
 
