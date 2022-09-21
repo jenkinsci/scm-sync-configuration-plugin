@@ -62,7 +62,7 @@ public final class ScmSyncGitUtils {
                 String relativeFile = file.getPath();
                 final String canonicalFile = file.getCanonicalPath();
 
-                if (canonicalFile.startsWith(canonicalWorkingDirectory)) {
+                if (file.getCanonicalFile().toPath().startsWith(canonicalWorkingDirectory)) {
                     relativeFile = canonicalFile.substring(canonicalWorkingDirectory.length());
                     if (relativeFile.startsWith(File.separator)) {
                         relativeFile = relativeFile.substring(File.separator.length());
