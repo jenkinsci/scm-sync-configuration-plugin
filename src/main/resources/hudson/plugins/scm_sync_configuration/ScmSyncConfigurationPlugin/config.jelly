@@ -1,14 +1,15 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project">
 
   <f:section title="${%SCM Sync configuration}">
     <f:entry title="${%SCM}" help="${rootUrl}/plugin/scm-sync-configuration/help/scm-help.html">
-        <table width="100%">
+        <div>
             <j:forEach var="scm" items="${it.scms}">
                 <f:radioBlock name="scm" value="${scm.id}" title="${scm.title}" checked="${it.isScmSelected(scm)}">
                     <st:include from="${it}" page="scms/${scm.configPage}" />
                 </f:radioBlock>
             </j:forEach>
-        </table>
+        </div>
     </f:entry>
     <f:entry title="${%Never bother me with commit messages}" help="${rootUrl}/plugin/scm-sync-configuration/help/noUserCommitMessage-help.html">
         <j:choose>
@@ -40,12 +41,12 @@
     -->
     <f:entry title="${%Manual synchronization includes}" help="${rootUrl}/plugin/scm-sync-configuration/manualIncludesHelp">
         <f:repeatable var="include" items="${it.manualSynchronizationIncludes}" add="${%Add new include}" minimum="0">
-            <table width="100%">
+            <div>
                 <f:entry title="${%Include}">
                     <f:textbox name="manualSynchronizationIncludes" value="${include}" />
                     <f:repeatableDeleteButton value="${%Delete include}"/>
                 </f:entry>
-            </table>
+            </div>
         </f:repeatable>
     </f:entry>
     <f:entry title="${%Reload config from SCM}" help="${rootUrl}/plugin/scm-sync-configuration/help/reloadScmConfig-help.html">
