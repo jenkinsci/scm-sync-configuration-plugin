@@ -17,7 +17,7 @@ public class ScmUnderTestGit implements ScmUnderTest {
 	}
 
 	public String createUrl(String url) {
-		return "scm:git:" + url;
+		return "scm:git:file://" + url.replace('\\', '/');
 	}
 
 	public Class<? extends SCM> getClazz() {

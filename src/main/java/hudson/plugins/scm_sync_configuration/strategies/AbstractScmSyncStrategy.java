@@ -99,11 +99,13 @@ public abstract class AbstractScmSyncStrategy implements ScmSyncStrategy {
             if (pathRelativeToRoot == null) {
                 throw new IllegalArgumentException(directory.getAbsolutePath() + " is not under " + jenkinsRoot.getAbsolutePath());
             }
+            pathRelativeToRoot = pathRelativeToRoot.replace('\\', '/');
             final String restrictedPath = pathRelativeToRoot.endsWith("/") ? pathRelativeToRoot : pathRelativeToRoot + '/';
             selector = new FileSelector() {
                 @Override
                 public boolean isSelected(File basedir, String pathRelativeToBasedir, File file) throws BuildException {
                     // Only include directories leading to our directory (parent directories and the directory itself) and then whatever is below.
+                    pathRelativeToBasedir = pathRelativeToBasedir.replace('\\', '/');
                     if (file.isDirectory()) {
                         pathRelativeToBasedir = pathRelativeToBasedir.endsWith("/") ? pathRelativeToBasedir : pathRelativeToBasedir + '/';
                     }

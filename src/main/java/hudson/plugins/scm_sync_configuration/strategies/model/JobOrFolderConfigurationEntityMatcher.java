@@ -53,6 +53,7 @@ public class JobOrFolderConfigurationEntityMatcher extends PatternsEntityMatcher
     @Override
     public boolean matches(Saveable saveable, String pathRelativeToRoot, boolean isDirectory) {
         if ((saveable instanceof AbstractItem) && pathRelativeToRoot != null) {
+            pathRelativeToRoot = pathRelativeToRoot.replace('\\', '/');
             if (isDirectory) {
                 if (!pathRelativeToRoot.endsWith("/")) {
                     pathRelativeToRoot += '/';
@@ -80,6 +81,7 @@ public class JobOrFolderConfigurationEntityMatcher extends PatternsEntityMatcher
                 if (originalSelector != null && !originalSelector.isSelected(basedir, pathRelativeToBaseDir, file)) {
                     return false;
                 }
+                pathRelativeToBaseDir = pathRelativeToBaseDir.replace('\\', '/');
                 if (CONFIGS_TO_MATCH.matcher(pathRelativeToBaseDir).matches()) {
                     return true;
                 }
