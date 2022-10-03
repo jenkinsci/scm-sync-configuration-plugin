@@ -35,6 +35,7 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
     public boolean matches(Saveable saveable, String pathRelativeToRoot, boolean isDirectory) {
         if (pathRelativeToRoot != null) {
             // Guard our own SCM workspace and the war directory. User-defined includes might inadvertently include those if they start with * or **!
+            pathRelativeToRoot = pathRelativeToRoot.replace('\\', '/');
             if (pathRelativeToRoot.equals(SCM_WORKING_DIRECTORY) || pathRelativeToRoot.startsWith(SCM_WORKING_DIRECTORY + '/')) {
                 return false;
             } else if (pathRelativeToRoot.equals(WAR_DIRECTORY) || pathRelativeToRoot.startsWith(WAR_DIRECTORY + '/')) {
@@ -47,7 +48,7 @@ public class PatternsEntityMatcher implements ConfigurationEntityMatcher {
                     return true;
                 } else if (isDirectory) {
                     // pathRelativeFromRoot is be a directory, and the pattern end in a file name. In this case, we must claim a match.
-                    int i = pattern.lastIndexOf('/');
+                    int i = pattern.replace('\\', '/').lastIndexOf('/');
                     if (directoryName == null) {
                         directoryName = pathRelativeToRoot.endsWith("/") ? pathRelativeToRoot.substring(0, pathRelativeToRoot.length() - 1) : pathRelativeToRoot;
                     }

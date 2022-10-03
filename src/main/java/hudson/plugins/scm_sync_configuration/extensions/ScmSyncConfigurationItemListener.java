@@ -57,7 +57,7 @@ public class ScmSyncConfigurationItemListener extends ItemListener {
         // Figure out where the item previously might have been.
         File oldDir = null;
         Jenkins jenkins = Jenkins.getInstance();
-        int i = oldFullName.lastIndexOf('/');
+        int i = oldFullName.replace('\\', '/').lastIndexOf('/');
         String oldSimpleName = i > 0 ? oldFullName.substring(i+1) : oldFullName;
         Object oldParent = i > 0 ? jenkins.getItemByFullName(oldFullName.substring(0, i)) : jenkins;
         Object newParent = item.getParent();

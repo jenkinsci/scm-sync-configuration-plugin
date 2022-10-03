@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
 
 <j:set var="url" value="${request.requestURL}" />
@@ -68,13 +69,13 @@
         }
 	</script>
 
-    <table width="100%">
+    <div>
         <tr><td id="footer">
             <span style="color:gray">SCM Sync status : <img src="${imagesURL}/16x16/${icon}.png" alt="" height="16" width="16"/>
-            ${msg}
+            <j:out value="${msg}"/>
             </span>
         </td></tr>
-    </table>
+    </div>
 </j:if>
 
 </j:jelly>

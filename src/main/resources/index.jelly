@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <div>
   This plugin allows you to synchronize your hudson configuration files with an SCM, allowing you to specify a commit message every time a config file is modified.
 </div>
