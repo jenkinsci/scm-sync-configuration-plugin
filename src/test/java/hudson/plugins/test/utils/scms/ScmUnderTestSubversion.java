@@ -14,7 +14,7 @@ public class ScmUnderTestSubversion implements ScmUnderTest {
 	}
 
 	public String createUrl(String url) {
-		return "scm:svn:file://" + url.replace('\\', '/');
+		return "scm:svn:file:///" + url.replace('\\', '/');
 	}
 
 	public Class<? extends SCM> getClazz() {
